@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Roadmap
 
-## Getting Started
+## User Types & Access Levels
 
-First, run the development server:
+### Institute/University Users
+- Can add/update their institution's profile.
+- Manage placement data for their institution.
+- View aggregated placement statistics.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Corporate Users
+- Access student database (with privacy controls).
+- Post job opportunities.
+- View institution profiles.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Admin Users
+- Verify and approve new institutions/corporations.
+- Access to all data and analytics.
+- Manage user permissions.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Authentication Flow
 
-## Learn More
+### Registration Process
+1. Separate registration forms for institutions and corporations.
+2. Required documentation upload (e.g., institution licenses, corporate registrations).
+3. Email verification.
+4. Admin approval before activation.
 
-To learn more about Next.js, take a look at the following resources:
+### Login Process
+- Email/password authentication.
+- Optional two-factor authentication (2FA).
+- "Remember me" functionality.
+- Password reset flow.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Security Considerations
 
-## Deploy on Vercel
+### Password Requirements
+- Minimum length: 8 characters.
+- Mix of:
+  - Uppercase and lowercase letters.
+  - Numbers.
+  - Special characters.
+- Password strength indicator.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Session Management
+- Session timeout.
+- Limit on maximum concurrent sessions.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Additional Security Measures
+- Rate limiting for login attempts.
+- IP-based blocking for suspicious activities.
+
+---
+
+## User Profile Management
+
+### Profile Completion Requirements
+- Basic institution/corporate details.
+- Contact information.
+- Document verification.
+
+### Profile Update Permissions
+- Users can update their profiles within their assigned permissions.
+
+### Account Deletion
+- Users can request account deletion following data retention policies.
+
+---
+
+## Data Access Controls
+
+### Role-Based Access Control (RBAC)
+- Define roles and permissions for each user type.
+
+### Data Visibility Rules
+- Ensure data visibility is restricted based on roles and permissions.
+
+### Audit Logging
+- Maintain logs for sensitive operations such as:
+  - Data updates.
+  - Admin approvals.
+  - User profile changes.
