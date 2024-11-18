@@ -1,4 +1,5 @@
 import Providers from "@/components/providers/provider";
+import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config/site.config";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
@@ -60,6 +61,7 @@ export default function RootLayout({
         <Providers>
           <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
           {children}
+          <Toaster />
         </Providers>
       </body>
     </html>
