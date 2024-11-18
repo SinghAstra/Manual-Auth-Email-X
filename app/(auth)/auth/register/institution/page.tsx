@@ -3,6 +3,7 @@
 import InstitutionRegistrationForm from "@/components/auth/institution-registration-form";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { registerInstitution } from "@/lib/actions/auth.actions";
 import { institutionFormSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -17,36 +18,110 @@ const InstitutionRegistrationPage = () => {
   const form = useForm<z.infer<typeof institutionFormSchema>>({
     resolver: zodResolver(institutionFormSchema),
     defaultValues: {
-      institutionName: "",
+      institutionName: "abhay",
       type: "university",
-      establishedYear: "",
-      location: "",
-      email: "",
-      phone: "",
-      address: "",
-      adminName: "",
-      adminEmail: "",
-      adminPassword: "",
-      termsAccepted: false,
+      establishedYear: "2017",
+      affiliationNumber: "2019199234",
+      location: "new york",
+      email: "abhay@gmail.com",
+      phone: "6387661992",
+      address: "Anand Nagar Civil Line Ballia",
+      zipCode: "2770001",
+      adminName: "abhay",
+      adminEmail: "abhay@gmail.com",
+      adminPassword: "Abhay@codeman123",
+      confirmPassword: "Abhay@codeman123",
+      termsAccepted: true,
+      designation: "principal",
+      affiliationCertificate: undefined,
+      governmentRecognition: undefined,
+      letterhead: undefined,
     },
+    mode: "onChange",
   });
 
-  async function onSubmit(values: z.infer<typeof institutionFormSchema>) {
+  const handleStepChange = async (newStep: number) => {
+    console.log("In handleStepChange");
+    const currentStepFields = {
+      1: [
+        "institutionName",
+        "type",
+        "establishedYear",
+        "location",
+        "affiliationNumber",
+      ],
+      2: ["email", "phone", "address", "zipCode"],
+      3: [
+        "adminName",
+        "designation",
+        "adminEmail",
+        "adminPassword",
+        "confirmPassword",
+      ],
+      4: ["termsAccepted"],
+    };
+    console.log("newStep is ", newStep);
+    console.log("step is ", step);
+
+    if (newStep > step) {
+      const fieldsToValidate = currentStepFields[step] || [];
+      const result = await form.trigger(fieldsToValidate);
+
+      if (!result) {
+        toast({
+          title: "Validation Error",
+          description: "Please complete all required fields correctly.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if any of the fields have errors
+      const hasErrors = fieldsToValidate.some(
+        (field) => form.getFieldState(field).error
+      );
+
+      if (hasErrors) {
+        toast({
+          title: "Validation Error",
+          description: "Please correct the errors before proceeding.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setStep(newStep);
+  };
+
+  const onSubmit = async (values: z.infer<typeof institutionFormSchema>) => {
     try {
-      // Here you would typically make an API call to your backend
-      console.log(values);
-      toast({
-        title: "Registration Successful",
-        description: "Please check your email to verify your account.",
-      });
+      console.log("In the onSubmit.");
+      const result = await registerInstitution(values);
+
+      if (result.success) {
+        toast({
+          title: "Registration Successful",
+          description:
+            result.message || "Please check your email to verify your account.",
+        });
+      } else {
+        toast({
+          title: "Registration Error",
+          description:
+            result.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      console.log("error --InstitutionRegistrationPage is ", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -63,7 +138,9 @@ const InstitutionRegistrationPage = () => {
             <InstitutionRegistrationForm
               form={form}
               currentStep={step}
-              onStepChange={setStep}
+              onStepChange={handleStepChange}
+              onSubmit={onSubmit}
+              totalSteps={totalSteps}
             />
           </form>
         </Form>

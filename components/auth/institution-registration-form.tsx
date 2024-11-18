@@ -42,7 +42,13 @@ const institutionTypes = [
   { value: "technical", label: "Technical Institute" },
   { value: "research", label: "Research Institution" },
 ];
-const InstitutionRegistrationForm = ({ form, currentStep, onStepChange }) => {
+const InstitutionRegistrationForm = ({
+  form,
+  currentStep,
+  onStepChange,
+  onSubmit,
+  totalSteps,
+}) => {
   const formSteps = {
     1: <BasicDetails form={form} />,
     2: <ContactInformation form={form} />,
@@ -79,14 +85,14 @@ const InstitutionRegistrationForm = ({ form, currentStep, onStepChange }) => {
           <Button
             type="button"
             onClick={() => {
-              if (currentStep === 4) {
-                form.handleSubmit((data) => console.log(data))();
+              if (currentStep === totalSteps) {
+                form.handleSubmit(onSubmit)();
               } else {
                 onStepChange(currentStep + 1);
               }
             }}
           >
-            {currentStep === 4 ? "Submit" : "Next"}
+            {currentStep === totalSteps ? "Submit" : "Next"}
           </Button>
         </div>
       </Card>
@@ -115,7 +121,7 @@ function BasicDetails({ form }) {
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Institution Details</h2>
         <p className="text-sm text-muted-foreground">
-          Please provide your institution's basic information
+          Please provide your institution&apos;s basic information
         </p>
       </div>
 
@@ -375,7 +381,6 @@ function AdminDetails({ form }) {
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
-              <FormDescription>Must be at least 8 characters</FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String      @id @default(cuid())
+  email             String      @unique
+  password          String
+  role              UserRole
+  isVerified        Boolean     @default(false)
+  isApproved        Boolean     @default(false)
+  institution       Institution? @relation(fields: [institutionId], references: [id])
+  institutionId     String?
+  corporate         Corporate?  @relation(fields: [corporateId], references: [id])
+  corporateId       String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Institution {
+  id                  String      @id @default(cuid())
+  name                String
+  type                InstitutionType
+  establishedYear     Int
+  affiliationNumber   String
+  location            String
+  email               String
+  phone               String
+  alternatePhone      String?
+  address             String
+  zipCode             String
+  adminName           String
+  adminDesignation    String
+  users               User[]
+  documents           InstitutionDocument[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model InstitutionDocument {
+  id                        String      @id @default(cuid())
+  affiliationCertificate    String?
+  governmentRecognition     String?
+  letterhead                String?
+  institution               Institution @relation(fields: [institutionId], references: [id])
+  institutionId             String
+}
+
+model Corporate {
+  id                  String      @id @default(cuid())
+  name                String
+  industry            String
+  companyType         CompanyType
+  companySize         CompanySize
+  establishedYear     Int
+  registrationNumber  String
+  gstNumber           String
+  description         String?
+  email               String
+  phone               String
+  website             String
+  address             Json
+  hrContact           Json
+  users               User[]
+  documents           CorporateDocument[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model CorporateDocument {
+  id                      String      @id @default(cuid())
+  registrationCertificate String?
+  taxDocument             String?
+  companyProfile          String?
+  corporate               Corporate   @relation(fields: [corporateId], references: [id])
+  corporateId             String
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  type      String   
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+
+
+
+enum UserRole {
+  ADMIN
+  INSTITUTION
+  CORPORATE
+}
+
+enum InstitutionType {
+  university
+  college
+  technical
+  research
+}
+
+enum CompanyType {
+  PUBLIC
+  PRIVATE
+  PARTNERSHIP
+  STARTUP
+  GOVERNMENT
+}
+
+enum CompanySize {
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
