@@ -183,10 +183,10 @@ const LoginPage = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 w-full">
-            <Button variant="outline" type="button" disabled={isLoading}>
+            <Button variant="outline" type="button" disabled={true}>
               Google
             </Button>
-            <Button variant="outline" type="button" disabled={isLoading}>
+            <Button variant="outline" type="button" disabled={true}>
               Github
             </Button>
           </div>
