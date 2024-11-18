@@ -1,4 +1,4 @@
-import { SiteConfig } from "@/types/site.config";
+import { SiteConfig } from "@/types/site";
 
 export const siteConfig: SiteConfig = {
   name: "SkillX",
