@@ -30,7 +30,7 @@ export async function sendEmail({ email, name, token, type }: EmailOptions) {
     },
     PASSWORD_RESET: {
       subject: "Password Reset Request",
-      link: `${baseUrl}/auth/reset-password?token=${token}`,
+      link: `${baseUrl}/auth/reset-password/${token}`,
       html: (resetLink: string) => `
         <h1>Password Reset</h1>
         <p>Click the link below to reset your password:</p>

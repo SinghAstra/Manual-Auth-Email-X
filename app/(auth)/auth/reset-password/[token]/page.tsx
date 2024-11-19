@@ -20,6 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { resetPasswordAction } from "@/lib/actions/auth/reset.password";
+import { validateResetTokenAction } from "@/lib/actions/auth/validate.reset.password.token";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
 import Link from "next/link";
@@ -57,7 +59,6 @@ const ResetPasswordPage = () => {
   const { token } = useParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isTokenValid, setIsTokenValid] = useState(true);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
     score: 0,
@@ -73,22 +74,26 @@ const ResetPasswordPage = () => {
       password: "",
       confirmPassword: "",
     },
+    mode: "onChange",
   });
 
   useEffect(() => {
-    // Validate token
     const validateToken = async () => {
       try {
-        // Simulate API call to validate token
-        await new Promise((resolve) => setTimeout(resolve, 9000));
-        // For demo purposes, we'll consider the token valid if it's longer than 10 characters
-        if (token && token.length) {
-          setIsTokenValid(token.length > 10);
+        const result = await validateResetTokenAction(token as string);
+        setIsTokenValid(result.isValid);
+
+        if (!result.isValid) {
+          toast({
+            title: "Token Validation Failed",
+            description: result.message,
+          });
         }
       } catch (error) {
         setIsTokenValid(false);
       }
     };
+
     validateToken();
   }, [token]);
 
@@ -149,25 +154,20 @@ const ResetPasswordPage = () => {
   }
 
   async function onSubmit(values: z.infer<typeof passwordSchema>) {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+    const result = await resetPasswordAction(token as string, values);
 
+    if (result.success) {
       toast({
         title: "Password Reset Successful",
-        description:
-          "Your password has been successfully reset. Please log in with your new password.",
+        description: result.message,
       });
       router.push("/auth/login");
-    } catch (error) {
+    } else {
       toast({
-        title: "Error",
-        description: "Failed to reset password. Please try again.",
+        title: "OOPS!",
+        description: result.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -202,7 +202,7 @@ const ResetPasswordPage = () => {
                           placeholder="Enter your new password"
                           className="pl-10 pr-10"
                           {...field}
-                          disabled={isLoading}
+                          disabled={form.formState.isSubmitting}
                         />
                         <Button
                           type="button"
@@ -257,7 +257,7 @@ const ResetPasswordPage = () => {
                           placeholder="Confirm your new password"
                           className="pl-10 pr-10"
                           {...field}
-                          disabled={isLoading}
+                          disabled={form.formState.isSubmitting}
                         />
                         <Button
                           type="button"
@@ -322,15 +322,21 @@ const ResetPasswordPage = () => {
                 </ul>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Resetting password..." : "Reset Password"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting
+                  ? "Resetting password..."
+                  : "Reset Password"}
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link href="/auth/login">
-            <Button variant="ghost">
+            <Button variant="ghost bg-gray-700">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Button>
