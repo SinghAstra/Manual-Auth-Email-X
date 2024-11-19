@@ -122,6 +122,13 @@ export async function registerInstitution(
       }
     );
 
+    console.log("sendEmail args --register.institute is ", {
+      email: validatedData.adminEmail,
+      name: validatedData.adminName,
+      token: result.verificationToken.token,
+      type: "EMAIL_VERIFICATION",
+    });
+
     // Send verification email
     await sendEmail({
       email: validatedData.adminEmail,

@@ -10,77 +10,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
+import { verifyEmail } from "@/lib/actions/auth/verify.email";
+import { ArrowLeft, Mail, MailIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function VerifyEmailPage() {
-  const [countdown, setCountdown] = useState(60);
-  const [isResending, setIsResending] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<
-    "pending" | "success" | "error"
-  >("pending");
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [verificationStatus, setVerificationStatus] = useState<
+    "pending" | "error"
+  >("pending");
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
+    const token = searchParams.get("token");
+    if (token) {
+      handleEmailVerification(token);
     }
-    return () => clearInterval(timer);
-  }, [countdown]);
+  }, [searchParams]);
 
-  const handleResendEmail = async () => {
+  // Email verification handler
+  const handleEmailVerification = async (token: string) => {
     try {
-      setIsResending(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await verifyEmail(token);
 
-      setCountdown(60);
-      toast({
-        title: "Verification email sent",
-        description: "Please check your inbox for the verification link.",
-      });
+      if (result.success) {
+        toast({
+          title: "Email Verified Successfully.",
+          description: result.message,
+        });
+        router.push("/auth/login");
+      } else {
+        setVerificationStatus("error");
+        toast({
+          title: "OOPS!",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      setVerificationStatus("error");
       toast({
-        title: "Error",
-        description: "Failed to resend verification email. Please try again.",
+        title: "Email Verification Failed!",
+        description: "Some Internal Error",
         variant: "destructive",
       });
-    } finally {
-      setIsResending(false);
     }
   };
 
-  if (verificationStatus === "success") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-2">
-            <div className="flex justify-center mb-4">
-              <CheckCircle2 className="h-12 w-12 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-center">
-              Email Verified
-            </CardTitle>
-            <CardDescription className="text-center">
-              Your email has been successfully verified. You can now access your
-              account.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter className="flex flex-col space-y-4">
-            <Link href="/auth/login" className="w-full">
-              <Button className="w-full">Continue to Login</Button>
-            </Link>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
+  // Error or pending verification view
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -89,41 +69,31 @@ export default function VerifyEmailPage() {
             <Mail className="h-12 w-12 text-muted-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Verify your email
+            {verificationStatus === "error"
+              ? "Verification Failed"
+              : "Verify your email"}
           </CardTitle>
           <CardDescription className="text-center">
-            We&apos;ve sent a verification link to your email address. Please
-            check your inbox and click the link to verify your account.
+            {verificationStatus === "error"
+              ? "Invalid or Expired Link"
+              : "We've sent a verification link to your email address. Please check your inbox and click the link to verify your account."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-              Didn&apos;t receive the email? Check your spam folder or request a
-              new verification link.
+              {verificationStatus === "error"
+                ? "Please try resending the verification email or contact support."
+                : "Didn't receive the email? Check your spam folder or request a new verification link."}
             </p>
-            <div className="flex justify-center items-center space-x-2">
-              <Button
-                variant="outline"
-                onClick={handleResendEmail}
-                disabled={countdown > 0 || isResending}
-                className="relative"
-              >
-                <RefreshCw
-                  className={cn("mr-2 h-4 w-4", isResending && "animate-spin")}
-                />
-                {isResending
-                  ? "Sending..."
-                  : countdown > 0
-                  ? `Resend in ${countdown}s`
-                  : "Resend email"}
-              </Button>
-            </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center flex-col">
+          {verificationStatus === "error" &&  <Button variant="ghost" className="bg-gray-700">
+            <MailIcon className="mr-3"/>
+            Resend Email</Button>}
           <Link href="/auth/login">
-            <Button variant="ghost">
+            <Button variant="ghost" className="bg-gray-700">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Button>
