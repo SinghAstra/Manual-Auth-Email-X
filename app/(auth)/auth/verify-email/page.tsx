@@ -10,8 +10,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { resendVerificationEmail } from "@/lib/actions/auth/resend.verify.email";
 import { verifyEmail } from "@/lib/actions/auth/verify.email";
-import { ArrowLeft, Mail, MailIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,9 +24,17 @@ export default function VerifyEmailPage() {
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "error"
   >("pending");
+  const [email, setEmail] = useState<string>("");
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const emailParam = searchParams.get("email");
+
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+
     if (token) {
       handleEmailVerification(token);
     }
@@ -60,6 +69,44 @@ export default function VerifyEmailPage() {
     }
   };
 
+  const handleResendEmail = async () => {
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "No email address found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsResending(true);
+    try {
+      const result = await resendVerificationEmail(email);
+
+      if (result.success) {
+        toast({
+          title: "Verification Email Resent",
+          description: "Please check your inbox",
+        });
+        setVerificationStatus("pending");
+      } else {
+        toast({
+          title: "OOPS!",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend verification email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   // Error or pending verification view
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -88,12 +135,29 @@ export default function VerifyEmailPage() {
             </p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center flex-col">
-          {verificationStatus === "error" &&  <Button variant="ghost" className="bg-gray-700">
-            <MailIcon className="mr-3"/>
-            Resend Email</Button>}
-          <Link href="/auth/login">
-            <Button variant="ghost" className="bg-gray-700">
+        <CardFooter className="flex justify-center flex-col gap-2">
+          {verificationStatus === "error" && email && (
+            <Button
+              onClick={handleResendEmail}
+              disabled={isResending}
+              variant="ghost"
+              className="bg-primary w-full"
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Resending...
+                </>
+              ) : (
+                <>
+                  <MailIcon className="mr-3" />
+                  Resend Email
+                </>
+              )}
+            </Button>
+          )}
+          <Link href="/auth/login" className="w-full">
+            <Button variant="outline" className=" w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Button>

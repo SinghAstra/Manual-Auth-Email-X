@@ -20,7 +20,9 @@ export async function sendEmail({ email, name, token, type }: EmailOptions) {
   const emailTemplates = {
     EMAIL_VERIFICATION: {
       subject: "Verify Your Account",
-      link: `${baseUrl}/auth/verify-email?token=${token}`,
+      link: `${baseUrl}/auth/verify-email?token=${token}&email=${encodeURIComponent(
+        email
+      )}`,
       html: (verificationLink: string) => `
         <h1>Welcome, ${name}!</h1>
         <p>Please verify your email by clicking the link below:</p>
