@@ -61,7 +61,7 @@ const InstitutionRegistrationForm = ({
     <div className="space-y-8">
       <ProgressSteps currentStep={currentStep} steps={steps} />
 
-      <Card className="p-6 mt-16">
+      <Card className="p-6 mt-16 bg-gray-900/60 border border-gray-800 backdrop-blur-xl">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}

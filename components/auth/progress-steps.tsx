@@ -12,7 +12,7 @@ const ProgressSteps = ({ currentStep, steps }: ProgressStepsProps) => {
   return (
     <div className="space-y-2 mb-4">
       <div className="relative">
-        <div className="absolute left-0 top-2 h-0.5 w-full bg-muted">
+        <div className="absolute left-0 top-2 h-0.5 w-full bg-gray-900">
           <div
             className="absolute h-full bg-primary transition-all duration-500 ease-in-out"
             style={{

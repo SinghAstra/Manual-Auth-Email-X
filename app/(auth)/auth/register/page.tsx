@@ -8,7 +8,8 @@ import Link from "next/link";
 
 const RegisterPage = () => {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
       <div className="max-w-4xl w-full space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">Get Started</h1>
@@ -19,7 +20,7 @@ const RegisterPage = () => {
 
         <div className="grid md:grid-cols-2 gap-6 mt-8">
           <Link href="/auth/register/institution">
-            <Card className="group relative overflow-hidden p-6 hover:border-primary transition-colors">
+            <Card className="group relative overflow-hidden p-6 hover:border-primary transition-colors bg-gray-900/60 border border-gray-800 backdrop-blur-xl">
               <motion.div whileHover={{ scale: 1.02 }} className="space-y-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <GraduationCap className="h-6 w-6 text-primary" />
@@ -42,7 +43,7 @@ const RegisterPage = () => {
           </Link>
 
           <Link href="/auth/register/corporate">
-            <Card className="group relative overflow-hidden p-6 hover:border-primary transition-colors">
+            <Card className="group relative overflow-hidden p-6 hover:border-primary transition-colors bg-gray-900/60 border border-gray-800 backdrop-blur-xl">
               <motion.div whileHover={{ scale: 1.02 }} className="space-y-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="h-6 w-6 text-primary" />
