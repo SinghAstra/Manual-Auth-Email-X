@@ -66,7 +66,7 @@ export function OverviewStats() {
         icon={GraduationCap}
       />
       <StatCard
-        title="Corporates"
+        title="Corporate"
         stats={{
           total: 892,
           pending: 23,

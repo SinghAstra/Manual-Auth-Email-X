@@ -1,15 +1,26 @@
-import { Button } from "@/components/ui/button";
+"use client";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FileCheck, LayoutDashboard, Settings, Users } from "lucide-react";
+import {
+  Building2,
+  FileCheck,
+  GraduationCap,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navigation = [
-  { name: "Overview", href: "#", icon: LayoutDashboard },
-  { name: "Verifications", href: "#", icon: FileCheck },
-  { name: "Users", href: "#", icon: Users },
+  { name: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Institutes", href: "/admin/verify/institutes", icon: GraduationCap },
+  { name: "Corporate", href: "/admin/verify/corporate", icon: Building2 },
   { name: "Settings", href: "#", icon: Settings },
 ];
 
 const Sidebar = () => {
+  const pathname = usePathname();
+
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900/50 backdrop-blur-xl px-6 pb-4 border-r border-gray-800">
@@ -20,20 +31,24 @@ const Sidebar = () => {
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {navigation.map((item) => (
-                  <li key={item.name}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start gap-x-3",
-                        item.name === "Overview" && "bg-gray-800"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.name}
-                    </Button>
-                  </li>
-                ))}
+                {navigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          buttonVariants({ variant: "ghost" }),
+                          "w-full justify-start gap-x-3",
+                          isActive && "bg-accent"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.name}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </li>
           </ul>
