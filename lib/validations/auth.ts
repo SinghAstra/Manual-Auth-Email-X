@@ -42,9 +42,9 @@ export const institutionFormSchema = z
     confirmPassword: z.string(),
 
     // Documents
-    affiliationCertificate: z.any().optional(),
-    governmentRecognition: z.any().optional(),
-    letterhead: z.any().optional(),
+    affiliationCertificate: z.instanceof(File).optional(),
+    governmentRecognition: z.instanceof(File).optional(),
+    letterhead: z.instanceof(File).optional(),
 
     // Terms
     termsAccepted: z.boolean().refine((val) => val === true, {

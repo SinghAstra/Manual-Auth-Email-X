@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'INSTITUTION', 'CORPORATE');
 
 -- CreateEnum
-CREATE TYPE "InstitutionType" AS ENUM ('UNIVERSITY', 'COLLEGE', 'TECHNICAL', 'RESEARCH');
+CREATE TYPE "InstitutionType" AS ENUM ('university', 'college', 'technical', 'research');
 
 -- CreateEnum
 CREATE TYPE "CompanyType" AS ENUM ('PUBLIC', 'PRIVATE', 'PARTNERSHIP', 'STARTUP', 'GOVERNMENT');

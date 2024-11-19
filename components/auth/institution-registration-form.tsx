@@ -42,6 +42,7 @@ const institutionTypes = [
   { value: "technical", label: "Technical Institute" },
   { value: "research", label: "Research Institution" },
 ];
+
 const InstitutionRegistrationForm = ({
   form,
   currentStep,
@@ -91,8 +92,21 @@ const InstitutionRegistrationForm = ({
                 onStepChange(currentStep + 1);
               }
             }}
+            disabled={form.formState.isSubmitting}
           >
-            {currentStep === totalSteps ? "Submit" : "Next"}
+            {form.formState.isSubmitting ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-3 "
+                  viewBox="0 0 24 24"
+                ></svg>
+                Wait....
+              </>
+            ) : currentStep === totalSteps ? (
+              "Submit"
+            ) : (
+              "Next"
+            )}
           </Button>
         </div>
       </Card>
@@ -405,6 +419,16 @@ function AdminDetails({ form }) {
 }
 
 function DocumentUpload({ form }) {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      form.setValue(fieldName, file);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -418,11 +442,18 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="affiliationCertificate"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Affiliation Certificate</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) =>
+                    handleFileChange(e, "affiliationCertificate")
+                  }
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)
@@ -435,11 +466,16 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="governmentRecognition"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Government Recognition</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => handleFileChange(e, "governmentRecognition")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)
@@ -452,11 +488,16 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="letterhead"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Institute Letterhead</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => handleFileChange(e, "letterhead")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)
