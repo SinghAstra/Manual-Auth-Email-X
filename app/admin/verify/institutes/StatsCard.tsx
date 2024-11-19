@@ -18,8 +18,10 @@ export function StatsCard({
 }: StatsCardProps) {
   return (
     <Card className="bg-gray-900/60 border-gray-800">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-gray-200">
+          {title}
+        </CardTitle>
         <Icon className="h-4 w-4 text-gray-400" />
       </CardHeader>
       <CardContent>

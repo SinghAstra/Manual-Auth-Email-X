@@ -9,7 +9,7 @@ const navigation = [
   { name: "Settings", href: "#", icon: Settings },
 ];
 
-export function Sidebar() {
+const Sidebar = () => {
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900/50 backdrop-blur-xl px-6 pb-4 border-r border-gray-800">
@@ -41,4 +41,6 @@ export function Sidebar() {
       </div>
     </div>
   );
-}
+};
+
+export default Sidebar;

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bell, Search } from "lucide-react";
 
-export function Header() {
+const Header = () => {
   return (
     <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-xl px-6">
       <div className="flex flex-1 gap-x-4">
@@ -27,4 +27,6 @@ export function Header() {
       </div>
     </header>
   );
-}
+};
+
+export default Header;
