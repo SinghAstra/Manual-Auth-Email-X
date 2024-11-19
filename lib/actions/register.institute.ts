@@ -1,11 +1,10 @@
-"use server";
 import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { db } from "../db";
 import { sendEmail } from "../mail";
-import { uploadDocument } from "../supabase";
-import { institutionFormSchema } from "../validations/auth";
+import { handleDocumentUpload } from "../supabase";
+import { institutionFormSchema } from "../validations/institutionSchema";
 
 export async function registerInstitution(
   data: z.infer<typeof institutionFormSchema>
@@ -78,18 +77,29 @@ export async function registerInstitution(
           validatedData.governmentRecognition ||
           validatedData.letterhead
         ) {
+          const storageFolder = "institution-documents";
+          const [
+            affiliationCertificateUrl,
+            governmentRecognitionUrl,
+            letterheadUrl,
+          ] = await Promise.all([
+            handleDocumentUpload(
+              storageFolder,
+              validatedData.affiliationCertificate
+            ),
+            handleDocumentUpload(
+              storageFolder,
+              validatedData.governmentRecognition
+            ),
+            handleDocumentUpload(storageFolder, validatedData.letterhead),
+          ]);
+
           await tx.institutionDocument.create({
             data: {
               institutionId: institution.id,
-              affiliationCertificate: validatedData.affiliationCertificate
-                ? await uploadDocument(validatedData.affiliationCertificate)
-                : null,
-              governmentRecognition: validatedData.governmentRecognition
-                ? await uploadDocument(validatedData.governmentRecognition)
-                : null,
-              letterhead: validatedData.letterhead
-                ? await uploadDocument(validatedData.letterhead)
-                : null,
+              affiliationCertificate: affiliationCertificateUrl,
+              governmentRecognition: governmentRecognitionUrl,
+              letterhead: letterheadUrl,
             },
           });
         }

@@ -69,7 +69,7 @@ export async function sendEmail({ email, name, token, type }: EmailOptions) {
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
+    from: process.env.EMAIL_USER,
     to: email,
     subject: template.subject,
     html: template.html(template.link),

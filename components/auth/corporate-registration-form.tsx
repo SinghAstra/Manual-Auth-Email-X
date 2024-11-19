@@ -4,30 +4,38 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, Info, Phone, Shield, Upload, Users } from "lucide-react";
+import {
+  Building2,
+  Info,
+  Loader2,
+  Phone,
+  Shield,
+  Upload,
+  Users,
+} from "lucide-react";
 import ProgressSteps from "./progress-steps";
 
 const steps = [
@@ -63,7 +71,12 @@ const companySizes = [
   { value: "500+", label: "500+ employees" },
 ];
 
-export function CorporateRegistrationForm({ form, currentStep, onStepChange }) {
+export function CorporateRegistrationForm({
+  form,
+  currentStep,
+  totalSteps,
+  onStepChange,
+}) {
   const formSteps = {
     1: <CompanyDetails form={form} />,
     2: <ContactInformation form={form} />,
@@ -101,14 +114,20 @@ export function CorporateRegistrationForm({ form, currentStep, onStepChange }) {
           <Button
             type="button"
             onClick={() => {
-              if (currentStep === 5) {
-                form.handleSubmit((data) => console.log(data))();
-              } else {
-                onStepChange(currentStep + 1);
-              }
+              onStepChange(currentStep + 1);
             }}
+            disabled={form.formState.isSubmitting}
           >
-            {currentStep === 5 ? "Submit" : "Next"}
+            {form.formState.isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                Wait....
+              </>
+            ) : currentStep === totalSteps ? (
+              "Submit"
+            ) : (
+              "Next"
+            )}
           </Button>
         </div>
       </Card>
@@ -666,6 +685,15 @@ function AdminSetup({ form }) {
 }
 
 function DocumentUpload({ form }) {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      form.setValue(fieldName, file);
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -682,11 +710,18 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="registrationCertificate"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Company Registration Certificate</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) =>
+                    handleFileChange(e, "registrationCertificate")
+                  }
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)
@@ -699,11 +734,16 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="taxDocument"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>GST/Tax Registration Document</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => handleFileChange(e, "taxDocument")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)
@@ -716,11 +756,16 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="companyProfile"
-          render={({ field }) => (
+          render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <FormLabel>Company Profile/Brochure</FormLabel>
               <FormControl>
-                <Input type="file" accept=".pdf,.doc,.docx" {...field} />
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => handleFileChange(e, "companyProfile")}
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Upload PDF or DOC format (max 5MB)

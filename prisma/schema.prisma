@@ -107,11 +107,11 @@ enum InstitutionType {
 }
 
 enum CompanyType {
-  PUBLIC
-  PRIVATE
-  PARTNERSHIP
-  STARTUP
-  GOVERNMENT
+  public
+  private
+  partnership
+  startup
+  government
 }
 
 enum CompanySize {

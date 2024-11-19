@@ -3,9 +3,11 @@
 import InstitutionRegistrationForm from "@/components/auth/institution-registration-form";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { registerInstitution } from "@/lib/actions/auth.actions";
-import { institutionFormSchema } from "@/lib/validations/auth";
+import { registerInstitution } from "@/lib/actions/register.institute";
+// import { registerInstitution } from "@/lib/actions/register.institute";
+import { institutionFormSchema } from "@/lib/validations/institutionSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { error } from "console";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -14,6 +16,25 @@ const InstitutionRegistrationPage = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const totalSteps = 4;
+
+  const stepFields = {
+    1: [
+      "institutionName",
+      "type",
+      "establishedYear",
+      "location",
+      "affiliationNumber",
+    ],
+    2: ["email", "phone", "address", "zipCode"],
+    3: [
+      "adminName",
+      "designation",
+      "adminEmail",
+      "adminPassword",
+      "confirmPassword",
+    ],
+    4: ["termsAccepted"],
+  };
 
   const form = useForm<z.infer<typeof institutionFormSchema>>({
     resolver: zodResolver(institutionFormSchema),
@@ -41,30 +62,8 @@ const InstitutionRegistrationPage = () => {
   });
 
   const handleStepChange = async (newStep: number) => {
-    console.log("In handleStepChange");
-    const currentStepFields = {
-      1: [
-        "institutionName",
-        "type",
-        "establishedYear",
-        "location",
-        "affiliationNumber",
-      ],
-      2: ["email", "phone", "address", "zipCode"],
-      3: [
-        "adminName",
-        "designation",
-        "adminEmail",
-        "adminPassword",
-        "confirmPassword",
-      ],
-      4: ["termsAccepted"],
-    };
-    console.log("newStep is ", newStep);
-    console.log("step is ", step);
-
     if (newStep > step) {
-      const fieldsToValidate = currentStepFields[step] || [];
+      const fieldsToValidate = stepFields[step] || [];
       const result = await form.trigger(fieldsToValidate);
 
       if (!result) {
@@ -96,21 +95,17 @@ const InstitutionRegistrationPage = () => {
 
   const onSubmit = async (values: z.infer<typeof institutionFormSchema>) => {
     try {
-      console.log("In the onSubmit.");
-      const result = await registerInstitution(values);
+      const response = await registerInstitution(values);
 
-      if (result.success) {
+      if (!response.success) {
         toast({
-          title: "Registration Successful",
-          description:
-            result.message || "Please check your email to verify your account.",
+          title: "Registration Failed!",
+          description: response.message,
         });
       } else {
         toast({
-          title: "Registration Error",
-          description:
-            result.message || "Something went wrong. Please try again.",
-          variant: "destructive",
+          title: "Registration Successful",
+          description: "Please check your email to verify your account.",
         });
       }
     } catch (error) {
