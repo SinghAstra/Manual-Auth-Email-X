@@ -1,3 +1,4 @@
+"use server";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
 import { compare } from "bcryptjs";
@@ -7,17 +8,13 @@ export async function login(values: z.infer<typeof loginSchema>) {
   try {
     const validatedFields = loginSchema.parse(values);
 
+    console.log("validatedFields is ", validatedFields);
+
     const user = await db.user.findUnique({
       where: { email: validatedFields.email },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        role: true,
-        isVerified: true,
-        isApproved: true,
-      },
     });
+
+    console.log("user is ", user);
 
     if (!user) {
       return {

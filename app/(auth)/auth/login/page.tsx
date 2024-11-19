@@ -20,46 +20,85 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { login } from "@/lib/actions/auth/login";
 import { loginSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, KeyRound, Mail } from "lucide-react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: "sharma@gmail.com",
+      password: "Abhay@codeman123",
       rememberMe: false,
     },
   });
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(values);
+      const loginResult = await login(values);
+
+      if (!loginResult.success) {
+        switch (loginResult.code) {
+          case "EMAIL_NOT_VERIFIED":
+            toast({
+              title: "Verification Required",
+              description: "Please verify your email before logging in.",
+            });
+            return;
+
+          case "APPROVAL_PENDING":
+            router.push("/auth/approval-status");
+            return;
+
+          default:
+            toast({
+              title: "Login Failed",
+              description: loginResult.message || "Unable to sign in.",
+            });
+            return;
+        }
+      }
+      const signInResult = await signIn("credentials", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+      });
+
+      console.log("signInResult is ", signInResult);
+
+      if (signInResult?.error) {
+        toast({
+          title: "Login Failed",
+          description: "Unable to sign in.",
+        });
+        return;
+      }
+
+      // Successful login
       toast({
         title: "Success",
         description: "You have successfully logged in.",
       });
+
+      router.push("/");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Invalid email or password.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -90,7 +129,6 @@ const LoginPage = () => {
                           placeholder="Enter your email"
                           className="pl-10"
                           {...field}
-                          disabled={isLoading}
                         />
                       </div>
                     </FormControl>
@@ -113,7 +151,6 @@ const LoginPage = () => {
                           placeholder="Enter your password"
                           className="pl-10 pr-10"
                           {...field}
-                          disabled={isLoading}
                         />
                         <Button
                           type="button"
@@ -145,7 +182,6 @@ const LoginPage = () => {
                         id="rememberMe"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={isLoading}
                       />
                       <label
                         htmlFor="rememberMe"
@@ -164,8 +200,12 @@ const LoginPage = () => {
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </Form>

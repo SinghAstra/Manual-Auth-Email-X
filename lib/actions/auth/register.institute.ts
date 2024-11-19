@@ -1,10 +1,11 @@
+"use server";
+import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/mail";
+import { handleDocumentUpload } from "@/lib/supabase";
+import { institutionFormSchema } from "@/lib/validations/institutionSchema";
 import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { db } from "../db";
-import { sendEmail } from "../mail";
-import { handleDocumentUpload } from "../supabase";
-import { institutionFormSchema } from "../validations/institutionSchema";
 
 export async function registerInstitution(
   data: z.infer<typeof institutionFormSchema>

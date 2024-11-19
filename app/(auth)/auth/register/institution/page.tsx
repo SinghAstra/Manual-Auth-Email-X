@@ -3,11 +3,9 @@
 import InstitutionRegistrationForm from "@/components/auth/institution-registration-form";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { registerInstitution } from "@/lib/actions/register.institute";
-// import { registerInstitution } from "@/lib/actions/register.institute";
+import { registerInstitution } from "@/lib/actions/auth/register.institute";
 import { institutionFormSchema } from "@/lib/validations/institutionSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { error } from "console";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -49,7 +47,7 @@ const InstitutionRegistrationPage = () => {
       address: "Anand Nagar Civil Line Ballia",
       zipCode: "2770001",
       adminName: "abhay",
-      adminEmail: "abhay@gmail.com",
+      adminEmail: "sharma@gmail.com",
       adminPassword: "Abhay@codeman123",
       confirmPassword: "Abhay@codeman123",
       termsAccepted: true,
@@ -95,7 +93,9 @@ const InstitutionRegistrationPage = () => {
 
   const onSubmit = async (values: z.infer<typeof institutionFormSchema>) => {
     try {
+      console.log("values --onSubmit --register-institution is ", values);
       const response = await registerInstitution(values);
+      console.log("response is ", response);
 
       if (!response.success) {
         toast({

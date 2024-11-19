@@ -1,8 +1,9 @@
+"use server";
 import { login } from "@/lib/actions/auth/login";
 import NextAuth, { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions = {
+const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -14,6 +15,8 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const result = await login(credentials);
+
+        console.log("result is ", result);
 
         if (result.success) {
           return {
