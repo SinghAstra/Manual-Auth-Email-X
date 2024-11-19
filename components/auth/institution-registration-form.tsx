@@ -26,7 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
-import { Info } from "lucide-react";
+import { Info, Loader2 } from "lucide-react";
 import ProgressSteps from "./progress-steps";
 
 const steps = [
@@ -96,10 +96,7 @@ const InstitutionRegistrationForm = ({
           >
             {form.formState.isSubmitting ? (
               <>
-                <svg
-                  className="animate-spin h-5 w-5 mr-3 "
-                  viewBox="0 0 24 24"
-                ></svg>
+                <Loader2 className="animate-spin h-5 w-5 mr-2" />
                 Wait....
               </>
             ) : currentStep === totalSteps ? (
