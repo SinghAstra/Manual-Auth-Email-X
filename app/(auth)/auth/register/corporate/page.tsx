@@ -3,7 +3,7 @@
 import { CorporateRegistrationForm } from "@/components/auth/corporate-registration-form";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { registerCorporate } from "@/lib/actions/register.corporate";
+import { registerCorporate } from "@/lib/actions/auth/register.corporate";
 import { corporateFormSchema } from "@/lib/validations/corporateSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";

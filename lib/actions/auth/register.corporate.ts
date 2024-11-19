@@ -3,10 +3,10 @@ import { CompanySize } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { db } from "../db";
-import { sendEmail } from "../mail";
-import { handleDocumentUpload } from "../supabase";
-import { corporateFormSchema } from "../validations/corporateSchema";
+import { db } from "../../db";
+import { sendEmail } from "../../mail";
+import { handleDocumentUpload } from "../../supabase";
+import { corporateFormSchema } from "../../validations/corporateSchema";
 
 export async function registerCorporate(
   data: z.infer<typeof corporateFormSchema>

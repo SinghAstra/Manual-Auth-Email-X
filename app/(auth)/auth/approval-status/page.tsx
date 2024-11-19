@@ -17,7 +17,7 @@ import { ArrowLeft, Hourglass, Mail, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const PendingApprovalPage = () => {
+const ApprovalStatusPage = () => {
   const [status, setStatus] = useState<ApprovalStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -180,4 +180,4 @@ const PendingApprovalPage = () => {
   );
 };
 
-export default PendingApprovalPage;
+export default ApprovalStatusPage;
