@@ -2,64 +2,72 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { forgotPasswordAction } from "@/lib/actions/auth/forgot.password";
 import { forgotPasswordSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 const ForgotPasswordPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: "",
+      email: "contact.singhastra@gmail.com",
     },
   });
 
   async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
-    console.log("values --forgot-password is ",values)
+    console.log("values --forgot-password is ", values);
     try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await forgotPasswordAction(values);
 
-      setEmailSent(true);
-      toast({
-        title: "Reset link sent",
-        description:
-          "If an account exists, you'll receive a password reset email.",
-      });
+      if (result.success) {
+        setEmailSent(true);
+        toast({
+          title: "Reset link sent",
+          description: result.message,
+        });
+      } else {
+        if (result.redirectToApproval) {
+          router.push("/auth/approval-status");
+          return;
+        }
+        toast({
+          title: "Oops!",
+          description: result.message,
+        });
+      }
     } catch (error) {
       toast({
-        title: "Error",
+        title: "Oops!",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -92,7 +100,7 @@ const ForgotPasswordPage = () => {
               Try again
             </Button>
             <Link href="/auth/login" className="w-full">
-              <Button variant="ghost" className="w-full">
+              <Button variant="ghost" className="w-full bg-gray-700">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to login
               </Button>
@@ -131,7 +139,7 @@ const ForgotPasswordPage = () => {
                           placeholder="name@example.com"
                           className="pl-10"
                           {...field}
-                          disabled={isLoading}
+                          disabled={form.formState.isSubmitting}
                           type="email"
                           autoComplete="email"
                         />
@@ -141,15 +149,21 @@ const ForgotPasswordPage = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending reset link..." : "Send reset link"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting
+                  ? "Sending reset link..."
+                  : "Send reset link"}
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter>
           <Link href="/auth/login" className="w-full">
-            <Button variant="ghost" className="w-full">
+            <Button variant="ghost" className="w-full bg-gray-700">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Button>
