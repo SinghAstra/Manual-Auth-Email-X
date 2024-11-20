@@ -150,7 +150,7 @@ const LoginPage = () => {
                         <KeyRound className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                         <Input
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder="••••••••"
                           className="pl-10 pr-10"
                           {...field}
                         />
