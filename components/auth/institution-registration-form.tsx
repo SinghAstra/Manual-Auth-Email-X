@@ -25,9 +25,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { institutionFormSchema } from "@/lib/validations/institutionSchema";
 import { AnimatePresence, motion } from "framer-motion";
 import { Info, Loader2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 import ProgressSteps from "./progress-steps";
 
 interface Step {
@@ -40,38 +42,16 @@ interface InstitutionType {
   label: string;
 }
 
-interface FormData {
-  institutionName: string;
-  type: string;
-  establishedYear: string;
-  affiliationNumber: string;
-  location: string;
-  email: string;
-  phone: string;
-  alternatePhone?: string;
-  address: string;
-  zipCode: string;
-  adminName: string;
-  designation: string;
-  adminEmail: string;
-  adminPassword: string;
-  confirmPassword: string;
-  affiliationCertificate: File | null;
-  governmentRecognition: File | null;
-  letterhead: File | null;
-  termsAccepted: boolean;
-}
-
 interface InstitutionRegistrationFormProps {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<z.infer<typeof institutionFormSchema>>;
   currentStep: number;
   onStepChange: (step: number) => void;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (values: z.infer<typeof institutionFormSchema>) => Promise<void>;
   totalSteps: number;
 }
 
 interface FormComponentProps {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<z.infer<typeof institutionFormSchema>>;
 }
 
 interface FormTooltipProps {
@@ -91,6 +71,12 @@ const institutionTypes: InstitutionType[] = [
   { value: "technical", label: "Technical Institute" },
   { value: "research", label: "Research Institution" },
 ];
+
+export type DocumentUpload = {
+  affiliationCertificate: File | null;
+  governmentRecognition: File | null;
+  letterhead: File | null;
+};
 
 const InstitutionRegistrationForm = ({
   form,
@@ -467,10 +453,7 @@ function AdminDetails({ form }: FormComponentProps) {
 function DocumentUpload({ form }: FormComponentProps) {
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldName: keyof Pick<
-      FormData,
-      "affiliationCertificate" | "governmentRecognition" | "letterhead"
-    >
+    fieldName: keyof DocumentUpload
   ) => {
     const file = e.target.files?.[0];
     if (file) {

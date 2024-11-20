@@ -10,24 +10,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-type FormSchema = z.infer<typeof corporateFormSchema>;
-
-type NestedKeyOf<ObjectType extends object> = {
-  [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object
-    ? `${Key}` | `${Key}.${NestedKeyOf<ObjectType[Key]>}`
-    : `${Key}`;
-}[keyof ObjectType & (string | number)];
-
-type StepFields = {
-  [K in 1 | 2 | 3 | 4 | 5]: NestedKeyOf<FormSchema>[];
-};
-
 export default function CorporateRegistrationPage() {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
 
-  const stepFields: StepFields = {
+  const stepFields = {
     1: [
       "companyName",
       "industry",
@@ -64,7 +52,9 @@ export default function CorporateRegistrationPage() {
       "adminDetails.phone",
     ],
     5: ["termsAccepted"],
-  };
+  } as const;
+
+  type StepFields = typeof stepFields;
 
   const handleStepChange = async (newStep: number) => {
     if (newStep < step) {

@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { corporateFormSchema } from "@/lib/validations/corporateSchema";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Building2,
@@ -37,6 +38,7 @@ import {
   Users,
 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import { z } from "zod";
 import ProgressSteps from "./progress-steps";
 
 const steps: FormStep[] = [
@@ -82,7 +84,7 @@ export type CompanyDetails = {
   industry: string;
   companyType: string;
   companySize: string;
-  establishedYear: number;
+  establishedYear: string;
   registrationNumber: string;
   gstNumber: string;
   companyDescription: string;
@@ -128,13 +130,8 @@ export type DocumentUpload = {
   termsAccepted: boolean;
 };
 
-export type CorporateRegistrationFormData = CompanyDetails &
-  ContactInformation & { hrContact: HRContact } & {
-    adminDetails: AdminDetails;
-  } & DocumentUpload;
-
 export type CorporateRegistrationFormProps = {
-  form: UseFormReturn<CorporateRegistrationFormData>;
+  form: UseFormReturn<z.infer<typeof corporateFormSchema>>;
   currentStep: number;
   totalSteps: number;
   onStepChange: (step: number) => void;
@@ -155,7 +152,7 @@ export interface FormTooltipProps {
 }
 
 export interface FormStepProps {
-  form: UseFormReturn<CorporateRegistrationFormData>;
+  form: UseFormReturn<z.infer<typeof corporateFormSchema>>;
 }
 
 export function CorporateRegistrationForm({
