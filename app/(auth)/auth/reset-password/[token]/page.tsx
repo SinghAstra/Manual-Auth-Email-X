@@ -96,7 +96,7 @@ const ResetPasswordPage = () => {
     };
 
     validateToken();
-  }, [token]);
+  }, [toast, token]);
 
   const calculatePasswordStrength = (password: string): PasswordStrength => {
     let score = 0;

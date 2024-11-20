@@ -118,7 +118,7 @@ class DocumentUploadService {
 
       const fileName = this.generateFileName(file.name);
 
-      const { data, error } = await this.supabase.storage
+      const { error } = await this.supabase.storage
         .from(this.BUCKET_NAME)
         .upload(fileName, file, {
           cacheControl: "3600",

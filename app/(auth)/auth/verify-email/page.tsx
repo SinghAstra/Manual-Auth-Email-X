@@ -38,6 +38,7 @@ export default function VerifyEmailPage() {
     if (token) {
       handleEmailVerification(token);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Email verification handler
