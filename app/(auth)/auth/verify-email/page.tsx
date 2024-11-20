@@ -60,6 +60,7 @@ export default function VerifyEmailPage() {
         });
       }
     } catch (error) {
+      console.log("error --handleEmailVerification is ", error);
       setVerificationStatus("error");
       toast({
         title: "Email Verification Failed!",
@@ -97,6 +98,7 @@ export default function VerifyEmailPage() {
         });
       }
     } catch (error) {
+      console.log("error --verify-email is ", error);
       toast({
         title: "Error",
         description: "Failed to resend verification email",

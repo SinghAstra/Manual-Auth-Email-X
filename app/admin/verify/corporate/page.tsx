@@ -152,7 +152,6 @@ const CorporateVerificationPage = () => {
               searchQuery={searchQuery}
               statusFilter={statusFilter}
               typeFilter={typeFilter}
-              timeFilter={timeFilter}
             />
           </div>
         </main>

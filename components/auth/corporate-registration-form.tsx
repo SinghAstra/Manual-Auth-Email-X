@@ -36,9 +36,10 @@ import {
   Upload,
   Users,
 } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 import ProgressSteps from "./progress-steps";
 
-const steps = [
+const steps: FormStep[] = [
   { title: "Company", description: "Basic details" },
   { title: "Contact", description: "Contact info" },
   { title: "HR Contact", description: "HR details" },
@@ -46,7 +47,7 @@ const steps = [
   { title: "Documents", description: "Upload files" },
 ];
 
-const industries = [
+const industries: SelectOption[] = [
   { value: "it", label: "IT/Software" },
   { value: "manufacturing", label: "Manufacturing" },
   { value: "consulting", label: "Consulting" },
@@ -56,7 +57,7 @@ const industries = [
   { value: "other", label: "Others" },
 ];
 
-const companyTypes = [
+const companyTypes: SelectOption[] = [
   { value: "public", label: "Public Limited" },
   { value: "private", label: "Private Limited" },
   { value: "partnership", label: "Partnership" },
@@ -64,20 +65,106 @@ const companyTypes = [
   { value: "government", label: "Government Enterprise" },
 ];
 
-const companySizes = [
+const companySizes: SelectOption[] = [
   { value: "1-50", label: "1-50 employees" },
   { value: "51-200", label: "51-200 employees" },
   { value: "201-500", label: "201-500 employees" },
   { value: "500+", label: "500+ employees" },
 ];
 
+export type FormStep = {
+  title: string;
+  description: string;
+};
+
+export type CompanyDetails = {
+  companyName: string;
+  industry: string;
+  companyType: string;
+  companySize: string;
+  establishedYear: number;
+  registrationNumber: string;
+  gstNumber: string;
+  companyDescription: string;
+};
+
+export type Address = {
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+};
+
+export type ContactInformation = {
+  email: string;
+  phone: string;
+  website: string;
+  address: Address;
+};
+
+export type HRContact = {
+  name: string;
+  designation: string;
+  department: string;
+  email: string;
+  phone: string;
+  linkedin?: string;
+};
+
+export type AdminDetails = {
+  name: string;
+  designation: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+};
+
+export type DocumentUpload = {
+  registrationCertificate: File | null;
+  taxDocument: File | null;
+  companyProfile: File | null;
+  termsAccepted: boolean;
+};
+
+export type CorporateRegistrationFormData = CompanyDetails &
+  ContactInformation & { hrContact: HRContact } & {
+    adminDetails: AdminDetails;
+  } & DocumentUpload;
+
+export type CorporateRegistrationFormProps = {
+  form: UseFormReturn<CorporateRegistrationFormData>;
+  currentStep: number;
+  totalSteps: number;
+  onStepChange: (step: number) => void;
+};
+
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
+export type FileChangeHandler = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  fieldName: string
+) => void;
+
+export interface FormTooltipProps {
+  content: string;
+}
+
+export interface FormStepProps {
+  form: UseFormReturn<CorporateRegistrationFormData>;
+}
+
 export function CorporateRegistrationForm({
   form,
   currentStep,
   totalSteps,
   onStepChange,
-}) {
-  const formSteps = {
+}: CorporateRegistrationFormProps) {
+  const formSteps: Record<number, React.ReactNode> = {
     1: <CompanyDetails form={form} />,
     2: <ContactInformation form={form} />,
     3: <HRContact form={form} />,
@@ -135,7 +222,7 @@ export function CorporateRegistrationForm({
   );
 }
 
-function FormTooltip({ content }: { content: string }) {
+function FormTooltip({ content }: FormTooltipProps) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -150,7 +237,7 @@ function FormTooltip({ content }: { content: string }) {
   );
 }
 
-function CompanyDetails({ form }) {
+function CompanyDetails({ form }: FormStepProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -159,7 +246,7 @@ function CompanyDetails({ form }) {
           Company Details
         </h2>
         <p className="text-sm text-muted-foreground">
-          Please provide your company's basic information
+          Please provide your company&apos;s basic information
         </p>
       </div>
 
@@ -330,7 +417,7 @@ function CompanyDetails({ form }) {
   );
 }
 
-function ContactInformation({ form }) {
+function ContactInformation({ form }: FormStepProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -468,7 +555,7 @@ function ContactInformation({ form }) {
   );
 }
 
-function HRContact({ form }) {
+function HRContact({ form }: FormStepProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -581,7 +668,7 @@ function HRContact({ form }) {
   );
 }
 
-function AdminSetup({ form }) {
+function AdminSetup({ form }: FormStepProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -684,10 +771,10 @@ function AdminSetup({ form }) {
   );
 }
 
-function DocumentUpload({ form }) {
+function DocumentUpload({ form }: FormStepProps) {
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldName: string
+    fieldName: keyof DocumentUpload
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -710,7 +797,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="registrationCertificate"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Company Registration Certificate</FormLabel>
               <FormControl>
@@ -720,7 +807,6 @@ function DocumentUpload({ form }) {
                   onChange={(e) =>
                     handleFileChange(e, "registrationCertificate")
                   }
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -734,7 +820,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="taxDocument"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>GST/Tax Registration Document</FormLabel>
               <FormControl>
@@ -742,7 +828,6 @@ function DocumentUpload({ form }) {
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => handleFileChange(e, "taxDocument")}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -756,7 +841,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="companyProfile"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Company Profile/Brochure</FormLabel>
               <FormControl>
@@ -764,7 +849,6 @@ function DocumentUpload({ form }) {
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => handleFileChange(e, "companyProfile")}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>

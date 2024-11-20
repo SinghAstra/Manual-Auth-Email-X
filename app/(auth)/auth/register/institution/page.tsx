@@ -10,12 +10,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+type FormSchema = z.infer<typeof institutionFormSchema>;
+type FormFields = keyof FormSchema;
+
+type StepFields = {
+  [key: number]: FormFields[];
+};
+
 const InstitutionRegistrationPage = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const totalSteps = 4;
 
-  const stepFields = {
+  const stepFields: StepFields = {
     1: [
       "institutionName",
       "type",

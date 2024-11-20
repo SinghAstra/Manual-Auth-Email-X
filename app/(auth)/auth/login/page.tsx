@@ -94,6 +94,7 @@ const LoginPage = () => {
 
       router.push("/");
     } catch (error) {
+      console.log("error --login is ", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred.",

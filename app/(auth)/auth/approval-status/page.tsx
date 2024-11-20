@@ -29,6 +29,7 @@ const ApprovalStatusPage = () => {
       const data = await getApprovalStatus();
       setStatus(data);
     } catch (error) {
+      console.log("error --fetchStatus is ", error);
       toast({
         title: "Error",
         description: "Failed to fetch approval status. Please try again.",

@@ -90,6 +90,7 @@ const ResetPasswordPage = () => {
           });
         }
       } catch (error) {
+        console.log("error --validateToken is ", error);
         setIsTokenValid(false);
       }
     };
@@ -338,7 +339,7 @@ const ResetPasswordPage = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Link href="/auth/login">
-            <Button variant="ghost bg-gray-700">
+            <Button variant="ghost" className="bg-gray-700">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Button>

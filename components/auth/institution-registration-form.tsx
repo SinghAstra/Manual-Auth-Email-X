@@ -27,16 +27,65 @@ import {
 } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { Info, Loader2 } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 import ProgressSteps from "./progress-steps";
 
-const steps = [
+interface Step {
+  title: string;
+  description: string;
+}
+
+interface InstitutionType {
+  value: string;
+  label: string;
+}
+
+interface FormData {
+  institutionName: string;
+  type: string;
+  establishedYear: string;
+  affiliationNumber: string;
+  location: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  address: string;
+  zipCode: string;
+  adminName: string;
+  designation: string;
+  adminEmail: string;
+  adminPassword: string;
+  confirmPassword: string;
+  affiliationCertificate: File | null;
+  governmentRecognition: File | null;
+  letterhead: File | null;
+  termsAccepted: boolean;
+}
+
+interface InstitutionRegistrationFormProps {
+  form: UseFormReturn<FormData>;
+  currentStep: number;
+  onStepChange: (step: number) => void;
+  onSubmit: (data: FormData) => void;
+  totalSteps: number;
+}
+
+interface FormComponentProps {
+  form: UseFormReturn<FormData>;
+}
+
+interface FormTooltipProps {
+  content: string;
+}
+
+const steps: Step[] = [
   { title: "Institution", description: "Basic details" },
   { title: "Contact", description: "Contact info" },
   { title: "Admin", description: "Admin details" },
   { title: "Documents", description: "Upload files" },
 ];
 
-const institutionTypes = [
+const institutionTypes: InstitutionType[] = [
   { value: "university", label: "University" },
   { value: "college", label: "College" },
   { value: "technical", label: "Technical Institute" },
@@ -49,8 +98,8 @@ const InstitutionRegistrationForm = ({
   onStepChange,
   onSubmit,
   totalSteps,
-}) => {
-  const formSteps = {
+}: InstitutionRegistrationFormProps) => {
+  const formSteps: Record<number, React.ReactNode> = {
     1: <BasicDetails form={form} />,
     2: <ContactInformation form={form} />,
     3: <AdminDetails form={form} />,
@@ -111,7 +160,7 @@ const InstitutionRegistrationForm = ({
   );
 };
 
-function FormTooltip({ content }: { content: string }) {
+function FormTooltip({ content }: FormTooltipProps) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -126,7 +175,7 @@ function FormTooltip({ content }: { content: string }) {
   );
 }
 
-function BasicDetails({ form }) {
+function BasicDetails({ form }: FormComponentProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -228,7 +277,7 @@ function BasicDetails({ form }) {
   );
 }
 
-function ContactInformation({ form }) {
+function ContactInformation({ form }: FormComponentProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -317,7 +366,7 @@ function ContactInformation({ form }) {
   );
 }
 
-function AdminDetails({ form }) {
+function AdminDetails({ form }: FormComponentProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -415,10 +464,13 @@ function AdminDetails({ form }) {
   );
 }
 
-function DocumentUpload({ form }) {
+function DocumentUpload({ form }: FormComponentProps) {
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    fieldName: string
+    fieldName: keyof Pick<
+      FormData,
+      "affiliationCertificate" | "governmentRecognition" | "letterhead"
+    >
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -439,7 +491,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="affiliationCertificate"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Affiliation Certificate</FormLabel>
               <FormControl>
@@ -449,7 +501,6 @@ function DocumentUpload({ form }) {
                   onChange={(e) =>
                     handleFileChange(e, "affiliationCertificate")
                   }
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -463,7 +514,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="governmentRecognition"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Government Recognition</FormLabel>
               <FormControl>
@@ -471,7 +522,6 @@ function DocumentUpload({ form }) {
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => handleFileChange(e, "governmentRecognition")}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -485,7 +535,7 @@ function DocumentUpload({ form }) {
         <FormField
           control={form.control}
           name="letterhead"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Institute Letterhead</FormLabel>
               <FormControl>
@@ -493,7 +543,6 @@ function DocumentUpload({ form }) {
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => handleFileChange(e, "letterhead")}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>

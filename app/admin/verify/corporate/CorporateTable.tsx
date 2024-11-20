@@ -32,7 +32,6 @@ interface CorporateTableProps {
   searchQuery: string;
   statusFilter: string;
   typeFilter: string;
-  timeFilter: string;
 }
 
 const companies = [
@@ -96,7 +95,6 @@ export function CorporateTable({
   searchQuery,
   statusFilter,
   typeFilter,
-  timeFilter,
 }: CorporateTableProps) {
   const [selectedCompany, setSelectedCompany] = useState<
     (typeof companies)[0] | null

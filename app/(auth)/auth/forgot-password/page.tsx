@@ -63,6 +63,7 @@ const ForgotPasswordPage = () => {
         });
       }
     } catch (error) {
+      console.log("error --forgot-password is ", error);
       toast({
         title: "Oops!",
         description: "Something went wrong. Please try again.",
