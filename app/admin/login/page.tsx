@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { loginSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,14 +21,16 @@ import {
   MailIcon,
   ShieldCheckIcon,
 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  // const { toast } = useToast();
-  // const router = useRouter();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -38,7 +41,34 @@ function AdminLoginPage() {
   });
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
-    console.log("data --AdminLogin is ", data);
+    try {
+      const response = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
+
+      if (response?.error) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password",
+        });
+        return;
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Redirecting to dashboard...",
+      });
+
+      router.push("/admin/dashboard");
+    } catch (error) {
+      console.log("error --onSubmit --AdminLogin Page is ", error);
+      toast({
+        title: "Internal Server Error",
+        description: "An unexpected error occurred",
+      });
+    }
   };
 
   return (
@@ -126,7 +156,7 @@ function AdminLoginPage() {
               >
                 {form.formState.isSubmitting ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 text-muted-foreground animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Wait....
                   </>
                 ) : (
