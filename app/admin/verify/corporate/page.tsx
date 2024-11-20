@@ -1,6 +1,6 @@
 "use client";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/admin/Header";
+import Sidebar from "@/components/layout/admin/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
