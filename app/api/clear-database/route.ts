@@ -9,6 +9,8 @@ export async function GET() {
     await db.user.deleteMany();
     await db.institution.deleteMany();
     await db.corporate.deleteMany();
+    await db.account.deleteMany();
+    await db.session.deleteMany();
 
     return NextResponse.json(
       { message: "Database cleared successfully" },

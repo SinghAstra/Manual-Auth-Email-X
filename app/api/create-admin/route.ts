@@ -11,6 +11,7 @@ export async function GET() {
       );
     }
 
+    const adminName = "adminName";
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -41,6 +42,7 @@ export async function GET() {
 
     const admin = await db.user.create({
       data: {
+        name: adminName,
         email: adminEmail,
         password: hashedPassword,
         role: "ADMIN",

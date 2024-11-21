@@ -7,6 +7,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   Settings,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +17,7 @@ const navigation = [
   { name: "Institutes", href: "/admin/verify/institutes", icon: GraduationCap },
   { name: "Corporate", href: "/admin/verify/corporate", icon: Building2 },
   { name: "Settings", href: "#", icon: Settings },
+  { name: "Profile", href: "/admin/profile", icon: User },
 ];
 
 const Sidebar = () => {

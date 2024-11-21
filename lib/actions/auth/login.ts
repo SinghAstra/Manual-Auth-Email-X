@@ -60,6 +60,8 @@ export async function login(values: z.infer<typeof loginSchema>) {
         id: user.id,
         email: user.email,
         role: user.role,
+        name: user.name,
+        image: user.image,
       },
     };
   } catch (error) {
