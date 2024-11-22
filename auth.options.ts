@@ -2,10 +2,6 @@ import { login } from "@/lib/actions/auth/login";
 import { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-if (!process.env.NEXT_AUTH_SECRET) {
-  throw new Error("NEXT_AUTH_SECRET is required");
-}
-
 export const authOptions = {
   providers: [
     CredentialsProvider({
