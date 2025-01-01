@@ -9,31 +9,52 @@
 
 @layer base {
   :root {
-    --background: 255, 10%, 9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Core background and surface colors */
+    --background: 222 47% 5%;
+    --foreground: 213 31% 91%;
+
+    /* Elevated surfaces */
+    --card: 222 47% 7%;
+    --card-foreground: 213 31% 91%;
+    --popover: 222 47% 7%;
+    --popover-foreground: 213 31% 91%;
+
+    /* Primary accent - Vivid blue */
+    --primary: 214 95% 65%;
+    --primary-foreground: 222 47% 5%;
+
+    /* Secondary - Subtle blue-gray */
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 213 31% 91%;
+
+    /* Muted elements */
+    --muted: 222 47% 11%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent - Slightly brighter than secondary */
+    --accent: 217 19% 27%;
+    --accent-foreground: 213 31% 91%;
+
+    /* Destructive actions */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 240, 2%, 19%;
-    --ring: 224.3 76.3% 48%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+
+    /* Borders and inputs */
+    --border: 222 47% 11%;
+    --input: 222 20% 15%;
+    --ring: 214 95% 65%;
+
+    /* Radius */
     --radius: 0.875rem;
+
+    --stats-blue: 210 40% 50%; /* Vibrant blue */
+    --stats-purple: 270 50% 50%; /* Deep purple */
+    --stats-pink: 330 60% 50%; /* Bright pink */
+    --stats-teal: 180 50% 40%; /* Teal green */
+    --stats-orange: 25 90% 50%; /* Warm orange */
+
+    --stats-green: 120 50% 40%; /* Verdant green */
+    --stats-red: 0 70% 50%;
   }
 }
 
@@ -46,32 +67,28 @@
   }
 }
 
-/* Customized Scrollbar */
-
 body {
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
 }
 
-/* Hide scrollbar for specific elements */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .no-scrollbar {
-  -ms-overflow-style: none; /* For IE and Edge */
-  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* For Webkit browsers (Chrome, Safari, etc.) */
 ::-webkit-scrollbar {
   width: 6px;
-  scrollbar-color: #262626;
+  scrollbar-color: hsl(222 47% 11%);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #262626;
+  background-color: hsl(222 47% 11%);
   border-radius: 3px;
 }
 
@@ -79,17 +96,6 @@ body {
   background: rgba(0, 0, 0, 0);
 }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
-  -webkit-text-fill-color: white !important;
-  caret-color: white !important;
-  box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
-}
-
-input:-webkit-autofill:not(:focus) {
-  -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
-  -webkit-text-fill-color: white !important;
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
 }

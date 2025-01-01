@@ -1,7 +1,8 @@
+
 export default function Home() {
   return (
-    <h1 className="min-h-screen bg-black text-white flex items-center justify-center">
-      Hey There Raj Singh
-    </h1>
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      Home
+    </div>
   );
 }
