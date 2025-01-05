@@ -17,8 +17,8 @@ export const siteConfig: SiteConfig = {
     "Data visualization tools",
   ],
   links: {
-    twitter: "https://twitter.com/yourprofile", // Replace with your Twitter profile
-    github: "https://github.com/yourrepo", // Replace with your GitHub repository
-    linkedIn: "https://linkedin.com/in/yourprofile", // Replace with your LinkedIn profile
+    twitter: "https://twitter.com/XSinghAstra",
+    github: "https://github.com/SinghAstra/PlacementX",
+    linkedIn: "https://linkedin.com/in/singhastra",
   },
 };

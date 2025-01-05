@@ -106,9 +106,6 @@ export default function SignIn() {
                   Welcome to{" "}
                   <span className="text-primary">{siteConfig.name}</span>
                 </h2>
-                <p className="text-muted-foreground">
-                  Sign in to start analyzing your repositories
-                </p>
               </div>
 
               <div className="space-y-4">
