@@ -64,7 +64,6 @@ export const authOptions: NextAuthOptions = {
   // Customize authentication pages
   pages: {
     signIn: "/auth/sign-in", // Custom sign-in page
-    error: "/auth/error",
   },
 
   // debug: process.env.NODE_ENV === "development",

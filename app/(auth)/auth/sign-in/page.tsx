@@ -3,7 +3,6 @@
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
@@ -21,25 +20,10 @@ const features = [
 
 export default function SignIn() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isGithubLoading, setIsGithubLoading] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
   console.log("callbackUrl is ", callbackUrl);
-
-  const handleGitHubSignIn = async () => {
-    try {
-      setIsGithubLoading(true);
-      await signIn("github", {
-        callbackUrl,
-        redirect: true,
-      });
-    } catch (error) {
-      console.error("GitHub Sign-In Error:", error);
-    } finally {
-      setIsGithubLoading(false);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -51,11 +35,9 @@ export default function SignIn() {
     } catch (error) {
       console.error("GitHub Sign-In Error:", error);
     } finally {
-      setIsGithubLoading(false);
+      setIsGoogleLoading(false);
     }
   };
-
-  console.log("Testing Purpose.");
 
   return (
     <div className="flex min-h-screen overflow-hidden">
@@ -130,39 +112,6 @@ export default function SignIn() {
               </div>
 
               <div className="space-y-4">
-                <Button
-                  onClick={handleGitHubSignIn}
-                  disabled={isGithubLoading}
-                  variant="default"
-                  className="w-full bg-[#24292F] text-white hover:bg-[#24292F]/90 group"
-                >
-                  {isGithubLoading ? (
-                    <>
-                      <Icons.loader className="w-5 h-5 animate-spin" />
-                      Wait ...
-                    </>
-                  ) : (
-                    <>
-                      <Icons.gitLogo className="mr-2 h-5 w-5" />
-                      <span className="text-center">Continue with GitHub</span>
-                      <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full ml-2 animate-pulse">
-                        Recommended
-                      </span>
-                    </>
-                  )}
-                </Button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                      Or
-                    </span>
-                  </div>
-                </div>
-
                 <Button
                   variant="outline"
                   className="w-full text-primary"
