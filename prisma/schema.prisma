@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  INSTITUTION_ADMIN
+  COMPANY_REPRESENTATIVE
+  STUDENT
+  GOVERNMENT
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DocumentType {
+  INSTITUTION_PROOF
+  COMPANY_PROOF
+  GOVERNMENT_ID
+  STUDENT_ID
+}
+
+enum PlacementStatus {
+  PLACED
+  UNPLACED
+  IN_PROCESS
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(STUDENT)
+  isActive      Boolean   @default(true)
+  verified      Boolean   @default(false)
+
+  // Auth Relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // Profile Relations
+  institutionProfile InstitutionProfile?
+  companyProfile     CompanyProfile?
+  studentProfile     StudentProfile?
+  governmentProfile  GovernmentProfile?
+
+  // Document Relations
+  documents     Document[]
+  verifiedDocs  Document[] @relation("Verifier")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Institution {
+  id            String    @id @default(cuid())
+  name          String
+  type          String    // University, College, etc.
+  address       String
+  city          String
+  state         String
+  pincode       String
+  website       String?
+  phone         String
+
+  // Relations
+  admins        InstitutionProfile[]
+  students      StudentProfile[]
+  courses       Course[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model InstitutionProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  institutionId String
+  designation   String
+  department    String?
+
+  user          User        @relation(fields: [userId], references: [id])
+  institution   Institution @relation(fields: [institutionId], references: [id])
+}
+
+model Company {
+  id            String    @id @default(cuid())
+  name          String
+  industry      String
+  description   String?
+  website       String?
+  address       String
+  city          String
+  state         String
+  pincode       String
+
+  // Relations
+  representatives CompanyProfile[]
+  placements      PlacementRecord[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model CompanyProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  companyId     String
+  designation   String
+  department    String?
+
+  user          User      @relation(fields: [userId], references: [id])
+  company       Company   @relation(fields: [companyId], references: [id])
+}
+
+model GovernmentProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  department    String
+  designation   String
+  jurisdiction  String    // National, State, etc.
+
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Course {
+  id            String    @id @default(cuid())
+  name          String
+  type          String    // B.Tech, M.Tech, etc.
+  duration      Int       // in years
+  institutionId String
+
+  // Relations
+  institution   Institution     @relation(fields: [institutionId], references: [id])
+  students      StudentProfile[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model StudentProfile {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  institutionId String
+  courseId      String
+  enrollmentNo  String
+  graduationYear Int
+  skills        String[]
+  cgpa          Float?
+
+  // Relations
+  user          User        @relation(fields: [userId], references: [id])
+  institution   Institution @relation(fields: [institutionId], references: [id])
+  course        Course      @relation(fields: [courseId], references: [id])
+  placements    PlacementRecord[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model PlacementRecord {
+  id              String    @id @default(cuid())
+  studentId       String
+  companyId       String
+  position        String
+  salary          Float?
+  joiningDate     DateTime?
+  offerLetterUrl  String?
+  status          PlacementStatus @default(IN_PROCESS)
+  verificationStatus VerificationStatus @default(PENDING)
+  verificationFeedback String?
+
+  // Relations
+  student        StudentProfile @relation(fields: [studentId], references: [id])
+  company        Company    @relation(fields: [companyId], references: [id])
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Document {
+  id            String    @id @default(cuid())
+  userId        String
+  type          DocumentType
+  fileUrl       String
+  status        VerificationStatus @default(PENDING)
+  feedback      String?
+  verifierId    String?
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id])
+  verifier      User?     @relation("Verifier", fields: [verifierId], references: [id])
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AnalyticsSnapshot {
+  id            String    @id @default(cuid())
+  date          DateTime
+  institutionId String?
+  courseId      String?
+  
+  totalStudents Int
+  placedStudents Int
+  averageSalary Float?
+  topCompanies  Json?    // Store array of company IDs and placement counts
+  skillDemand   Json?    // Store skills and their demand frequency
+  
+  createdAt     DateTime  @default(now())
+}
