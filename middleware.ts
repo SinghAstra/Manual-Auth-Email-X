@@ -11,7 +11,7 @@ const roleRoutes: Record<Role, string[]> = {
   GOVERNMENT: ["/analytics", "/reports"],
 };
 
-const roleDefaultRoutes: Record<Role, string> = {
+export const roleDefaultRoutes: Record<Role, string> = {
   SUPER_ADMIN: "/admin",
   INSTITUTION_ADMIN: "/institution",
   COMPANY_REPRESENTATIVE: "/company",
@@ -54,19 +54,6 @@ export async function middleware(req: NextRequest) {
   if (!hasRouteAccess) {
     // Redirect to / page
     return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  if (req.nextUrl.pathname === roleDefaultRoutes.STUDENT) {
-    const role = user.role as Role;
-    const isVerified = user.verified as boolean;
-
-    // If user is not verified, send them to verification
-    if (!isVerified) {
-      return NextResponse.redirect(new URL("/verification", req.url));
-    }
-
-    // Redirect to role-specific dashboard
-    return NextResponse.redirect(new URL(roleDefaultRoutes[role], req.url));
   }
 
   return NextResponse.next();

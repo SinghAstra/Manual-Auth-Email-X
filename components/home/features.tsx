@@ -1,8 +1,8 @@
 import { Card } from "@/components/ui/card";
+import { siteConfig } from "@/config/site";
 import { ColorVariant, Feature } from "@/interfaces/feature";
 import React from "react";
 import { FadeInUp } from "../animation/fade-in-up";
-import { siteConfig } from "@/config/site";
 
 const colorMap: Record<ColorVariant, string> = {
   "stats-blue":
@@ -60,14 +60,16 @@ export function Features({ features }: FeaturesProps) {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 leading-tight tracking-tighter">
-            Powerful Features
-          </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            {siteConfig.headline}
-          </p>
-        </div>
+        <FadeInUp delay={0.2}>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 leading-tight tracking-tighter">
+              Powerful Features
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              {siteConfig.headline}
+            </p>
+          </div>
+        </FadeInUp>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => {

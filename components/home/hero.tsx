@@ -3,6 +3,7 @@
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils/utils";
+import { roleDefaultRoutes } from "@/middleware";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -13,7 +14,7 @@ import { Icons } from "../Icons";
 import { Button, buttonVariants } from "../ui/button";
 
 export function Hero() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -32,7 +33,7 @@ export function Hero() {
     }
 
     if (status === "authenticated") {
-      router.push("/profile");
+      router.push(roleDefaultRoutes[session?.user.role]);
     }
   };
 
