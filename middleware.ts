@@ -7,28 +7,25 @@ const roleRoutes: Record<Role, string[]> = {
   SUPER_ADMIN: ["/admin", "/verification"],
   INSTITUTION_ADMIN: ["/institution", "/students"],
   COMPANY_REPRESENTATIVE: ["/company", "/verify-placements"],
-  STUDENT: ["/profile", "/placements"],
+  STUDENT: ["/profile", "/dashboard", "/verification"],
   GOVERNMENT: ["/analytics", "/reports"],
 };
 
-const onboardingRoutes = [
-  "/onboarding/role-selection",
-  "/onboarding/institution/profile",
-  "/onboarding/company/profile",
-  "/onboarding/government/profile",
-  "/onboarding/student/profile",
-  "/onboarding/documents",
-  "/onboarding/verification-pending",
-  "/onboarding/verification-rejected",
-];
+const roleDefaultRoutes: Record<Role, string> = {
+  SUPER_ADMIN: "/admin",
+  INSTITUTION_ADMIN: "/institution",
+  COMPANY_REPRESENTATIVE: "/company",
+  STUDENT: "/profile",
+  GOVERNMENT: "/analytics",
+};
+
+const authRoutes = ["/auth/sign-in"];
 
 export async function middleware(req: NextRequest) {
   const user = await getToken({
     req,
     secret: process.env.NEXT_AUTH_SECRET,
   });
-
-  console.log("user --middleware is", user);
 
   if (!user?.email) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -39,63 +36,37 @@ export async function middleware(req: NextRequest) {
   }
 
   const path = req.nextUrl.pathname;
+  const isAuthRoutes = authRoutes.some((route) => path.startsWith(route));
 
-  // Handle unverified users and onboarding flow
-  if (!user.verified) {
-    if (onboardingRoutes.some((route) => path.startsWith(route))) {
-      // Role selection check
-      if (!user.role && path !== "/onboarding/role-selection") {
-        return NextResponse.redirect(
-          new URL("/onboarding/role-selection", req.url)
-        );
-      }
+  console.log("path is ", path);
+  console.log("isAuthRoutes is ", isAuthRoutes);
 
-      // Document upload check
-      if (
-        user.role &&
-        user.documents.length === 0 &&
-        !path.includes("/documents")
-      ) {
-        return NextResponse.redirect(
-          new URL(`/onboarding/${user.role.toLowerCase()}/documents`, req.url)
-        );
-      }
-
-      // Verification status checks
-      if (user.documents.some((doc) => doc.status === "PENDING")) {
-        return NextResponse.redirect(
-          new URL("/onboarding/verification-pending", req.url)
-        );
-      }
-
-      if (user.documents.some((doc) => doc.status === "REJECTED")) {
-        return NextResponse.redirect(
-          new URL("/onboarding/verification-rejected", req.url)
-        );
-      }
-
-      return NextResponse.next();
-    }
-
-    // Redirect unverified users trying to access main app
-    return NextResponse.redirect(
-      new URL("/onboarding/role-selection", req.url)
-    );
-  }
-
-  // Redirect verified users away from onboarding
-  if (onboardingRoutes.some((route) => path.startsWith(route))) {
-    return NextResponse.redirect(
-      new URL(`/${user.role.toLowerCase()}/dashboard`, req.url)
-    );
+  if (isAuthRoutes) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   // Check role-based access
   const allowedRoutes = roleRoutes[user.role] || [];
   const hasRouteAccess = allowedRoutes.some((route) => path.startsWith(route));
 
+  console.log("hasRouteAccess is ", hasRouteAccess);
+
   if (!hasRouteAccess) {
-    return new NextResponse("Forbidden", { status: 403 });
+    // Redirect to / page
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  if (req.nextUrl.pathname === roleDefaultRoutes.STUDENT) {
+    const role = user.role as Role;
+    const isVerified = user.verified as boolean;
+
+    // If user is not verified, send them to verification
+    if (!isVerified) {
+      return NextResponse.redirect(new URL("/verification", req.url));
+    }
+
+    // Redirect to role-specific dashboard
+    return NextResponse.redirect(new URL(roleDefaultRoutes[role], req.url));
   }
 
   return NextResponse.next();

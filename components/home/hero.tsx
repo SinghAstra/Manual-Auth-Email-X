@@ -32,7 +32,7 @@ export function Hero() {
     }
 
     if (status === "authenticated") {
-      router.push("/dashboard");
+      router.push("/profile");
     }
   };
 

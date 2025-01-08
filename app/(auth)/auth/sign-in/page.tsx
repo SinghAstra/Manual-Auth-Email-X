@@ -28,7 +28,7 @@ const features = [
 export default function SignIn() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/profile";
 
   console.log("callbackUrl is ", callbackUrl);
 

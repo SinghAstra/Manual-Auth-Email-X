@@ -24,17 +24,12 @@ export const authOptions: NextAuthOptions = {
   // Callbacks to customize session and token
   callbacks: {
     jwt: async ({ token, user }) => {
-      console.log("JWT callback - User:", user);
-      console.log("JWT callback - token:", token);
       if (user) {
         // Fetch user from database when they sign in
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email! },
           include: { documents: true },
         });
-
-        console.log("In user");
-        console.log("dbUser is ", dbUser);
 
         if (dbUser) {
           token.role = dbUser.role;
@@ -46,8 +41,6 @@ export const authOptions: NextAuthOptions = {
     },
     // Customize the session object
     session: async ({ session, token }) => {
-      console.log("Session callback - session:", session);
-      console.log("Session callback - token:", token);
       if (session?.user) {
         session.user.role = token.role;
         session.user.verified = token.verified;
@@ -57,27 +50,21 @@ export const authOptions: NextAuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
-      console.log("Redirect callback - URL:", url);
-      console.log("Redirect callback - Base URL:", baseUrl);
-
       // Ensure URL is properly formatted
       try {
         // Handle relative URLs
         if (url.startsWith("/")) {
           const finalUrl = `${baseUrl}${url}`;
-          console.log("Redirecting to:", finalUrl);
           return finalUrl;
         }
 
         // Handle absolute URLs
         const urlObject = new URL(url);
         if (urlObject.origin === baseUrl) {
-          console.log("Redirecting to same-origin URL:", url);
           return url;
         }
 
         // Default fallback
-        console.log("Falling back to base URL:", baseUrl);
         return baseUrl;
       } catch (error) {
         console.error("Error in redirect callback:", error);
