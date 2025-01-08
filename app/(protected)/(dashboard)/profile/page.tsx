@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@prisma/client";
 import { format } from "date-fns";
 import { AlertCircle, CalendarDays, Mail } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ProfileView() {

@@ -38,7 +38,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r">
+      <aside className="hidden lg:flex w-64 flex-col border-r fixed top-0 left-0 bottom-0">
         <div className="flex h-14 items-center border-b px-4">
           <h2 className="text-lg text-primary">{siteConfig.name}</h2>
         </div>
@@ -93,9 +93,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-4 lg:p-8">{children}</div>
-      </main>
+      <main className="flex-1 overflow-y-auto lg:pl-64">{children}</main>
     </div>
   );
 }
