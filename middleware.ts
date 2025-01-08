@@ -62,17 +62,17 @@ export async function middleware(req: NextRequest) {
       }
 
       // Verification status checks
-      //   if (user.documents.some((doc) => doc.status === "PENDING")) {
-      //     return NextResponse.redirect(
-      //       new URL("/onboarding/verification-pending", req.url)
-      //     );
-      //   }
+      if (user.documents.some((doc) => doc.status === "PENDING")) {
+        return NextResponse.redirect(
+          new URL("/onboarding/verification-pending", req.url)
+        );
+      }
 
-      //   if (user.documents.some((doc) => doc.status === "REJECTED")) {
-      //     return NextResponse.redirect(
-      //       new URL("/onboarding/verification-rejected", req.url)
-      //     );
-      //   }
+      if (user.documents.some((doc) => doc.status === "REJECTED")) {
+        return NextResponse.redirect(
+          new URL("/onboarding/verification-rejected", req.url)
+        );
+      }
 
       return NextResponse.next();
     }
@@ -103,6 +103,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/dashboard",
     "/onboarding/:path*",
     "/admin/:path*",
     "/institution/:path*",
