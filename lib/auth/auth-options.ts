@@ -24,18 +24,31 @@ export const authOptions: NextAuthOptions = {
   // Callbacks to customize session and token
   callbacks: {
     jwt: async ({ token, user }) => {
+      console.log("JWT callback - User:", user);
+      console.log("JWT callback - token:", token);
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.verified = user.verified;
-        token.documents = user.documents;
+        // Fetch user from database when they sign in
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+          include: { documents: true },
+        });
+
+        console.log("In user");
+        console.log("dbUser is ", dbUser);
+
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.verified = dbUser.verified;
+          token.documents = dbUser.documents;
+        }
       }
       return token;
     },
     // Customize the session object
     session: async ({ session, token }) => {
+      console.log("Session callback - session:", session);
+      console.log("Session callback - token:", token);
       if (session?.user) {
-        session.user.id = token.id;
         session.user.role = token.role;
         session.user.verified = token.verified;
         session.user.documents = token.documents;

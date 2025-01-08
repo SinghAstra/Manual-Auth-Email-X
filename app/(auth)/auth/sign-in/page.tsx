@@ -47,7 +47,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex min=h-screen overflow-hidden">
+    <div className="flex min-h-screen overflow-hidden">
       {/* Left Panel - Info Section */}
       <div className="hidden lg:flex lg:w-3/5 bg-gradient-to-br from-background via-secondary to-background relative z-10">
         <div className="absolute inset-0 bg-grid-white" />

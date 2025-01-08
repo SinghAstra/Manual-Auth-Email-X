@@ -1,8 +1,6 @@
 import { Role } from "@prisma/client";
 import { getToken } from "next-auth/jwt";
-import withAuth, { NextRequestWithAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-import { prisma } from "./lib/utils/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
 // Define routes that require specific roles
 const roleRoutes: Record<Role, string[]> = {
@@ -24,104 +22,84 @@ const onboardingRoutes = [
   "/onboarding/verification-rejected",
 ];
 
-export default withAuth(
-  async function middleware(req: NextRequestWithAuth) {
-    const token = await getToken({
-      req,
-      secret: process.env.NEXT_AUTH_SECRET,
-    });
+export async function middleware(req: NextRequest) {
+  const user = await getToken({
+    req,
+    secret: process.env.NEXT_AUTH_SECRET,
+  });
 
-    if (!token?.email) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+  console.log("user --middleware is", user);
 
-    // Fetch user from database
-    const user = await prisma.user.findUnique({
-      where: { email: token.email },
-      include: {
-        documents: true,
-      },
-    });
+  if (!user?.email) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
 
-    if (!user) {
-      return new NextResponse("User not found", { status: 404 });
-    }
+  if (!user) {
+    return new NextResponse("User not found", { status: 404 });
+  }
 
-    // Get the requested path
-    const path = req.nextUrl.pathname;
+  const path = req.nextUrl.pathname;
 
-    // If user exists but isn't verified, handle onboarding flow
-    if (!user.verified) {
-      // Allow access to onboarding routes
-      if (onboardingRoutes.some((route) => path.startsWith(route))) {
-        // If no role selected yet, force to role selection
-        if (!user.role && path !== "/onboarding/role-selection") {
-          return NextResponse.redirect(
-            new URL("/onboarding/role-selection", req.url)
-          );
-        }
-
-        // If role selected but no docs, force to document upload
-        if (
-          user.role &&
-          user.documents.length === 0 &&
-          !path.includes("/documents")
-        ) {
-          return NextResponse.redirect(
-            new URL(`/onboarding/${user.role.toLowerCase()}/documents`, req.url)
-          );
-        }
-
-        // If docs pending verification, show pending screen
-        if (user.documents.some((doc) => doc.status === "PENDING")) {
-          return NextResponse.redirect(
-            new URL("/onboarding/verification-pending", req.url)
-          );
-        }
-
-        // If docs rejected, show rejection screen
-        if (user.documents.some((doc) => doc.status === "REJECTED")) {
-          return NextResponse.redirect(
-            new URL("/onboarding/verification-rejected", req.url)
-          );
-        }
-
-        return NextResponse.next();
+  // Handle unverified users and onboarding flow
+  if (!user.verified) {
+    if (onboardingRoutes.some((route) => path.startsWith(route))) {
+      // Role selection check
+      if (!user.role && path !== "/onboarding/role-selection") {
+        return NextResponse.redirect(
+          new URL("/onboarding/role-selection", req.url)
+        );
       }
 
-      // If trying to access main app routes while not verified, redirect to appropriate onboarding step
-      return NextResponse.redirect(
-        new URL("/onboarding/role-selection", req.url)
-      );
+      // Document upload check
+      if (
+        user.role &&
+        user.documents.length === 0 &&
+        !path.includes("/documents")
+      ) {
+        return NextResponse.redirect(
+          new URL(`/onboarding/${user.role.toLowerCase()}/documents`, req.url)
+        );
+      }
+
+      // Verification status checks
+      //   if (user.documents.some((doc) => doc.status === "PENDING")) {
+      //     return NextResponse.redirect(
+      //       new URL("/onboarding/verification-pending", req.url)
+      //     );
+      //   }
+
+      //   if (user.documents.some((doc) => doc.status === "REJECTED")) {
+      //     return NextResponse.redirect(
+      //       new URL("/onboarding/verification-rejected", req.url)
+      //     );
+      //   }
+
+      return NextResponse.next();
     }
 
-    // For verified users, prevent access to onboarding routes
-    if (onboardingRoutes.some((route) => path.startsWith(route))) {
-      return NextResponse.redirect(
-        new URL(`/${user.role.toLowerCase()}/dashboard`, req.url)
-      );
-    }
-
-    // Check role-based access
-    const allowedRoutes = roleRoutes[user.role] || [];
-    const hasRouteAccess = allowedRoutes.some((route) =>
-      path.startsWith(route)
+    // Redirect unverified users trying to access main app
+    return NextResponse.redirect(
+      new URL("/onboarding/role-selection", req.url)
     );
-
-    console.log("hasRouteAccess", hasRouteAccess);
-
-    if (!hasRouteAccess) {
-      return new NextResponse("Forbidden", { status: 403 });
-    }
-
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
   }
-);
+
+  // Redirect verified users away from onboarding
+  if (onboardingRoutes.some((route) => path.startsWith(route))) {
+    return NextResponse.redirect(
+      new URL(`/${user.role.toLowerCase()}/dashboard`, req.url)
+    );
+  }
+
+  // Check role-based access
+  const allowedRoutes = roleRoutes[user.role] || [];
+  const hasRouteAccess = allowedRoutes.some((route) => path.startsWith(route));
+
+  if (!hasRouteAccess) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
