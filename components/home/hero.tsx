@@ -2,13 +2,15 @@
 
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils/utils";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FadeInUp } from "../animation/fade-in-up";
-import { AnimatedButton } from "../custom-ui/animated-button";
 import { GradientText } from "../custom-ui/gradient-text";
 import { Icons } from "../Icons";
+import { Button, buttonVariants } from "../ui/button";
 
 export function Hero() {
   const { status } = useSession();
@@ -40,20 +42,22 @@ export function Hero() {
         <div className="flex flex-col items-center space-y-8 text-center">
           <FadeInUp>
             <div className="flex flex-col sm:flex-row gap-3">
-              <AnimatedButton
+              <Link
                 href={siteConfig.links.github}
-                icon={<Icons.gitLogo />}
-                label="Star on GitHub"
-                className="bg-primary/10 text-primary hover:bg-primary/20"
-                isExternal
-              />
-              <AnimatedButton
+                target="_blank"
+                className={cn(buttonVariants({ variant: "outline" }))}
+              >
+                <Icons.gitLogo />
+                Star on Github
+              </Link>
+              <Link
                 href={siteConfig.links.twitter}
-                icon={<Icons.twitter />}
-                label="Follow Updates"
-                className="bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20"
-                isExternal
-              />
+                target="_blank"
+                className={cn(buttonVariants({ variant: "outline" }))}
+              >
+                <Icons.twitter />
+                Follow Updates
+              </Link>
             </div>
           </FadeInUp>
 
@@ -71,23 +75,18 @@ export function Hero() {
           </FadeInUp>
 
           <FadeInUp delay={0.4}>
-            <AnimatedButton
-              label={
-                <div className="flex items-center gap-2">
-                  <span className="text-base">Get Started</span>
-                  <motion.div
-                    className="ml-2"
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                  >
-                    <Icons.arrowRight />
-                  </motion.div>
-                </div>
-              }
-              onClick={handleGetStarted}
-              disabled={status === "loading"}
-              className="h-12 px-8 text-base bg-primary text-primary-foreground hover:bg-primary/90"
-            />
+            <Button onClick={handleGetStarted} disabled={status === "loading"}>
+              <div className="flex items-center gap-2">
+                <span className="text-base">Get Started</span>
+                <motion.div
+                  className="ml-2"
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  <Icons.arrowRight />
+                </motion.div>
+              </div>
+            </Button>
           </FadeInUp>
         </div>
       </div>

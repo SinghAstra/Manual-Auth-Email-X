@@ -23,10 +23,22 @@ export const authOptions: NextAuthOptions = {
 
   // Callbacks to customize session and token
   callbacks: {
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.verified = user.verified;
+        token.documents = user.documents;
+      }
+      return token;
+    },
     // Customize the session object
-    async session({ session, token }) {
-      if (token.sub) {
-        session.user.id = token.sub;
+    session: async ({ session, token }) => {
+      if (session?.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.verified = token.verified;
+        session.user.documents = token.documents;
       }
       return session;
     },

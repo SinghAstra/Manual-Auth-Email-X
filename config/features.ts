@@ -1,4 +1,5 @@
-import { User, School, Briefcase, BarChart } from "lucide-react";
+import { Feature } from "@/interfaces/feature";
+import { BarChart, Briefcase, School, User } from "lucide-react";
 
 export const features: Feature[] = [
   {

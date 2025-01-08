@@ -12,9 +12,16 @@ import { useState } from "react";
 
 const features = [
   {
-    title: "",
-    description: "",
-    icon: <Icons.networkGraph className="w-5 h-5" />,
+    title: "Placement Record Management",
+    description:
+      "Allow institutions to upload student data and placement records, with company verification mechanisms.",
+    icon: <Icons.database className="w-5 h-5" />,
+  },
+  {
+    title: "Analytics Dashboard",
+    description:
+      "Provide data insights for institutions and governments, such as placement rates and skill demand trends.",
+    icon: <Icons.barChart className="w-5 h-5" />,
   },
 ];
 
@@ -40,7 +47,7 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex min-h-screen overflow-hidden">
+    <div className="flex min=h-screen overflow-hidden">
       {/* Left Panel - Info Section */}
       <div className="hidden lg:flex lg:w-3/5 bg-gradient-to-br from-background via-secondary to-background relative z-10">
         <div className="absolute inset-0 bg-grid-white" />
