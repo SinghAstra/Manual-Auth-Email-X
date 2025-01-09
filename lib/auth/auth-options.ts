@@ -32,20 +32,24 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (dbUser) {
+          token.id = dbUser.id;
           token.role = dbUser.role;
           token.verified = dbUser.verified;
           token.documents = dbUser.documents;
         }
       }
+      console.log("token.id is ", token.id);
       return token;
     },
     // Customize the session object
     session: async ({ session, token }) => {
       if (session?.user) {
+        session.user.id = token.id;
         session.user.role = token.role;
         session.user.verified = token.verified;
         session.user.documents = token.documents;
       }
+      console.log("session.user.id is ", session.user.id);
       return session;
     },
 
