@@ -93,7 +93,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto lg:pl-64">{children}</main>
+      <main className="flex-1 overflow-y-auto lg:pl-64 py-2">{children}</main>
     </div>
   );
 }

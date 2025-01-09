@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,9 +13,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils/utils";
 import {
   Building2,
-  CheckCircle2,
+  Eye,
   FileIcon,
   HelpCircle,
   Landmark,
@@ -23,8 +24,18 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
+
+type UploadedFiles = {
+  [docName: string]: File;
+};
+
+type FilePreview = {
+  url: string;
+  type: string;
+};
 
 const roles = [
   {
@@ -50,20 +61,33 @@ const roles = [
   },
 ];
 
-const DocumentUploadCard = ({ docName, file, onFileChange, onRemove }) => {
-  const inputRef = React.useRef(null);
+const DocumentUploadCard = ({
+  docName,
+  file,
+  onFileChange,
+  onRemove,
+}: {
+  docName: string;
+  file: File;
+  onFileChange: (docName: string, file: File) => void;
+  onRemove: (docName: string) => void;
+}) => {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const [preview, setPreview] = useState<FilePreview | null>(null);
 
-  const handleDragOver = (e) => {
+  console.log("preview is ", preview);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.classList.add("bg-accent");
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.classList.remove("bg-accent");
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.classList.remove("bg-accent");
     const droppedFile = e.dataTransfer.files[0];
@@ -72,18 +96,45 @@ const DocumentUploadCard = ({ docName, file, onFileChange, onRemove }) => {
     }
   };
 
-  const isValidFile = (file) => {
+  const isValidFile = (file: File) => {
     const validTypes = ["application/pdf", "image/jpeg", "image/png"];
     const maxSize = 5 * 1024 * 1024; // 5MB
     return validTypes.includes(file.type) && file.size <= maxSize;
   };
 
-  const handleFileSelect = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile && isValidFile(selectedFile)) {
       onFileChange(docName, selectedFile);
     }
   };
+
+  // Create a function to generate preview
+  const generatePreview = useCallback((file: File) => {
+    // Clean up previous preview URL to prevent memory leaks
+    // if (preview?.url) {
+    //   URL.revokeObjectURL(preview.url);
+    // }
+
+    // Generate new preview URL
+    const url = URL.createObjectURL(file);
+    setPreview({ url, type: file.type });
+  }, []);
+
+  // Use useEffect to generate preview when file changes
+  useEffect(() => {
+    if (file) {
+      generatePreview(file);
+    }
+
+    // Cleanup function to revoke object URL when component unmounts
+    // or when file changes
+    // return () => {
+    //   if (preview?.url) {
+    //     URL.revokeObjectURL(preview.url);
+    //   }
+    // };
+  }, [file, generatePreview]);
 
   return (
     <Card className="mt-4">
@@ -106,34 +157,40 @@ const DocumentUploadCard = ({ docName, file, onFileChange, onRemove }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {file ? (
+        {file && preview ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center min-w-0 space-x-2 flex-1 mr-4">
                 <FileIcon className="w-5 h-5" />
-                <span className="text-sm font-medium">{file.name}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium truncate">
+                  {file.name}
+                </span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   ({(file.size / 1024 / 1024).toFixed(2)} MB)
                 </span>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onRemove(docName)}
-                className="text-destructive hover:text-destructive/90"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            {file.type.startsWith("image/") && (
-              <div className="relative h-48 bg-accent/50 rounded-lg overflow-hidden">
-                {/* <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Preview of ${docName}`}
-                  className="w-full h-full object-contain"
-                /> */}
+              <div className="flex gap-2 items-center flex-shrink-0">
+                <Link
+                  href={preview.url}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "flex gap-2 whitespace-nowrap"
+                  )}
+                  target="_blank"
+                >
+                  <Eye />
+                  Preview
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onRemove(docName)}
+                  className="text-destructive hover:text-destructive/90"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-            )}
+            </div>
           </div>
         ) : (
           <div
@@ -167,11 +224,12 @@ const DocumentUploadCard = ({ docName, file, onFileChange, onRemove }) => {
 const VerificationPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [uploadedFiles, setUploadedFiles] = useState({});
-
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>({});
   const selectedRole = searchParams.get("role");
 
-  const handleRoleSelect = (roleTitle) => {
+  console.log("uploadedFiles is ", uploadedFiles);
+
+  const handleRoleSelect = (roleTitle: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("role", roleTitle);
     router.push(`/verification?${params.toString()}`, { scroll: false });
@@ -185,14 +243,14 @@ const VerificationPage = () => {
     setUploadedFiles({});
   }, [router, searchParams]);
 
-  const handleFileChange = (docName, file) => {
+  const handleFileChange = (docName: string, file: File) => {
     setUploadedFiles((prev) => ({
       ...prev,
       [docName]: file,
     }));
   };
 
-  const handleFileRemove = (docName) => {
+  const handleFileRemove = (docName: string) => {
     setUploadedFiles((prev) => {
       const newFiles = { ...prev };
       delete newFiles[docName];
