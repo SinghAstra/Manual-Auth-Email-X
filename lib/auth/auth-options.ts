@@ -39,6 +39,8 @@ export const authOptions: NextAuthOptions = {
         }
       }
       console.log("token.id is ", token.id);
+      console.log("token.documents is ", token.documents);
+      console.log("token.verified is ", token.verified);
       return token;
     },
     // Customize the session object
@@ -50,6 +52,8 @@ export const authOptions: NextAuthOptions = {
         session.user.documents = token.documents;
       }
       console.log("session.user.id is ", session.user.id);
+      console.log("session.user.documents is ", session.user.documents);
+      console.log("session.user.verified is ", session.user.verified);
       return session;
     },
 
