@@ -1,19 +1,15 @@
 "use client";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
+import { formatDocumentName } from "@/lib/utils/formatter";
 import { cn } from "@/lib/utils/utils";
+import { DocumentType } from "@prisma/client";
 import {
   Building2,
   Eye,
@@ -29,7 +25,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 
 type UploadedFiles = {
-  [docName: string]: File;
+  [key in DocumentType]?: File;
 };
 
 type FilePreview = {
@@ -43,21 +39,24 @@ const roles = [
     title: "Institution Admin",
     description: "Manage institution profile and student placement data",
     icon: Library,
-    requiredDocs: ["Institution ID", "Authorization Letter"],
+    requiredDocs: [
+      DocumentType.INSTITUTION_ID,
+      DocumentType.AUTHORIZATION_LETTER,
+    ],
   },
   {
     id: "COMPANY_REPRESENTATIVE",
     title: "Company Representative",
     description: "Verify placement claims and manage company profile",
     icon: Building2,
-    requiredDocs: ["Company ID", "Business Card"],
+    requiredDocs: [DocumentType.COMPANY_ID, DocumentType.BUSINESS_CARD],
   },
   {
     id: "GOVERNMENT",
     title: "Government Official",
     description: "Access analytics and oversee placement data",
     icon: Landmark,
-    requiredDocs: ["Government ID", "Department Letter"],
+    requiredDocs: [DocumentType.GOVERNMENT_ID, DocumentType.DEPARTMENT_LETTER],
   },
 ];
 
@@ -67,10 +66,10 @@ const DocumentUploadCard = ({
   onFileChange,
   onRemove,
 }: {
-  docName: string;
-  file: File;
-  onFileChange: (docName: string, file: File) => void;
-  onRemove: (docName: string) => void;
+  docName: DocumentType;
+  file: File | undefined;
+  onFileChange: (docName: DocumentType, file: File) => void;
+  onRemove: (docName: DocumentType) => void;
 }) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<FilePreview | null>(null);
@@ -141,7 +140,7 @@ const DocumentUploadCard = ({
       <div className="text-lg flex items-center justify-between ">
         <div className="flex items-center space-x-2">
           <FileIcon className="w-5 h-5 text-primary" />
-          <span>{docName}</span>
+          <span>{formatDocumentName(docName)}</span>
         </div>
         <TooltipProvider>
           <Tooltip>
@@ -149,7 +148,10 @@ const DocumentUploadCard = ({
               <HelpCircle className="w-4 h-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Upload a clear, readable copy of your {docName}</p>
+              <p>
+                Upload a clear, readable copy of your{" "}
+                {formatDocumentName(docName)}
+              </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -161,7 +163,7 @@ const DocumentUploadCard = ({
               <div className="flex items-center min-w-0 space-x-2 flex-1 mr-4">
                 <FileIcon className="w-5 h-5" />
                 <span className="text-sm font-medium truncate">
-                  {file.name}
+                  {formatDocumentName(docName)}
                 </span>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   ({(file.size / 1024 / 1024).toFixed(2)} MB)
@@ -200,7 +202,8 @@ const DocumentUploadCard = ({
           >
             <Upload className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              Drag and drop your {docName} here, or click to select file
+              Drag and drop your {formatDocumentName(docName)} here, or click to
+              select file
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               Supported formats: PDF, JPG, PNG (Max size: 5MB)
@@ -224,6 +227,8 @@ const VerificationPage = () => {
   const searchParams = useSearchParams();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>({});
   const selectedRole = searchParams.get("role");
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
 
   console.log("uploadedFiles is ", uploadedFiles);
 
@@ -241,14 +246,14 @@ const VerificationPage = () => {
     setUploadedFiles({});
   }, [router, searchParams]);
 
-  const handleFileChange = (docName: string, file: File) => {
+  const handleFileChange = (docName: DocumentType, file: File) => {
     setUploadedFiles((prev) => ({
       ...prev,
       [docName]: file,
     }));
   };
 
-  const handleFileRemove = (docName: string) => {
+  const handleFileRemove = (docName: DocumentType) => {
     setUploadedFiles((prev) => {
       const newFiles = { ...prev };
       delete newFiles[docName];
@@ -264,6 +269,43 @@ const VerificationPage = () => {
 
   const currentRole = roles.find((r) => r.title === selectedRole);
 
+  const handleSubmit = async () => {
+    if (!currentRole || !Object.keys(uploadedFiles).length) return;
+    try {
+      setIsUploading(true);
+
+      // Create FormData
+      const formData = new FormData();
+
+      Object.entries(uploadedFiles).forEach(([docType, file]) => {
+        formData.append(docType, file);
+      });
+
+      const response = await fetch("/api/submit-verification-docs", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Upload failed");
+      }
+      // Show success message
+      toast({ title: "Documents uploaded successfully" });
+
+      // Clear the form
+      setUploadedFiles({});
+    } catch (error) {
+      console.log("Upload error --VerificationPage:", error);
+      toast({
+        title:
+          error instanceof Error ? error.message : "Failed to upload documents",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-8">
       {!selectedRole && (
@@ -275,7 +317,7 @@ const VerificationPage = () => {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className={`cursor-pointer p-2 rounded-md border bg-card/50 backdrop-blur-sm transition-all duration-200 hover:bg-accent ${
+                className={`cursor-pointer p-2 px-4 rounded-md border bg-card/50 backdrop-blur-sm transition-all duration-200 hover:bg-accent ${
                   selectedRole === role.title ? "ring-2 ring-primary" : ""
                 }`}
                 onClick={() => handleRoleSelect(role.title)}
@@ -321,12 +363,14 @@ const VerificationPage = () => {
 
           <Button
             className="w-full"
+            onClick={handleSubmit}
             disabled={
+              isUploading ||
               currentRole.requiredDocs.length !==
-              Object.keys(uploadedFiles).length
+                Object.keys(uploadedFiles).length
             }
           >
-            Submit Documents
+            {isUploading ? "Uploading..." : "Submit Documents"}
           </Button>
         </div>
       )}
