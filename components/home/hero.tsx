@@ -32,7 +32,9 @@ export function Hero() {
       return;
     }
 
+    console.log("session is ", session);
     if (status === "authenticated") {
+      console.log("session?.user.role is ", session?.user.role);
       router.push(roleDefaultRoutes[session?.user.role]);
     }
   };

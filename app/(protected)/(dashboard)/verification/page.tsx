@@ -137,29 +137,27 @@ const DocumentUploadCard = ({
   }, [file, generatePreview]);
 
   return (
-    <Card className="mt-4">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <FileIcon className="w-5 h-5 text-primary" />
-            <span>{docName}</span>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <HelpCircle className="w-4 h-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Upload a clear, readable copy of your {docName}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="border bg-card/50 backdrop-blur-sm p-4 space-y-4 rounded-md">
+      <div className="text-lg flex items-center justify-between ">
+        <div className="flex items-center space-x-2">
+          <FileIcon className="w-5 h-5 text-primary" />
+          <span>{docName}</span>
+        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Upload a clear, readable copy of your {docName}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+      <div>
         {file && preview ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
+            <div className="flex items-center justify-between border backdrop-blur-lg rounded-md py-2 px-4">
               <div className="flex items-center min-w-0 space-x-2 flex-1 mr-4">
                 <FileIcon className="w-5 h-5" />
                 <span className="text-sm font-medium truncate">
@@ -182,7 +180,7 @@ const DocumentUploadCard = ({
                   Preview
                 </Link>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => onRemove(docName)}
                   className="text-destructive hover:text-destructive/90"
@@ -216,8 +214,8 @@ const DocumentUploadCard = ({
             />
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -269,37 +267,33 @@ const VerificationPage = () => {
   return (
     <div className="container mx-auto p-6 space-y-8">
       {!selectedRole && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl leading-tight">Apply For Verification</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="w-full flex flex-col gap-4">
             {roles.map((role) => (
-              <Card
+              <div
                 key={role.id}
-                className={`cursor-pointer transition-all duration-200 hover:bg-accent ${
+                className={`cursor-pointer p-2 rounded-md border bg-card/50 backdrop-blur-sm transition-all duration-200 hover:bg-accent ${
                   selectedRole === role.title ? "ring-2 ring-primary" : ""
                 }`}
                 onClick={() => handleRoleSelect(role.title)}
               >
-                <CardHeader>
-                  <div className="flex items-center space-x-2">
-                    <role.icon className="w-6 h-6 text-primary" />
-                    <CardTitle className="text-lg">{role.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{role.description}</CardDescription>
-                </CardContent>
-              </Card>
+                <div className="flex items-center space-x-2 py-2">
+                  <role.icon className="w-6 h-6 text-primary" />
+                  <span className="text-lg">{role.title}</span>
+                </div>
+                <span>{role.description}</span>
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {selectedRole && currentRole && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6 max-w-2xl mx-auto">
+          <div className="flex items-center justify-between border-b py-4">
             <div className="flex flex-col gap-2">
               <div className="flex items-center space-x-2">
                 <Upload className="w-5 h-5" />
