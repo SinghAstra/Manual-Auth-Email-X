@@ -1,11 +1,83 @@
 "use client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import DocumentUploadCard from "@/components/verification/document-upload-card";
 import { useToast } from "@/hooks/use-toast";
-import { DocumentType } from "@prisma/client";
-import { Building2, Landmark, Library, Upload } from "lucide-react";
+import { Document, DocumentType } from "@prisma/client";
+import {
+  Building2,
+  CheckCircle2,
+  Clock,
+  Landmark,
+  Library,
+  Upload,
+  X,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
+// ------------------------------------------------------------------------------
+
+type VerificationState = {
+  verified: boolean;
+  documents: Document[];
+};
+
+const VerificationStatus = ({ state }: { state: VerificationState }) => {
+  if (state.documents.length === 0) return null;
+
+  const getStatus = () => {
+    if (state.verified) return "APPROVED";
+    const hasRejected = state.documents.some(
+      (doc) => doc.status === "REJECTED"
+    );
+    return hasRejected ? "REJECTED" : "PENDING";
+  };
+
+  const getFeedback = () =>
+    state.documents
+      .filter((doc) => doc.feedback)
+      .map((doc) => doc.feedback)
+      .join(". ");
+
+  const status = getStatus();
+
+  const statusConfig = {
+    PENDING: {
+      icon: Clock,
+      title: "Verification in Progress",
+      description:
+        "Your documents are being reviewed. We'll notify you once complete.",
+      color: "text-yellow-600",
+    },
+    REJECTED: {
+      icon: X,
+      title: "Verification Failed",
+      description:
+        getFeedback() ||
+        "Documents rejected. Please review feedback and resubmit.",
+      color: "text-red-600",
+    },
+    APPROVED: {
+      icon: CheckCircle2,
+      title: "Verification Complete",
+      description:
+        "Your account has been verified. You now have access to all features.",
+      color: "text-green-600",
+    },
+  };
+
+  const config = statusConfig[status];
+  const Icon = config.icon;
+
+  return (
+    <Alert className="mb-8">
+      <Icon className={`h-5 w-5 ${config.color}`} />
+      <AlertTitle>{config.title}</AlertTitle>
+      <AlertDescription>{config.description}</AlertDescription>
+    </Alert>
+  );
+};
+// ------------------------------------------------------------------------------
 
 type UploadedFiles = {
   [key in DocumentType]?: File;
@@ -39,14 +111,19 @@ const roles = [
 ];
 
 const VerificationPage = () => {
+  // ------------------------------------------------------------------------------
+  const [verificationState, setVerificationState] =
+    useState<VerificationState>();
+  const [isFetchingVerificationStatus, setIsFetchingVerificationStatus] =
+    useState(false);
+  // ------------------------------------------------------------------------------
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>({});
   const selectedRole = searchParams.get("role");
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-
-  console.log("uploadedFiles is ", uploadedFiles);
 
   const handleRoleSelect = (roleTitle: string) => {
     const params = new URLSearchParams(searchParams);
@@ -97,7 +174,7 @@ const VerificationPage = () => {
         formData.append(docType, file);
       });
 
-      const response = await fetch("/api/submit-verification-docs", {
+      const response = await fetch("/api/verification/submit", {
         method: "POST",
         body: formData,
       });
@@ -122,8 +199,74 @@ const VerificationPage = () => {
     }
   };
 
+  // ------------------------------------------------------------------------------
+
+  // Fetch user's verification status on mount
+  useEffect(() => {
+    const fetchVerificationStatus = async () => {
+      try {
+        setIsFetchingVerificationStatus(true);
+        const response = await fetch("/api/verification/status");
+        const data = await response.json();
+
+        if (response.ok) {
+          setVerificationState(data);
+        } else {
+          toast({
+            title: data.error || "Failed to fetch verification status",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch verification status:", error);
+      } finally {
+        setIsFetchingVerificationStatus(false);
+      }
+    };
+
+    fetchVerificationStatus();
+  }, [toast]);
+
+  if (isFetchingVerificationStatus) {
+    return <div>Loading...</div>;
+  }
+
+  if (!verificationState) {
+    return <div>Some Error Occurred Please try Again Later.</div>;
+  }
+
+  // If verified, show success and prevent further submissions
+  if (verificationState.verified) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <VerificationStatus state={verificationState} />
+        Your docs are verified
+      </div>
+    );
+  }
+
+  // If verification is pending, don't allow new submissions
+  // If documents are pending review, don't allow new submissions
+  const isPending = verificationState.documents.every(
+    (doc) => doc.status === "PENDING"
+  );
+  if (isPending) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <VerificationStatus state={verificationState} />
+        <div className="text-center">
+          <Button variant="outline" disabled>
+            Document submission in review
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ------------------------------------------------------------------------------
+
   return (
     <div className="container mx-auto p-6 space-y-8">
+      <VerificationStatus state={verificationState} />
       {!selectedRole && (
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
