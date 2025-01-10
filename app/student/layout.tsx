@@ -2,39 +2,42 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
-import { CardDescription, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
+import { VariantProps } from "class-variance-authority";
 import { FileText, User } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
+type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
+
+interface StudentLayoutProps {
+  children: React.ReactNode;
+}
+
 const navigation = [
   {
     title: "Profile",
     href: "/profile",
     icon: User,
-    variant: "default",
+    variant: "ghost" as ButtonVariant,
   },
   {
     title: "Verification",
     href: "/verification",
     icon: FileText,
-    variant: "default",
+    variant: "ghost" as ButtonVariant,
   },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function StudentLayout({ children }: StudentLayoutProps) {
   const pathName = usePathname();
   const { data: session } = useSession();
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
@@ -50,7 +53,7 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  buttonVariants({ variant: "ghost" }),
+                  buttonVariants({ variant: item.variant }),
                   "flex gap-2 items-center justify-start",
                   pathName === item.href &&
                     "font-medium text-primary bg-secondary"
@@ -78,14 +81,8 @@ export default function DashboardLayout({
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-1">
-                <CardTitle className="text-sm font-medium ">
-                  Account Status
-                </CardTitle>
-                <CardDescription>
-                  {session?.user.verified
-                    ? `Verified ${session.user.role.toLowerCase()}`
-                    : `Verification Pending`}
-                </CardDescription>
+                <div className="text-sm font-medium ">{session?.user.name}</div>
+                <div>{session?.user.email}</div>
               </div>
             </div>
           </div>

@@ -1,14 +1,9 @@
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/utils/prisma";
-import { User } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
-type ErrorResponse = {
-  error: string;
-};
-
-export async function GET(): Promise<NextResponse<User | ErrorResponse>> {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {

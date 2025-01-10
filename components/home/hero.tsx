@@ -4,10 +4,12 @@ import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils/utils";
 import { roleDefaultRoutes } from "@/middleware";
+import { User } from "@prisma/client";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { FadeInUp } from "../animation/fade-in-up";
 import { GradientText } from "../custom-ui/gradient-text";
 import { Icons } from "../Icons";
@@ -17,6 +19,31 @@ export function Hero() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
+  const [user, setUser] = useState<User>();
+  const [isFetchingUserProfile, setIsFetchingUserProfile] = useState(false);
+
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      setIsFetchingUserProfile(true);
+      const response = await fetch("/api/profile");
+      if (!response.ok) {
+        throw new Error("Error while fetching User Profile");
+      }
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.log("Error occurred while fetchUserProfile", error);
+      toast({ title: "Some Error Occurred Please try again later." });
+    } finally {
+      setIsFetchingUserProfile(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    if (session) {
+      fetchUserProfile();
+    }
+  }, [fetchUserProfile, session]);
 
   const handleGetStarted = () => {
     if (status === "loading") {
@@ -33,9 +60,8 @@ export function Hero() {
     }
 
     console.log("session is ", session);
-    if (status === "authenticated") {
-      console.log("session?.user.role is ", session?.user.role);
-      router.push(roleDefaultRoutes[session?.user.role]);
+    if (status === "authenticated" && user?.role) {
+      router.push(roleDefaultRoutes[user?.role]);
     }
   };
 
@@ -78,7 +104,10 @@ export function Hero() {
           </FadeInUp>
 
           <FadeInUp delay={0.4}>
-            <Button onClick={handleGetStarted} disabled={status === "loading"}>
+            <Button
+              onClick={handleGetStarted}
+              disabled={status === "loading" || isFetchingUserProfile}
+            >
               <div className="flex items-center gap-2">
                 <span className="text-base">Get Started</span>
                 <motion.div

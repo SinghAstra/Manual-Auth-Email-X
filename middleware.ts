@@ -1,21 +1,26 @@
-import { Role } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 // Define routes that require specific roles
 const roleRoutes: Record<Role, string[]> = {
-  SUPER_ADMIN: ["/admin", "/verification"],
+  SUPER_ADMIN: [
+    "/admin/dashboard",
+    "/admin/institutions",
+    "/admin/companies",
+    "/admin/users",
+  ],
   INSTITUTION_ADMIN: ["/institution", "/students"],
   COMPANY_REPRESENTATIVE: ["/company", "/verify-placements"],
-  STUDENT: ["/profile", "/dashboard", "/verification"],
+  STUDENT: ["/student/profile", "/student/verification"],
   GOVERNMENT: ["/analytics", "/reports"],
 };
 
 export const roleDefaultRoutes: Record<Role, string> = {
-  SUPER_ADMIN: "/admin",
+  SUPER_ADMIN: "/dashboard",
   INSTITUTION_ADMIN: "/institution",
   COMPANY_REPRESENTATIVE: "/company",
-  STUDENT: "/profile",
+  STUDENT: "/student/profile",
   GOVERNMENT: "/analytics",
 };
 
@@ -27,13 +32,17 @@ export async function middleware(req: NextRequest) {
     secret: process.env.NEXT_AUTH_SECRET,
   });
 
-  if (!user?.email) {
-    return new NextResponse("Unauthorized", { status: 401 });
+  if (!user) {
+    return new NextResponse("Unauthorized", { status: 404 });
   }
 
-  if (!user) {
-    return new NextResponse("User not found", { status: 404 });
-  }
+  // const response = await fetch("/api/profile");
+
+  // if (!response.ok) {
+  //   return new NextResponse("Unauthorized", { status: 404 });
+  // }
+
+  // const userProfile: User = await response.json();
 
   const path = req.nextUrl.pathname;
   const isAuthRoutes = authRoutes.some((route) => path.startsWith(route));
@@ -46,7 +55,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Check role-based access
-  const allowedRoutes = roleRoutes[user.role] || [];
+  const allowedRoutes = roleRoutes["STUDENT"] || [];
   const hasRouteAccess = allowedRoutes.some((route) => path.startsWith(route));
 
   console.log("hasRouteAccess is ", hasRouteAccess);
@@ -60,18 +69,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/dashboard",
-    "/onboarding/:path*",
-    "/admin/:path*",
-    "/institution/:path*",
-    "/company/:path*",
-    "/profile/:path*",
-    "/analytics/:path*",
-    "/verification/:path*",
-    "/verify-placements/:path*",
-    "/placements/:path*",
-    "/reports/:path*",
-    "/students/:path*",
-  ],
+  matcher: ["/student/:path*", "/admin/:path*"],
 };
