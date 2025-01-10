@@ -33,6 +33,9 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    console.log("verified is ", user.verified);
+    console.log("documents is ", user.documents);
+
     return NextResponse.json({
       verified: user.verified,
       documents: user.documents,

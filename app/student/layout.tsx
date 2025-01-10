@@ -22,13 +22,13 @@ interface StudentLayoutProps {
 const navigation = [
   {
     title: "Profile",
-    href: "/profile",
+    href: "/student/profile",
     icon: User,
     variant: "ghost" as ButtonVariant,
   },
   {
     title: "Verification",
-    href: "/verification",
+    href: "/student/verification",
     icon: FileText,
     variant: "ghost" as ButtonVariant,
   },
@@ -66,7 +66,7 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           </div>
         </ScrollArea>
 
-        <Link href="/profile">
+        <Link href="/student/profile">
           <div className="bg-secondary/50 border-t p-4">
             <div className="flex gap-2">
               <Avatar>
@@ -80,9 +80,11 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
                   {session?.user.name?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 overflow-hidden">
                 <div className="text-sm font-medium ">{session?.user.name}</div>
-                <div>{session?.user.email}</div>
+                <span className="text-xs text-muted-foreground truncate">
+                  {session?.user.email}
+                </span>
               </div>
             </div>
           </div>

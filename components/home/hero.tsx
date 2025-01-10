@@ -32,6 +32,10 @@ export function Hero() {
       const data = await response.json();
       setUser(data);
     } catch (error) {
+      if (error instanceof Error) {
+        console.log("error.message is ", error.message);
+        console.log("error.stack is ", error.stack);
+      }
       console.log("Error occurred while fetchUserProfile", error);
       toast({ title: "Some Error Occurred Please try again later." });
     } finally {
@@ -40,10 +44,10 @@ export function Hero() {
   }, [toast]);
 
   useEffect(() => {
-    if (session) {
+    if (session?.user.id) {
       fetchUserProfile();
     }
-  }, [fetchUserProfile, session]);
+  }, [fetchUserProfile, session?.user.id]);
 
   const handleGetStarted = () => {
     if (status === "loading") {
@@ -53,6 +57,8 @@ export function Hero() {
       });
       return;
     }
+
+    console.log("status --handleGetStarted is ", status);
 
     if (status === "unauthenticated") {
       router.push("/auth/sign-in");

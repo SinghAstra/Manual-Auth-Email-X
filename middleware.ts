@@ -1,7 +1,6 @@
 import { Role, User } from "@prisma/client";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
-
 // Define routes that require specific roles
 const roleRoutes: Record<Role, string[]> = {
   SUPER_ADMIN: [
@@ -24,48 +23,73 @@ export const roleDefaultRoutes: Record<Role, string> = {
   GOVERNMENT: "/analytics",
 };
 
-const authRoutes = ["/auth/sign-in"];
-
 export async function middleware(req: NextRequest) {
-  const user = await getToken({
-    req,
-    secret: process.env.NEXT_AUTH_SECRET,
-  });
+  try {
+    const token = await getToken({
+      req,
+      secret: process.env.NEXT_AUTH_SECRET,
+    });
+    console.log("token --middleware is ", token);
+    if (!token?.id) {
+      return NextResponse.redirect(new URL("/auth/sign-in", req.url));
+    }
 
-  if (!user) {
-    return new NextResponse("Unauthorized", { status: 404 });
+    const path = req.nextUrl.pathname;
+
+    console.log("path is ", path);
+
+    // Construct absolute URL for role verification
+    const baseUrl = process.env.NEXT_AUTH_URL || req.nextUrl.origin;
+    const response = await fetch(`${baseUrl}/api/profile`, {
+      headers: {
+        Authorization: `Bearer ${token.id}`,
+      },
+    });
+    const data = await response.json();
+
+    console.log(" req.nextUrl.origin is ", req.nextUrl.origin);
+    console.log("data --middleware is ", data);
+
+    if (!response.ok) {
+      return NextResponse.redirect(new URL("/auth/sign-in", req.url));
+    }
+
+    const currentUser: User = data;
+    const userRole = currentUser?.role;
+
+    if (!userRole) {
+      return new NextResponse("Unauthorized: No role assigned", {
+        status: 403,
+      });
+    }
+
+    // TODO:Redirect authenticated users away from auth routes
+
+    // Check role-based access
+    const allowedRoutes = roleRoutes[userRole] || [];
+    const hasRouteAccess = allowedRoutes.some((route) =>
+      path.startsWith(route)
+    );
+
+    console.log("hasRouteAccess is ", hasRouteAccess);
+
+    if (!hasRouteAccess) {
+      // Redirect to role's default route
+      const defaultRoute = roleDefaultRoutes[userRole] || "/";
+      return NextResponse.redirect(new URL(defaultRoute, req.url));
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.log("Error in middleware.");
+    if (error instanceof Error) {
+      console.log("error.message: " + error.message);
+      console.log("error.stack: " + error.stack);
+    }
+
+    // Handle unknown errors
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
-
-  // const response = await fetch("/api/profile");
-
-  // if (!response.ok) {
-  //   return new NextResponse("Unauthorized", { status: 404 });
-  // }
-
-  // const userProfile: User = await response.json();
-
-  const path = req.nextUrl.pathname;
-  const isAuthRoutes = authRoutes.some((route) => path.startsWith(route));
-
-  console.log("path is ", path);
-  console.log("isAuthRoutes is ", isAuthRoutes);
-
-  if (isAuthRoutes) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  // Check role-based access
-  const allowedRoutes = roleRoutes["STUDENT"] || [];
-  const hasRouteAccess = allowedRoutes.some((route) => path.startsWith(route));
-
-  console.log("hasRouteAccess is ", hasRouteAccess);
-
-  if (!hasRouteAccess) {
-    // Redirect to / page
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {

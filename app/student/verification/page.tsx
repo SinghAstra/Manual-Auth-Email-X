@@ -115,7 +115,7 @@ const VerificationPage = () => {
   const [verificationState, setVerificationState] =
     useState<VerificationState>();
   const [isFetchingVerificationStatus, setIsFetchingVerificationStatus] =
-    useState(false);
+    useState(true);
   // ------------------------------------------------------------------------------
 
   const router = useRouter();
@@ -208,6 +208,7 @@ const VerificationPage = () => {
         setIsFetchingVerificationStatus(true);
         const response = await fetch("/api/verification/status");
         const data = await response.json();
+        console.log("resposne --/api/verificationStatus os", data);
 
         if (response.ok) {
           setVerificationState(data);

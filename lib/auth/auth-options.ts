@@ -23,17 +23,21 @@ export const authOptions: NextAuthOptions = {
 
   // Callbacks to customize session and token
   callbacks: {
-    jwt: async ({ token }) => {
-      console.log("token is ", token);
+    jwt: async ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+      }
+      // console.log("token is ", token);
       return token;
     },
     // Customize the session object
     session: async ({ session, token }) => {
       if (session?.user) {
-        console.log("session.user is ", session.user);
         session.user.id = token.id;
         session.user.email = token.email;
       }
+      // console.log("session is ", session);
       return session;
     },
 

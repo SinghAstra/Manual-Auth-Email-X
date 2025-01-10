@@ -32,7 +32,7 @@ import { useEffect, useState } from "react";
 export default function ProfileView() {
   const [user, setUser] = useState<User>();
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
