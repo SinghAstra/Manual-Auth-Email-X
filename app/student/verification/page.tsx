@@ -245,29 +245,31 @@ const VerificationPage = () => {
     );
   }
 
+  console.log("verificationStatus.documents is ", verificationState.documents);
+
   // If verification is pending, don't allow new submissions
   // If documents are pending review, don't allow new submissions
-  const isPending = verificationState.documents.every(
-    (doc) => doc.status === "PENDING"
-  );
-  if (isPending) {
-    return (
-      <div className="container mx-auto p-6 max-w-2xl">
-        <VerificationStatus state={verificationState} />
-        <div className="text-center">
-          <Button variant="outline" disabled>
-            Document submission in review
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // const isPending = verificationState.documents.every(
+  //   (doc) => doc.status === "PENDING"
+  // );
+  // if (isPending) {
+  //   return (
+  //     <div className="container mx-auto p-6 max-w-2xl">
+  //       <VerificationStatus state={verificationState} />
+  //       <div className="text-center">
+  //         <Button variant="outline" disabled>
+  //           Document submission in review
+  //         </Button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // ------------------------------------------------------------------------------
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <VerificationStatus state={verificationState} />
+      {/* <VerificationStatus state={verificationState} /> */}
       {!selectedRole && (
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
