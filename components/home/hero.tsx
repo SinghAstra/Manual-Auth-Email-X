@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/utils";
 import { roleDefaultRoutes } from "@/middleware";
 import { User } from "@prisma/client";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ export function Hero() {
   const { toast } = useToast();
   const [user, setUser] = useState<User>();
   const [isFetchingUserProfile, setIsFetchingUserProfile] = useState(false);
+  const [isGettingStarted, setIsGettingStarted] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -50,6 +52,7 @@ export function Hero() {
   }, [fetchUserProfile, session?.user.id]);
 
   const handleGetStarted = () => {
+    setIsGettingStarted(true);
     if (status === "loading") {
       toast({
         title: "Authenticating",
@@ -66,6 +69,7 @@ export function Hero() {
     }
 
     console.log("session is ", session);
+    console.log("user.role is ", user.role);
     if (status === "authenticated" && user?.role) {
       router.push(roleDefaultRoutes[user?.role]);
     }
@@ -112,17 +116,26 @@ export function Hero() {
           <FadeInUp delay={0.4}>
             <Button
               onClick={handleGetStarted}
-              disabled={status === "loading" || isFetchingUserProfile}
+              disabled={
+                status === "loading" ||
+                isFetchingUserProfile ||
+                isGettingStarted
+              }
             >
-              <div className="flex items-center gap-2">
-                <span className="text-base">Get Started</span>
-                <motion.div
-                  className="ml-2"
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  <Icons.arrowRight />
-                </motion.div>
+              <div className="flex items-center gap-2 cursor-pointer">
+                {isGettingStarted && <Loader2 className="animate-spin" />}
+                <span className="text-base">
+                  {isGettingStarted ? "Getting Started" : "Get Started"}
+                </span>
+                {!isGettingStarted && (
+                  <motion.div
+                    className="ml-2"
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    <Icons.arrowRight />
+                  </motion.div>
+                )}
               </div>
             </Button>
           </FadeInUp>

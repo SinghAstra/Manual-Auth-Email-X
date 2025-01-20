@@ -2,10 +2,10 @@
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'INSTITUTION_ADMIN', 'COMPANY_REPRESENTATIVE', 'STUDENT', 'GOVERNMENT');
 
 -- CreateEnum
-CREATE TYPE "VerificationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+CREATE TYPE "VerificationStatus" AS ENUM ('NOT_APPLIED', 'PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "DocumentType" AS ENUM ('INSTITUTION_PROOF', 'COMPANY_PROOF', 'GOVERNMENT_ID', 'STUDENT_ID');
+CREATE TYPE "DocumentType" AS ENUM ('INSTITUTION_ID', 'AUTHORIZATION_LETTER', 'COMPANY_ID', 'BUSINESS_CARD', 'GOVERNMENT_ID', 'DEPARTMENT_LETTER');
 
 -- CreateEnum
 CREATE TYPE "PlacementStatus" AS ENUM ('PLACED', 'UNPLACED', 'IN_PROCESS');
@@ -48,6 +48,7 @@ CREATE TABLE "User" (
     "role" "Role" NOT NULL DEFAULT 'STUDENT',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "verified" BOOLEAN NOT NULL DEFAULT false,
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_APPLIED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -174,9 +175,6 @@ CREATE TABLE "Document" (
     "userId" TEXT NOT NULL,
     "type" "DocumentType" NOT NULL,
     "fileUrl" TEXT NOT NULL,
-    "status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
-    "feedback" TEXT,
-    "verifierId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -261,6 +259,3 @@ ALTER TABLE "PlacementRecord" ADD CONSTRAINT "PlacementRecord_companyId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "Document" ADD CONSTRAINT "Document_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Document" ADD CONSTRAINT "Document_verifierId_fkey" FOREIGN KEY ("verifierId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

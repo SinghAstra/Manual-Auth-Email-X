@@ -15,17 +15,7 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
-        verified: true,
-        documents: {
-          orderBy: { createdAt: "desc" },
-          select: {
-            type: true,
-            fileUrl: true,
-            status: true,
-            feedback: true,
-            createdAt: true,
-          },
-        },
+        verificationStatus: true,
       },
     });
 
@@ -33,12 +23,8 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    console.log("verified is ", user.verified);
-    console.log("documents is ", user.documents);
-
     return NextResponse.json({
-      verified: user.verified,
-      documents: user.documents,
+      verificationStatus: user.verificationStatus,
     });
   } catch (error) {
     console.log("Verification status error:", error);

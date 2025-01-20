@@ -1,83 +1,11 @@
 "use client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import DocumentUploadCard from "@/components/verification/document-upload-card";
 import { useToast } from "@/hooks/use-toast";
-import { Document, DocumentType } from "@prisma/client";
-import {
-  Building2,
-  CheckCircle2,
-  Clock,
-  Landmark,
-  Library,
-  Upload,
-  X,
-} from "lucide-react";
+import { DocumentType, VerificationStatus } from "@prisma/client";
+import { Building2, Landmark, Library, Upload } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
-// ------------------------------------------------------------------------------
-
-type VerificationState = {
-  verified: boolean;
-  documents: Document[];
-};
-
-const VerificationStatus = ({ state }: { state: VerificationState }) => {
-  if (state.documents.length === 0) return null;
-
-  const getStatus = () => {
-    if (state.verified) return "APPROVED";
-    const hasRejected = state.documents.some(
-      (doc) => doc.status === "REJECTED"
-    );
-    return hasRejected ? "REJECTED" : "PENDING";
-  };
-
-  const getFeedback = () =>
-    state.documents
-      .filter((doc) => doc.feedback)
-      .map((doc) => doc.feedback)
-      .join(". ");
-
-  const status = getStatus();
-
-  const statusConfig = {
-    PENDING: {
-      icon: Clock,
-      title: "Verification in Progress",
-      description:
-        "Your documents are being reviewed. We'll notify you once complete.",
-      color: "text-yellow-600",
-    },
-    REJECTED: {
-      icon: X,
-      title: "Verification Failed",
-      description:
-        getFeedback() ||
-        "Documents rejected. Please review feedback and resubmit.",
-      color: "text-red-600",
-    },
-    APPROVED: {
-      icon: CheckCircle2,
-      title: "Verification Complete",
-      description:
-        "Your account has been verified. You now have access to all features.",
-      color: "text-green-600",
-    },
-  };
-
-  const config = statusConfig[status];
-  const Icon = config.icon;
-
-  return (
-    <Alert className="mb-8">
-      <Icon className={`h-5 w-5 ${config.color}`} />
-      <AlertTitle>{config.title}</AlertTitle>
-      <AlertDescription>{config.description}</AlertDescription>
-    </Alert>
-  );
-};
-// ------------------------------------------------------------------------------
 
 type UploadedFiles = {
   [key in DocumentType]?: File;
@@ -111,13 +39,10 @@ const roles = [
 ];
 
 const VerificationPage = () => {
-  // ------------------------------------------------------------------------------
-  const [verificationState, setVerificationState] =
-    useState<VerificationState>();
+  const [verificationStatus, setVerificationStatus] =
+    useState<VerificationStatus>();
   const [isFetchingVerificationStatus, setIsFetchingVerificationStatus] =
     useState(true);
-  // ------------------------------------------------------------------------------
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>({});
@@ -199,7 +124,8 @@ const VerificationPage = () => {
     }
   };
 
-  // ------------------------------------------------------------------------------
+  console.log("selectedRole is ", selectedRole);
+  console.log("currentRole is ", currentRole);
 
   // Fetch user's verification status on mount
   useEffect(() => {
@@ -208,10 +134,10 @@ const VerificationPage = () => {
         setIsFetchingVerificationStatus(true);
         const response = await fetch("/api/verification/status");
         const data = await response.json();
-        console.log("resposne --/api/verificationStatus os", data);
+        console.log("data --/api/verificationStatus is", data);
 
         if (response.ok) {
-          setVerificationState(data);
+          setVerificationStatus(data.verified);
         } else {
           toast({
             title: data.error || "Failed to fetch verification status",
@@ -231,45 +157,38 @@ const VerificationPage = () => {
     return <div>Loading...</div>;
   }
 
-  if (!verificationState) {
-    return <div>Some Error Occurred Please try Again Later.</div>;
-  }
-
   // If verified, show success and prevent further submissions
-  if (verificationState.verified) {
+  if (verificationStatus === "APPROVED") {
     return (
       <div className="container mx-auto p-6 max-w-2xl">
-        <VerificationStatus state={verificationState} />
         Your docs are verified
       </div>
     );
   }
 
-  console.log("verificationStatus.documents is ", verificationState.documents);
-
-  // If verification is pending, don't allow new submissions
-  // If documents are pending review, don't allow new submissions
-  // const isPending = verificationState.documents.every(
-  //   (doc) => doc.status === "PENDING"
-  // );
-  // if (isPending) {
-  //   return (
-  //     <div className="container mx-auto p-6 max-w-2xl">
-  //       <VerificationStatus state={verificationState} />
-  //       <div className="text-center">
-  //         <Button variant="outline" disabled>
-  //           Document submission in review
-  //         </Button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // ------------------------------------------------------------------------------
+  if (verificationStatus === "PENDING") {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <div className="text-center">
+          <Button variant="outline" disabled>
+            Document submission in review
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* <VerificationStatus state={verificationState} /> */}
+      {verificationStatus === "REJECTED" && (
+        <div className="container mx-auto p-6 max-w-2xl">
+          <div className="text-center">
+            <Button variant="outline" disabled>
+              Documents Rejected
+            </Button>
+          </div>
+        </div>
+      )}
       {!selectedRole && (
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
@@ -294,7 +213,6 @@ const VerificationPage = () => {
           </div>
         </div>
       )}
-
       {selectedRole && currentRole && (
         <div className="space-y-6 max-w-2xl mx-auto">
           <div className="flex items-center justify-between border-b py-4">

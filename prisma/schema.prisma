@@ -16,6 +16,7 @@ enum Role {
 }
 
 enum VerificationStatus {
+  NOT_APPLIED
   PENDING
   APPROVED
   REJECTED
@@ -73,6 +74,8 @@ model User {
   role          Role      @default(STUDENT)
   isActive      Boolean   @default(true)
   verified      Boolean   @default(false)
+  verificationStatus VerificationStatus @default(NOT_APPLIED)
+
 
   // Auth Relations
   accounts      Account[]
@@ -86,7 +89,6 @@ model User {
 
   // Document Relations
   documents     Document[]
-  verifiedDocs  Document[] @relation("Verifier")
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -223,13 +225,9 @@ model Document {
   userId        String
   type          DocumentType
   fileUrl       String
-  status        VerificationStatus @default(PENDING)
-  feedback      String?
-  verifierId    String?
 
   // Relations
   user          User      @relation(fields: [userId], references: [id])
-  verifier      User?     @relation("Verifier", fields: [verifierId], references: [id])
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
