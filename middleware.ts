@@ -16,7 +16,7 @@ const roleRoutes: Record<Role, string[]> = {
 };
 
 export const roleDefaultRoutes: Record<Role, string> = {
-  SUPER_ADMIN: "/dashboard",
+  SUPER_ADMIN: "/admin/dashboard",
   INSTITUTION_ADMIN: "/institution",
   COMPANY_REPRESENTATIVE: "/company",
   STUDENT: "/student/profile",
