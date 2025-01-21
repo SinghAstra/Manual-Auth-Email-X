@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { VariantProps } from "class-variance-authority";
 import {
-  ActivitySquare,
   Building,
   Building2,
   LayoutDashboard,
+  User,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -52,9 +52,9 @@ const navigation = [
     variant: "ghost" as ButtonVariant,
   },
   {
-    title: "Activities",
-    href: "/admin/activities",
-    icon: ActivitySquare,
+    title: "Profile",
+    href: "/admin/profile",
+    icon: User,
     variant: "ghost" as ButtonVariant,
   },
 ];

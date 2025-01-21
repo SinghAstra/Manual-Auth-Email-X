@@ -1,56 +1,31 @@
+"use client";
+
+import StatsCard from "@/components/admin/stats-card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Building2, GraduationCap, LucideIcon, Users } from "lucide-react";
+import { formatEnumValue } from "@/lib/utils/utils";
+import { User } from "@prisma/client";
+import { Building2, GraduationCap, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 
-// components/stats-card.tsx
-interface StatsCardProps {
-  title: string;
-  value: number;
-  icon: LucideIcon;
+interface PendingUserItemProps {
+  pendingUser: User;
 }
 
-export function StatsCard({ title, value, icon: Icon }: StatsCardProps) {
-  return (
-    <Card>
-      <div className="p-6 flex items-center space-x-4">
-        <div className="p-2 bg-primary/10 rounded-full">
-          <Icon className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <h3 className="text-2xl font-bold">{value}</h3>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// components/verification-item.tsx
-interface VerificationItemProps {
-  verification: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    documents: { type: string; fileUrl: string }[];
-    createdAt: Date;
-  };
-}
-
-export function VerificationItem({ verification }: VerificationItemProps) {
+export function PendingUserItem({ pendingUser }: PendingUserItemProps) {
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="space-y-1">
-        <h3 className="font-medium">{verification.name}</h3>
-        <p className="text-sm text-muted-foreground">{verification.email}</p>
-        <p className="text-sm">Role: {verification.role}</p>
+        <h3 className="font-medium">{pendingUser.name}</h3>
+        <p className="text-sm text-muted-foreground">{pendingUser.email}</p>
       </div>
       <div className="flex gap-2">
+        <Badge className="text-sm" variant={"outline"}>
+          {formatEnumValue(pendingUser.role)}
+        </Badge>
         <Button variant="outline" size="sm">
-          View Documents
-        </Button>
-        <Button variant="default" size="sm">
-          Verify
+          View Details
         </Button>
       </div>
     </div>
@@ -59,6 +34,12 @@ export function VerificationItem({ verification }: VerificationItemProps) {
 
 // app/(admin)/admin/dashboard/page.tsx
 export default function AdminDashboard() {
+  const [
+    isFetchingPendingVerificationUsers,
+    setIsFetchingPendingVerificationUsers,
+  ] = useState(true);
+  const [pendingUsers, setPendingUsers] = useState<User[]>();
+
   // Static data for now
   const stats = {
     totalUsers: 1250,
@@ -67,48 +48,47 @@ export default function AdminDashboard() {
     totalPlacements: 856,
   };
 
-  const pendingVerifications = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@university.edu",
-      role: "INSTITUTION_ADMIN",
-      documents: [
-        { type: "INSTITUTION_ID", fileUrl: "/docs/1" },
-        { type: "AUTHORIZATION_LETTER", fileUrl: "/docs/2" },
-      ],
-      createdAt: new Date(),
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@techcorp.com",
-      role: "COMPANY_REPRESENTATIVE",
-      documents: [
-        { type: "COMPANY_ID", fileUrl: "/docs/3" },
-        { type: "BUSINESS_CARD", fileUrl: "/docs/4" },
-      ],
-      createdAt: new Date(),
-    },
-  ];
+  useEffect(() => {
+    const fetchPendingVerifications = async () => {
+      try {
+        setIsFetchingPendingVerificationUsers(true);
+        const response = await fetch("/api/admin/verifications");
+        if (!response.ok) {
+          throw new Error("Error in fetchPendingVerificationStatus Response.");
+        }
+        const data = await response.json();
+        console.log("data --/api/admin/verifications is ", data);
+        setPendingUsers(data.users);
+      } catch (error) {
+        console.log("Error in fetchPendingVerificationStatus.");
+        if (error instanceof Error) {
+          console.log("error.message is ", error.message);
+          console.log("error.stack is ", error.stack);
+        }
+      } finally {
+        setIsFetchingPendingVerificationUsers(false);
+      }
+    };
+    fetchPendingVerifications();
+  }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-4xl container mx-auto">
       {/* Overview Statistics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Total Users" value={stats.totalUsers} icon={Users} />
+        <StatsCard title="Users" value={stats.totalUsers} icon={Users} />
         <StatsCard
-          title="Total Institutions"
+          title="Institutions"
           value={stats.totalInstitutions}
           icon={Building2}
         />
         <StatsCard
-          title="Total Companies"
+          title="Companies"
           value={stats.totalCompanies}
           icon={Building2}
         />
         <StatsCard
-          title="Successful Placements"
+          title="Placements"
           value={stats.totalPlacements}
           icon={GraduationCap}
         />
@@ -123,12 +103,15 @@ export default function AdminDashboard() {
           </Button>
         </div>
         <div className="space-y-4">
-          {pendingVerifications.map((verification) => (
-            <VerificationItem
-              key={verification.id}
-              verification={verification}
-            />
-          ))}
+          {isFetchingPendingVerificationUsers ? (
+            <p>Loading...</p>
+          ) : !pendingUsers || pendingUsers?.length === 0 ? (
+            <p>No pending verifications</p>
+          ) : (
+            pendingUsers.map((pendingUser) => (
+              <PendingUserItem key={pendingUser.id} pendingUser={pendingUser} />
+            ))
+          )}
         </div>
       </Card>
     </div>

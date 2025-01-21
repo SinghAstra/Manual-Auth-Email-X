@@ -179,7 +179,7 @@ const VerificationPage = () => {
     verificationStatus === "REJECTED"
   ) {
     return (
-      <div className="container mx-auto p-6 max-w-2xl">
+      <div className="mx-auto p-6 max-w-2xl">
         <StatusCard status={verificationStatus} />
         {verificationStatus === "REJECTED" && (
           <div className="mt-6">

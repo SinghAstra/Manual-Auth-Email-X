@@ -8,6 +8,7 @@ const roleRoutes: Record<Role, string[]> = {
     "/admin/institutions",
     "/admin/companies",
     "/admin/users",
+    "/admin/profile",
   ],
   INSTITUTION_ADMIN: ["/institution", "/students"],
   COMPANY_REPRESENTATIVE: ["/company", "/verify-placements"],
