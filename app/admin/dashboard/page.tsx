@@ -1,38 +1,13 @@
 "use client";
 
+import PendingUserItem from "@/components/admin/pending-user-item";
 import StatsCard from "@/components/admin/stats-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatEnumValue } from "@/lib/utils/utils";
 import { User } from "@prisma/client";
 import { Building2, GraduationCap, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface PendingUserItemProps {
-  pendingUser: User;
-}
-
-export function PendingUserItem({ pendingUser }: PendingUserItemProps) {
-  return (
-    <div className="flex items-center justify-between p-4 border rounded-lg">
-      <div className="space-y-1">
-        <h3 className="font-medium">{pendingUser.name}</h3>
-        <p className="text-sm text-muted-foreground">{pendingUser.email}</p>
-      </div>
-      <div className="flex gap-2">
-        <Badge className="text-sm" variant={"outline"}>
-          {formatEnumValue(pendingUser.role)}
-        </Badge>
-        <Button variant="outline" size="sm">
-          View Details
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// app/(admin)/admin/dashboard/page.tsx
 export default function AdminDashboard() {
   const [
     isFetchingPendingVerificationUsers,
