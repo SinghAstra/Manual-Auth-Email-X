@@ -4,7 +4,7 @@ import DocumentUploadCard from "@/components/verification/document-upload-card";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentType, VerificationStatus } from "@prisma/client";
 import { Building2, Landmark, Library, Upload } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 
 type UploadedFiles = {
@@ -49,11 +49,14 @@ const VerificationPage = () => {
   const selectedRole = searchParams.get("role");
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const pathname = usePathname();
 
   const handleRoleSelect = (roleTitle: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("role", roleTitle);
-    router.push(`/verification?${params.toString()}`, { scroll: false });
+    router.push(`${pathname}?${params.toString()}`, {
+      scroll: false,
+    });
     setUploadedFiles({});
   };
 
@@ -113,6 +116,7 @@ const VerificationPage = () => {
 
       // Clear the form
       setUploadedFiles({});
+      setVerificationStatus("PENDING");
     } catch (error) {
       console.log("Upload error --VerificationPage:", error);
       toast({
@@ -137,7 +141,7 @@ const VerificationPage = () => {
         console.log("data --/api/verificationStatus is", data);
 
         if (response.ok) {
-          setVerificationStatus(data.verified);
+          setVerificationStatus(data.verificationStatus);
         } else {
           toast({
             title: data.error || "Failed to fetch verification status",

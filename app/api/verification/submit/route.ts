@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/utils/prisma";
-import { DocumentType, VerificationStatus } from "@prisma/client";
+import { DocumentType } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -73,7 +73,6 @@ export async function POST(req: NextRequest) {
           userId: session.user.id,
           type: uploadedFile.type,
           fileUrl: blob.url,
-          status: VerificationStatus.PENDING,
         },
       });
 
@@ -89,10 +88,10 @@ export async function POST(req: NextRequest) {
     console.log("uploadedResults is ", uploadResults);
 
     // 5. Update user verification status
-    // await db.user.update({
-    //   where: { id: session.user.id },
-    //   data: { verified: false }, // Reset to false until documents are verified
-    // });
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { verificationStatus: "PENDING" },
+    });
 
     return NextResponse.json({
       message: "Files uploaded successfully",
