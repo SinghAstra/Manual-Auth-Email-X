@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User } from "@prisma/client";
+import { User, VerificationStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { AlertCircle, CalendarDays, LogOut, Mail } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -76,6 +76,21 @@ export default function ProfileView() {
     );
   }
 
+  const getVerificationStatus = (verificationStatus: VerificationStatus) => {
+    switch (verificationStatus) {
+      case "APPROVED":
+        return "Verified";
+      case "PENDING":
+        return "Pending";
+      case "REJECTED":
+        return "Rejected";
+      case "NOT_APPLIED":
+        return "Not Applied";
+      default:
+        return "Unknown";
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4 p-4 border rounded-md bg-card/50 backdrop-blur-sm">
       <div className="flex items-start justify-between">
@@ -122,19 +137,15 @@ export default function ProfileView() {
         <div className="flex items-center justify-between border-b pb-3">
           <div className="space-y-1">
             <p className="text-sm font-medium">Verification Status</p>
-            <p className="text-sm text-muted-foreground">
-              {user.verified ? "Verified" : "Pending Verification"}
-            </p>
           </div>
           <Badge variant={"outline"}>
-            {user.verified ? "Verified" : "Unverified"}
+            {getVerificationStatus(user.verificationStatus)}
           </Badge>
         </div>
 
         <div className="flex items-center justify-between border-b pb-3">
           <div className="space-y-1">
             <p className="text-sm font-medium">Account Type</p>
-            <p className="text-sm text-muted-foreground">Student Account</p>
           </div>
           <Badge variant="secondary">{user.role}</Badge>
         </div>

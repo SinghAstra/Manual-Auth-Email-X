@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import DocumentUploadCard from "@/components/verification/document-upload-card";
+import StatusCard from "@/components/verification/status-card";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentType, VerificationStatus } from "@prisma/client";
 import { Building2, Landmark, Library, Upload } from "lucide-react";
@@ -50,6 +51,10 @@ const VerificationPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const pathname = usePathname();
+
+  const handleSubmitNewDocuments = () => {
+    setVerificationStatus("PENDING");
+  };
 
   const handleRoleSelect = (roleTitle: string) => {
     const params = new URLSearchParams(searchParams);
@@ -158,41 +163,40 @@ const VerificationPage = () => {
   }, [toast]);
 
   if (isFetchingVerificationStatus) {
-    return <div>Loading...</div>;
-  }
-
-  // If verified, show success and prevent further submissions
-  if (verificationStatus === "APPROVED") {
     return (
-      <div className="container mx-auto p-6 max-w-2xl">
-        Your docs are verified
-      </div>
-    );
-  }
-
-  if (verificationStatus === "PENDING") {
-    return (
-      <div className="container mx-auto p-6 max-w-2xl">
-        <div className="text-center">
-          <Button variant="outline" disabled>
-            Document submission in review
-          </Button>
+      <div className="container mx-auto p-6 flex items-center justify-center min-h-[50vh]">
+        <div className="animate-pulse flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 bg-secondary rounded-full"></div>
+          <div className="h-4 w-24 bg-secondary rounded"></div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto p-6 space-y-8">
-      {verificationStatus === "REJECTED" && (
-        <div className="container mx-auto p-6 max-w-2xl">
-          <div className="text-center">
-            <Button variant="outline" disabled>
-              Documents Rejected
+  if (
+    verificationStatus === "APPROVED" ||
+    verificationStatus === "PENDING" ||
+    verificationStatus === "REJECTED"
+  ) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <StatusCard status={verificationStatus} />
+        {verificationStatus === "REJECTED" && (
+          <div className="mt-6">
+            <Button
+              className="w-full"
+              onClick={handleSubmitNewDocuments}
+              variant="secondary"
+            >
+              Submit New Documents
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="container mx-auto p-6 space-y-8">
       {!selectedRole && (
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
