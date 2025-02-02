@@ -11,42 +11,60 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { formatEnumValue } from "@/lib/utils/utils";
-import { DocumentType, VerificationStatus } from "@prisma/client";
-import {
-  Calendar,
-  CheckCircle,
-  FileText,
-  User as UserIcon,
-  XCircle,
-} from "lucide-react";
-import { useState } from "react";
+import { Role, VerificationStatus } from "@prisma/client";
+import { CheckCircle, FileText, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { UserWithDocuments } from "./pending-user-item";
 
 interface UserVerificationDetailsProps {
   user: UserWithDocuments;
   onClose: () => void;
-  onStatusUpdate: () => void;
 }
+
+const DOCUMENT_ROLE_MAP = {
+  INSTITUTION_ID: Role.INSTITUTION_ADMIN,
+  AUTHORIZATION_LETTER: Role.INSTITUTION_ADMIN,
+  COMPANY_ID: Role.COMPANY_REPRESENTATIVE,
+  BUSINESS_CARD: Role.COMPANY_REPRESENTATIVE,
+  GOVERNMENT_ID: Role.GOVERNMENT,
+  DEPARTMENT_LETTER: Role.GOVERNMENT,
+};
 
 export default function UserVerificationDetails({
   user,
   onClose,
-  onStatusUpdate,
 }: UserVerificationDetailsProps) {
   const [feedback, setFeedback] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [message, setMessage] = useState<string>();
+  const { toast } = useToast();
+
+  // Determine role based on uploaded documents
+  const determineRole = () => {
+    const roles = new Set(
+      user.documents.map((doc) => DOCUMENT_ROLE_MAP[doc.type])
+    );
+
+    // If we find exactly one role from the documents, return it
+    if (roles.size === 1) {
+      return Array.from(roles)[0];
+    }
+
+    // If no clear role can be determined, return null
+    return null;
+  };
+
+  const determinedRole = determineRole();
 
   const handleStatusUpdate = async (newStatus: VerificationStatus) => {
+    if (newStatus === VerificationStatus.APPROVED && !determinedRole) {
+      setMessage("No determined Role");
+      return;
+    }
+
     try {
       setIsUpdating(true);
       const response = await fetch(`/api/admin/verifications/${user.id}`, {
@@ -57,12 +75,14 @@ export default function UserVerificationDetails({
         body: JSON.stringify({
           status: newStatus,
           feedback: feedback.trim(),
+          role:
+            newStatus === VerificationStatus.APPROVED ? determinedRole : null,
         }),
       });
 
       if (!response.ok) throw new Error("Failed to update verification status");
+      setMessage("Updated Verification Status");
 
-      onStatusUpdate();
       onClose();
     } catch (error) {
       console.error("Error updating verification status:", error);
@@ -71,55 +91,33 @@ export default function UserVerificationDetails({
     }
   };
 
-  const getRequiredDocuments = (role: string): DocumentType[] => {
-    switch (role) {
-      case "INSTITUTION_ADMIN":
-        return [DocumentType.INSTITUTION_ID, DocumentType.AUTHORIZATION_LETTER];
-      case "COMPANY_REPRESENTATIVE":
-        return [DocumentType.COMPANY_ID, DocumentType.BUSINESS_CARD];
-      case "GOVERNMENT":
-        return [DocumentType.GOVERNMENT_ID, DocumentType.DEPARTMENT_LETTER];
-      default:
-        return [];
-    }
-  };
-
-  const requiredDocs = getRequiredDocuments(user.role);
-  const uploadedDocTypes = user.documents.map((doc) => doc.type);
-  const missingDocs = requiredDocs.filter(
-    (doc) => !uploadedDocTypes.includes(doc)
-  );
+  useEffect(() => {
+    toast({
+      title: message,
+    });
+  }, [message, toast]);
 
   return (
-    <Card className="max-w-2xl w-full mx-auto">
-      <CardHeader>
-        <CardTitle>User Verification Details</CardTitle>
-        <CardDescription>
+    <div className="w-full mx-auto flex flex-col gap-4">
+      <div className="flex flex-col">
+        <h1 className="leading-loose">User Verification Details</h1>
+        <span className="text-muted-foreground text-sm">
           Review user documents and update verification status
-        </CardDescription>
-      </CardHeader>
+        </span>
+      </div>
 
-      <CardContent className="space-y-6">
+      <div className="space-y-6">
         {/* User Information */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <UserIcon className="h-4 w-4" />
-            <div>
-              <p className="font-medium">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-            </div>
+        <div className="flex items-center gap-2">
+          <div>
+            <p className="font-medium">{user.name}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
-
           <div className="flex items-center gap-2">
             <Badge variant="outline">{formatEnumValue(user.role)}</Badge>
             <Badge variant="secondary">
               {formatEnumValue(user.verificationStatus)}
             </Badge>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
 
@@ -140,7 +138,7 @@ export default function UserVerificationDetails({
                     <span>{formatEnumValue(doc.type)}</span>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => window.open(doc.fileUrl, "_blank")}
                   >
@@ -150,23 +148,10 @@ export default function UserVerificationDetails({
               ))}
             </div>
           )}
-
-          {missingDocs.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-sm font-medium text-destructive">
-                Missing Documents:
-              </h4>
-              <ul className="list-disc list-inside text-sm text-muted-foreground">
-                {missingDocs.map((doc) => (
-                  <li key={doc}>{formatEnumValue(doc)}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
 
         {/* Feedback Section */}
-        <div className="space-y-2">
+        <div className="space-y-2 p-2">
           <label className="text-sm font-medium">Feedback</label>
           <Textarea
             placeholder="Enter feedback for the user..."
@@ -174,9 +159,9 @@ export default function UserVerificationDetails({
             onChange={(e) => setFeedback(e.target.value)}
           />
         </div>
-      </CardContent>
+      </div>
 
-      <CardFooter className="flex justify-between">
+      <div className="flex justify-between">
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
@@ -212,10 +197,7 @@ export default function UserVerificationDetails({
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button
-                variant="default"
-                disabled={isUpdating || missingDocs.length > 0}
-              >
+              <Button variant="default" disabled={isUpdating}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Approve
               </Button>
@@ -241,7 +223,7 @@ export default function UserVerificationDetails({
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

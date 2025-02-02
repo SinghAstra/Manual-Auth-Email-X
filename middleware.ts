@@ -30,14 +30,11 @@ export async function middleware(req: NextRequest) {
       req,
       secret: process.env.NEXT_AUTH_SECRET,
     });
-    console.log("token --middleware is ", token);
     if (!token?.id) {
       return NextResponse.redirect(new URL("/auth/sign-in", req.url));
     }
 
     const path = req.nextUrl.pathname;
-
-    console.log("path is ", path);
 
     // Construct absolute URL for role verification
     const baseUrl = process.env.NEXT_AUTH_URL || req.nextUrl.origin;
@@ -47,9 +44,6 @@ export async function middleware(req: NextRequest) {
       },
     });
     const data = await response.json();
-
-    console.log(" req.nextUrl.origin is ", req.nextUrl.origin);
-    console.log("data --middleware is ", data);
 
     if (!response.ok) {
       return NextResponse.redirect(new URL("/auth/sign-in", req.url));
@@ -71,8 +65,6 @@ export async function middleware(req: NextRequest) {
     const hasRouteAccess = allowedRoutes.some((route) =>
       path.startsWith(route)
     );
-
-    console.log("hasRouteAccess is ", hasRouteAccess);
 
     if (!hasRouteAccess) {
       // Redirect to role's default route

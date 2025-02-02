@@ -69,7 +69,7 @@ export function Hero() {
     }
 
     console.log("session is ", session);
-    console.log("user.role is ", user.role);
+    console.log("user.role is ", user?.role);
     if (status === "authenticated" && user?.role) {
       router.push(roleDefaultRoutes[user?.role]);
     }

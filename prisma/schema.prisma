@@ -75,6 +75,7 @@ model User {
   isActive      Boolean   @default(true)
   verified      Boolean   @default(false)
   verificationStatus VerificationStatus @default(NOT_APPLIED)
+  feedback     String?
 
 
   // Auth Relations

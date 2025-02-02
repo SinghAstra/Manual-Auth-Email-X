@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
 import UserVerificationDetails from "./user-verifications-detail";
 
 interface PendingUserItemProps {
@@ -46,16 +47,14 @@ function PendingUserItem({ pendingUser }: PendingUserItemProps) {
       </div>
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-3xl">
-          {user && (
-            <UserVerificationDetails
-              user={user}
-              onClose={() => setIsDetailsOpen(false)}
-              onStatusUpdate={() => {
-                // Refresh the parent component's data
-                // window.location.reload();
-              }}
-            />
-          )}
+          <ScrollArea className="h-[450px] px-4">
+            {user && (
+              <UserVerificationDetails
+                user={user}
+                onClose={() => setIsDetailsOpen(false)}
+              />
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
