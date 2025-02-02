@@ -4,52 +4,22 @@ import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils/utils";
 import { roleDefaultRoutes } from "@/middleware";
-import { User } from "@prisma/client";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { FadeInUp } from "../animation/fade-in-up";
 import { GradientText } from "../custom-ui/gradient-text";
 import { Icons } from "../Icons";
 import { Button, buttonVariants } from "../ui/button";
 
 export function Hero() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
-  const [user, setUser] = useState<User>();
-  const [isFetchingUserProfile, setIsFetchingUserProfile] = useState(false);
+  const { data: session, status } = useSession();
   const [isGettingStarted, setIsGettingStarted] = useState(false);
-
-  const fetchUserProfile = useCallback(async () => {
-    try {
-      setIsFetchingUserProfile(true);
-      const response = await fetch("/api/profile");
-      if (!response.ok) {
-        throw new Error("Error while fetching User Profile");
-      }
-      const data = await response.json();
-      setUser(data);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("error.message is ", error.message);
-        console.log("error.stack is ", error.stack);
-      }
-      console.log("Error occurred while fetchUserProfile", error);
-      toast({ title: "Some Error Occurred Please try again later." });
-    } finally {
-      setIsFetchingUserProfile(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    if (session?.user.id) {
-      fetchUserProfile();
-    }
-  }, [fetchUserProfile, session?.user.id]);
 
   const handleGetStarted = () => {
     setIsGettingStarted(true);
@@ -61,17 +31,13 @@ export function Hero() {
       return;
     }
 
-    console.log("status --handleGetStarted is ", status);
-
     if (status === "unauthenticated") {
       router.push("/auth/sign-in");
       return;
     }
 
-    console.log("session is ", session);
-    console.log("user.role is ", user?.role);
-    if (status === "authenticated" && user?.role) {
-      router.push(roleDefaultRoutes[user?.role]);
+    if (status === "authenticated" && session.user.role) {
+      router.push(roleDefaultRoutes[session.user.role]);
     }
   };
 
@@ -116,11 +82,7 @@ export function Hero() {
           <FadeInUp delay={0.4}>
             <Button
               onClick={handleGetStarted}
-              disabled={
-                status === "loading" ||
-                isFetchingUserProfile ||
-                isGettingStarted
-              }
+              disabled={status === "loading" || isGettingStarted}
             >
               <div className="flex items-center gap-2 cursor-pointer">
                 {isGettingStarted && <Loader2 className="animate-spin" />}
