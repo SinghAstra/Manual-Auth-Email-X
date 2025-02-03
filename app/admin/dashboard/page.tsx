@@ -1,11 +1,7 @@
 "use client";
 
 import PendingUserItem from "@/components/admin/pending-user-item";
-import StatsCard from "@/components/admin/stats-card";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { User } from "@prisma/client";
-import { Building2, GraduationCap, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
@@ -14,14 +10,6 @@ export default function AdminDashboard() {
     setIsFetchingPendingVerificationUsers,
   ] = useState(true);
   const [pendingUsers, setPendingUsers] = useState<User[]>();
-
-  // Static data for now
-  const stats = {
-    totalUsers: 1250,
-    totalInstitutions: 45,
-    totalCompanies: 78,
-    totalPlacements: 856,
-  };
 
   useEffect(() => {
     const fetchPendingVerifications = async () => {
@@ -49,33 +37,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 max-w-4xl container mx-auto">
-      {/* Overview Statistics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Users" value={stats.totalUsers} icon={Users} />
-        <StatsCard
-          title="Institutions"
-          value={stats.totalInstitutions}
-          icon={Building2}
-        />
-        <StatsCard
-          title="Companies"
-          value={stats.totalCompanies}
-          icon={Building2}
-        />
-        <StatsCard
-          title="Placements"
-          value={stats.totalPlacements}
-          icon={GraduationCap}
-        />
-      </div>
-
-      {/* Pending Verifications */}
-      <Card className="p-6">
+      <div className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Pending Verifications</h2>
-          <Button variant="outline" size="sm">
-            View All
-          </Button>
         </div>
         <div className="space-y-4">
           {isFetchingPendingVerificationUsers ? (
@@ -88,7 +52,7 @@ export default function AdminDashboard() {
             ))
           )}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

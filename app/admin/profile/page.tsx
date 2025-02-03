@@ -1,7 +1,6 @@
 "use client";
 
 import ProfileSkeleton from "@/components/skeleton/user-profile";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,17 +16,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import { formatEnumValue } from "@/lib/utils/utils";
 import { User } from "@prisma/client";
 import { format } from "date-fns";
-import { AlertCircle, CalendarDays, LogOut, Mail } from "lucide-react";
+import { CalendarDays, LogOut, Mail } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 export default function ProfileView() {
   const [user, setUser] = useState<User>();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState<string>();
+  const [isFetchingUser, setIsFetchingUser] = useState(true);
+  const { toast } = useToast();
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
@@ -35,20 +36,18 @@ export default function ProfileView() {
 
   const fetchProfile = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
       const response = await fetch("/api/profile");
       if (!response.ok) throw new Error("Failed to fetch profile");
       setUser(await response.json());
     } catch (error) {
-      console.log("Error in fetchProfile - ProfileView /profile");
+      setMessage("Something went wrong while fetching Profile.");
+      console.log("Error in fetchProfile.");
       if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError("Internal Server Error");
+        console.log("error.message is ", error.message);
+        console.log("error.stack is ", error.stack);
       }
     } finally {
-      setIsLoading(false);
+      setIsFetchingUser(false);
     }
   };
 
@@ -56,19 +55,15 @@ export default function ProfileView() {
     fetchProfile();
   }, []);
 
-  if (isLoading) {
-    return <ProfileSkeleton />;
-  }
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+  }, [message, toast]);
 
-  if (error || !user) {
-    return (
-      <Alert variant="destructive" className="flex items-center">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="flex items-center">
-          Failed to load profile. Please try again later.
-        </AlertDescription>
-      </Alert>
-    );
+  if (isFetchingUser || !user) {
+    return <ProfileSkeleton />;
   }
 
   return (

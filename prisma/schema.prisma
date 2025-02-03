@@ -97,14 +97,7 @@ model User {
 
 model Institution {
   id            String    @id @default(cuid())
-  name          String
-  type          String    // University, College, etc.
-  address       String
-  city          String
-  state         String
-  pincode       String
-  website       String?
-  phone         String
+ 
 
   // Relations
   admins        InstitutionProfile[]
@@ -117,10 +110,15 @@ model Institution {
 
 model InstitutionProfile {
   id            String    @id @default(cuid())
-  userId        String    @unique
-  institutionId String
-  designation   String
-  department    String?
+  userId        String   
+   name          String
+  type          String    // University, College, etc.
+  address       String
+  city          String
+  state         String
+  pincode       String
+  website       String?
+  phone         String
 
   user          User        @relation(fields: [userId], references: [id])
   institution   Institution @relation(fields: [institutionId], references: [id])
