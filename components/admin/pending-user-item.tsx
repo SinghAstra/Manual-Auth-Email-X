@@ -1,7 +1,5 @@
-import { formatEnumValue } from "@/lib/utils/utils";
 import { Document, User } from "@prisma/client";
 import { useState } from "react";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { ScrollArea } from "../ui/scroll-area";
@@ -38,9 +36,6 @@ function PendingUserItem({ pendingUser }: PendingUserItemProps) {
         <p className="text-sm text-muted-foreground">{pendingUser.email}</p>
       </div>
       <div className="flex gap-2">
-        <Badge className="text-sm" variant={"outline"}>
-          {formatEnumValue(pendingUser.role)}
-        </Badge>
         <Button variant="outline" size="sm" onClick={handleViewDetails}>
           View Details
         </Button>

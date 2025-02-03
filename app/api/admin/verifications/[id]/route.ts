@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     // Check authentication and super admin status
@@ -45,7 +45,7 @@ export async function PATCH(
 
     // Get user and their documents
     const user = await prisma.user.findUnique({
-      where: { id: params.userId },
+      where: { id: params.id },
       include: { documents: true },
     });
 
@@ -80,7 +80,7 @@ export async function PATCH(
 
     // Update user verification status
     const updatedUser = await prisma.user.update({
-      where: { id: params.userId },
+      where: { id: params.id },
       data: {
         verificationStatus: status,
         role: status === VerificationStatus.APPROVED ? role : undefined,

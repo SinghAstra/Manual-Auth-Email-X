@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { formatEnumValue } from "@/lib/utils/utils";
 import { Role, VerificationStatus } from "@prisma/client";
-import { CheckCircle, FileText, XCircle } from "lucide-react";
+import { CheckCircle, FileText, Loader, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { UserWithDocuments } from "./pending-user-item";
 
@@ -85,13 +85,14 @@ export default function UserVerificationDetails({
 
       onClose();
     } catch (error) {
-      console.error("Error updating verification status:", error);
+      console.log("Error updating verification status:", error);
     } finally {
       setIsUpdating(false);
     }
   };
 
   useEffect(() => {
+    if (!message) return;
     toast({
       title: message,
     });
@@ -114,7 +115,6 @@ export default function UserVerificationDetails({
             <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{formatEnumValue(user.role)}</Badge>
             <Badge variant="secondary">
               {formatEnumValue(user.verificationStatus)}
             </Badge>
@@ -198,8 +198,17 @@ export default function UserVerificationDetails({
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="default" disabled={isUpdating}>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Approve
+                {isUpdating ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Wait ....
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </>
+                )}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
