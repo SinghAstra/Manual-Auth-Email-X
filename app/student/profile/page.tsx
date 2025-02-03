@@ -1,5 +1,6 @@
 "use client";
 
+import ProfileSkeleton from "@/components/skeleton/user-profile";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -15,16 +16,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CardDescription, CardTitle } from "@/components/ui/card";
 import { formatEnumValue } from "@/lib/utils/utils";
-import { User, VerificationStatus } from "@prisma/client";
+import { User } from "@prisma/client";
 import { format } from "date-fns";
 import { AlertCircle, CalendarDays, LogOut, Mail } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -45,11 +39,14 @@ export default function ProfileView() {
       setError(null);
       const response = await fetch("/api/profile");
       if (!response.ok) throw new Error("Failed to fetch profile");
-      setUser(await response.json());
+      const data = await response.json();
+      setUser(data);
     } catch (error) {
-      console.log("Error in fetchProfile - ProfileView /profile");
+      console.log("Error in fetchProfile");
       if (error instanceof Error) {
         setError(error.message);
+        console.log("error.message is ", error.message);
+        console.log("error.stack is ", error.stack);
       } else {
         setError("Internal Server Error");
       }
@@ -76,21 +73,6 @@ export default function ProfileView() {
       </Alert>
     );
   }
-
-  const getVerificationStatus = (verificationStatus: VerificationStatus) => {
-    switch (verificationStatus) {
-      case "APPROVED":
-        return "Verified";
-      case "PENDING":
-        return "Pending";
-      case "REJECTED":
-        return "Rejected";
-      case "NOT_APPLIED":
-        return "Not Applied";
-      default:
-        return "Unknown";
-    }
-  };
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-4 p-4 border rounded-md bg-card/50 backdrop-blur-sm">
@@ -140,7 +122,7 @@ export default function ProfileView() {
             <p className="text-sm font-medium">Verification Status</p>
           </div>
           <Badge variant={"outline"}>
-            {getVerificationStatus(user.verificationStatus)}
+            {formatEnumValue(user.verificationStatus)}
           </Badge>
         </div>
 
@@ -157,28 +139,5 @@ export default function ProfileView() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ProfileSkeleton() {
-  return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-[200px]" />
-            <Skeleton className="h-4 w-[150px]" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-4 w-[120px]" />
-        </div>
-      </CardContent>
-    </Card>
   );
 }
