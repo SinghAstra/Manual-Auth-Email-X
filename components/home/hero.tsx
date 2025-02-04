@@ -9,9 +9,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FadeInUp } from "../animation/fade-in-up";
-import { GradientText } from "../custom-ui/gradient-text";
-import { Icons } from "../Icons";
 import { Button, buttonVariants } from "../ui/button";
+import { GradientText } from "../ui-components/gradient-text";
+import { Icons } from "../Icons";
 
 export function Hero() {
   const { status } = useSession();
