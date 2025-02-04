@@ -9,9 +9,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FadeInUp } from "../animation/fade-in-up";
-import { Button, buttonVariants } from "../ui/button";
-import { GradientText } from "../ui-components/gradient-text";
 import { Icons } from "../Icons";
+import { GradientText } from "../ui-components/gradient-text";
+import { Button, buttonVariants } from "../ui/button";
 
 export function Hero() {
   const { status } = useSession();
@@ -44,14 +44,14 @@ export function Hero() {
     <div className="max-w-3xl flex flex-col items-center text-center gap-8">
       <FadeInUp delay={0.4}>
         <div className="min-h-screen flex flex-col items-center  text-center gap-8 max-w-3xl">
-          <h1 className="text-4xl font-bold  sm:text-5xl md:text-6xl lg:text-7xl mt-16">
+          <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl lg:text-7xl mt-16">
             <GradientText variant="secondary" animate>
-              Simplifying
+              Transforming
             </GradientText>{" "}
-            Understanding
+            Campus Placement
             <br />
             <GradientText variant="secondary" animate>
-              Github Repo
+              Analytics
             </GradientText>
           </h1>
 
@@ -76,16 +76,15 @@ export function Hero() {
       </FadeInUp>
       <FadeInUp delay={0.4}>
         <div className="min-h-screen flex flex-col items-center text-center gap-8 max-w-3xl">
-          <h1 className="text-2xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl ">
-            Perform{" "}
+          <h1 className="text-2xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+            Track{" "}
             <GradientText variant="accent" animate>
-              Semantic Searching
+              Real-time Data
             </GradientText>{" "}
-            on Github Repo on basis of{" "}
+            across Universities for{" "}
             <GradientText variant="accent" animate>
-              functionality
-            </GradientText>{" "}
-            of the code.
+              informed decisions
+            </GradientText>
           </h1>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
@@ -110,13 +109,13 @@ export function Hero() {
       <FadeInUp delay={0.4}>
         <div className="min-h-screen flex flex-col items-center text-center gap-8 max-w-3xl">
           <h1 className="text-2xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-            Find{" "}
+            Access{" "}
             <GradientText variant="success" animate>
-              Functionalities
+              Comprehensive Analytics
             </GradientText>{" "}
-            Implemented in Github Repo and their{" "}
+            for Placements and{" "}
             <GradientText variant="success" animate>
-              Respective Code
+              Industry Trends
             </GradientText>
           </h1>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -161,13 +160,13 @@ export function Hero() {
             </Link>
           </div>
           <h1 className="text-2xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-            Provides{" "}
+            Generate{" "}
             <GradientText variant="warning" animate>
-              Summary
+              Insights
             </GradientText>{" "}
-            of Code{" "}
+            from{" "}
             <GradientText variant="warning" animate>
-              Files and Directories
+              Nationwide Data
             </GradientText>
           </h1>
           <Button

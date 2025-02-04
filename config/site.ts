@@ -3,7 +3,7 @@ import { SiteConfig } from "@/interfaces/site";
 export const siteConfig: SiteConfig = {
   name: "PlacementX",
   description:
-    "A centralized platform built with Next.js 14, Prisma, and shadcn/ui to track and analyze campus placement data across technical institutes and universities nationwide.",
+    "Track and analyze campus placement data across technical institutes and universities nationwide.",
   tagline: "Empowering campuses with centralized placement analytics.",
   headline: "Streamline Campus Placements Nationwide",
   subHeadline:

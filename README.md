@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Platform
 
-## Getting Started
+A centralized platform built with Next.js 14, Prisma, and shadcn/ui to track and analyze campus placement data across technical institutes and universities nationwide.
 
-First, run the development server:
+## 🎯 Problem Statement
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Currently, there is no centralized database for tracking campus placements across technical institutions and universities in the country. This lack of consolidated data makes it difficult for:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Policy makers to understand and address unemployment trends
+- Educational institutions to benchmark their performance
+- Corporations to efficiently access and recruit talent
+- Students to make informed career decisions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💡 Solution
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Platform provides a unified platform where:
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Universities can upload and manage their placement data
+2. Corporations can access verified student talent pools
+3. Government bodies can analyze employment trends
+4. Students can track opportunities and placement statistics
