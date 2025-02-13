@@ -24,7 +24,6 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.role = user.role;
       }
-      console.log("token is ", token);
       return token;
     },
     session: async ({ session, token }) => {
@@ -33,7 +32,6 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email;
         session.user.role = token.role;
       }
-      console.log("session is ", session);
       return session;
     },
   },
