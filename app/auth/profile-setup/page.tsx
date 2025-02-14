@@ -1,7 +1,5 @@
 "use client";
 import { Navbar } from "@/components/home/navbar";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { dashboardRoutes } from "@/lib/constants";
 import { Role } from "@prisma/client";
 import { useSession } from "next-auth/react";
@@ -82,24 +80,20 @@ const ProfileSetup = () => {
             Select your role to begin the verification process
           </span>
           <div className="mt-2">
-            <RadioGroup onValueChange={handleRoleSelect} className="space-y-4">
-              {Object.entries(roleInfo).map(([role, info]) => (
-                <div
-                  key={role}
-                  className="flex items-center space-x-3 px-4 py-2 rounded-lg  border border-transparent hover:border-gray-500"
-                >
-                  <RadioGroupItem value={role} id={role} />
-                  <Label htmlFor={role} className="flex-1 cursor-pointer ">
-                    <div className="flex flex-col">
-                      <span className="font-medium">{info.title}</span>
-                      <span className="text-sm text-gray-500 mt-2">
-                        {info.description}
-                      </span>
-                    </div>
-                  </Label>
+            {Object.entries(roleInfo).map(([role, info]) => (
+              <div
+                key={role}
+                onClick={() => handleRoleSelect(role as Role)}
+                className="flex items-center space-x-3 px-4 py-2 rounded-lg  border border-transparent hover:bg-gray-500/20 cursor-pointer"
+              >
+                <div className="flex flex-col">
+                  <span className="font-medium">{info.title}</span>
+                  <span className="text-sm text-gray-500 mt-2">
+                    {info.description}
+                  </span>
                 </div>
-              ))}
-            </RadioGroup>
+              </div>
+            ))}
           </div>
         </div>
       </div>
