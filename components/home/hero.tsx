@@ -2,6 +2,7 @@
 
 import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
+import { dashboardRoutes } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -14,7 +15,8 @@ import { GradientText } from "../ui-components/gradient-text";
 import { Button, buttonVariants } from "../ui/button";
 
 export function Hero() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const user = session?.user;
   const router = useRouter();
   const { toast } = useToast();
   const [isStarting, setIsStarting] = useState(false);
@@ -34,8 +36,21 @@ export function Hero() {
       return;
     }
 
-    if (status === "authenticated") {
-      router.push("/dashboard");
+    console.log("user --handleGetStarted is ", user);
+
+    if (user) {
+      if (user.verificationStatus === "NOT_APPLIED") {
+        router.push("/auth/profile-setup");
+        return;
+      }
+
+      if (user.verificationStatus === "PENDING") {
+        router.push("/auth/verification-pending");
+      }
+
+      if (user.verificationStatus === "APPROVED") {
+        router.push(dashboardRoutes[user.role]);
+      }
     }
     setIsStarting(false);
   };

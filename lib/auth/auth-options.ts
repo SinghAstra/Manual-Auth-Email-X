@@ -1,7 +1,7 @@
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "../utils/prisma";
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXT_AUTH_SECRET,
@@ -23,6 +23,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.role = user.role;
+        token.verificationStatus = user.verificationStatus;
       }
       return token;
     },
@@ -31,6 +32,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
         session.user.email = token.email;
         session.user.role = token.role;
+        session.user.verificationStatus = token.verificationStatus;
       }
       return session;
     },
