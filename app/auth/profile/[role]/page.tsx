@@ -42,6 +42,7 @@ enum InstitutionAdminDocumentsType {
 interface DocumentFile {
   file: File | null;
   preview: string | null;
+  error: string | null;
 }
 
 type InstitutionAdminDocumentsFiles = {
@@ -57,8 +58,12 @@ const InstitutionAdminForm = () => {
   });
 
   const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
-    [DocumentType.INSTITUTION_ID]: { file: null, preview: null },
-    [DocumentType.AUTHORIZATION_LETTER]: { file: null, preview: null },
+    [DocumentType.INSTITUTION_ID]: { file: null, preview: null, error: null },
+    [DocumentType.AUTHORIZATION_LETTER]: {
+      file: null,
+      preview: null,
+      error: null,
+    },
   });
 
   const handleFileChange = (
@@ -73,6 +78,7 @@ const InstitutionAdminForm = () => {
         [type]: {
           file,
           preview: previewUrl,
+          error: null,
         },
       }));
     }
@@ -89,12 +95,41 @@ const InstitutionAdminForm = () => {
       [type]: {
         file: null,
         preview: null,
+        error: null,
       },
     }));
 
     if (fileInputRefs.current[type]) {
       fileInputRefs.current[type].value = "";
     }
+  };
+
+  const validateDocuments = (): boolean => {
+    let isValid = true;
+
+    Object.values(InstitutionAdminDocumentsType).forEach((type) => {
+      if (!documents[type]?.file) {
+        setDocuments((prev) => ({
+          ...prev,
+          [type]: {
+            file: null,
+            preview: null,
+            error: `${formatDocumentType(type)} is required`,
+          },
+        }));
+        isValid = false;
+      } else {
+        setDocuments((prev) => ({
+          ...prev,
+          [type]: {
+            ...documents[type],
+            error: null,
+          },
+        }));
+      }
+    });
+
+    return isValid;
   };
 
   const formSchema = z.object({
@@ -131,6 +166,12 @@ const InstitutionAdminForm = () => {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log(data);
+    // Validate documents
+    const isValidDocuments = validateDocuments();
+
+    if (!isValidDocuments) {
+      return;
+    }
     // Handle form submission
   };
 
@@ -282,7 +323,13 @@ const InstitutionAdminForm = () => {
 
           {Object.values(InstitutionAdminDocumentsType).map((type) => (
             <div key={type}>
-              <FormLabel className="text-sm transition-colors font-normal">
+              <FormLabel
+                className={`text-sm transition-colors font-normal ${
+                  documents[type] && documents[type].error
+                    ? "text-destructive"
+                    : ""
+                }`}
+              >
                 {formatDocumentType(type)}
               </FormLabel>
               <div className="mt-2">
@@ -290,8 +337,14 @@ const InstitutionAdminForm = () => {
                   type="file"
                   accept="image/*,.pdf"
                   onChange={(e) => handleFileChange(e, type)}
-                  className="w-full cursor-pointer"
-                  ref={(el) => (fileInputRefs.current[type] = el)}
+                  className={`w-full cursor-pointer ${
+                    documents[type] && documents[type].error
+                      ? "border-destructive"
+                      : ""
+                  }`}
+                  ref={(el) => {
+                    fileInputRefs.current[type] = el;
+                  }}
                 />
               </div>
               {documents[type]?.preview && (
