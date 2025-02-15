@@ -26,20 +26,39 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DocumentType } from "@prisma/client";
+import { X } from "lucide-react";
+import Image from "next/image";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const InstitutionAdminForm = () => {
-  const [documents, setDocuments] = useState({
-    INSTITUTION_ID: null,
-    AUTHORIZATION_LETTER: null,
-  });
+enum InstitutionAdminDocumentsType {
+  INSTITUTION_ID = "INSTITUTION_ID",
+  AUTHORIZATION_LETTER = "AUTHORIZATION_LETTER",
+}
 
-  const [previews, setPreviews] = useState({
-    INSTITUTION_ID: null,
-    AUTHORIZATION_LETTER: null,
+interface DocumentFile {
+  file: File | null;
+  preview: string | null;
+}
+
+type InstitutionAdminDocumentsFiles = {
+  [key in InstitutionAdminDocumentsType]?: DocumentFile;
+};
+
+const fileSchema = z.object({
+  file: z.instanceof(File, { message: "File is required" }).nullable(),
+  preview: z.string().nullable(),
+});
+
+const InstitutionAdminForm = () => {
+  const fileInputRefs = useRef<
+    Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
+  >({
+    [InstitutionAdminDocumentsType.INSTITUTION_ID]: null,
+    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
   });
 
   const formSchema = z.object({
@@ -51,6 +70,16 @@ const InstitutionAdminForm = () => {
     pincode: z.string().length(6),
     website: z.string().url().optional(),
     phone: z.string().min(10),
+    documents: z.object({
+      [InstitutionAdminDocumentsType.INSTITUTION_ID]: fileSchema.refine(
+        (data) => data.file !== null,
+        "Institution ID document is required"
+      ),
+      [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: fileSchema.refine(
+        (data) => data.file !== null,
+        "Authorization letter is required"
+      ),
+    }),
   });
 
   const form = useForm({
@@ -64,8 +93,58 @@ const InstitutionAdminForm = () => {
       pincode: "",
       website: "",
       phone: "",
+      documents: {
+        [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
+          file: null,
+          preview: null,
+        },
+        [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
+          file: null,
+          preview: null,
+        },
+      },
     },
   });
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: InstitutionAdminDocumentsType
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      form.setValue(`documents.${type}`, {
+        file,
+        preview: previewUrl,
+      });
+    }
+  };
+
+  const removeDocument = (type: InstitutionAdminDocumentsType) => {
+    const currentPreview = documents[type]?.preview;
+    if (currentPreview) {
+      URL.revokeObjectURL(currentPreview);
+    }
+
+    setDocuments((prev) => ({
+      ...prev,
+      [type]: {
+        file: null,
+        preview: null,
+      },
+    }));
+
+    if (fileInputRefs.current[type]) {
+      fileInputRefs.current[type].value = "";
+    }
+  };
+
+  const formatDocumentType = (type: string): string => {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log(data);
@@ -217,6 +296,55 @@ const InstitutionAdminForm = () => {
               </FormItem>
             )}
           />
+
+          {Object.values(InstitutionAdminDocumentsType).map((type) => (
+            <div key={type}>
+              <FormLabel className="text-sm transition-colors font-normal">
+                {formatDocumentType(type)}
+              </FormLabel>
+              <div className="mt-2">
+                <Input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => handleFileChange(e, type)}
+                  className="w-full cursor-pointer"
+                  ref={(el) => {
+                    fileInputRefs.current[type] = el;
+                  }}
+                />
+              </div>
+              {documents[type]?.preview && (
+                <div className="mt-2 relative">
+                  <div className="relative w-full h-40 border rounded-md overflow-hidden">
+                    {documents[type].file?.type.startsWith("image/") ? (
+                      <Image
+                        src={documents[type]?.preview}
+                        alt={`${type} Preview`}
+                        width={320}
+                        height={160}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-muted">
+                        <p className="text-sm text-muted-foreground">
+                          PDF Document
+                        </p>
+                      </div>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeDocument(type)}
+                      className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors h-8 w-8"
+                    >
+                      <X className="h-4 w-4 text-foreground" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
 
           <Button type="submit" className="w-full">
             Submit
