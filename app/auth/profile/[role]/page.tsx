@@ -48,11 +48,6 @@ type InstitutionAdminDocumentsFiles = {
   [key in InstitutionAdminDocumentsType]?: DocumentFile;
 };
 
-const fileSchema = z.object({
-  file: z.instanceof(File, { message: "File is required" }).nullable(),
-  preview: z.string().nullable(),
-});
-
 const InstitutionAdminForm = () => {
   const fileInputRefs = useRef<
     Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
@@ -61,49 +56,9 @@ const InstitutionAdminForm = () => {
     [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
   });
 
-  const formSchema = z.object({
-    name: z.string().min(2).max(50),
-    type: z.string().min(2),
-    address: z.string().min(10),
-    city: z.string().min(2),
-    state: z.string().min(2),
-    pincode: z.string().length(6),
-    website: z.string().url().optional(),
-    phone: z.string().min(10),
-    documents: z.object({
-      [InstitutionAdminDocumentsType.INSTITUTION_ID]: fileSchema.refine(
-        (data) => data.file !== null,
-        "Institution ID document is required"
-      ),
-      [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: fileSchema.refine(
-        (data) => data.file !== null,
-        "Authorization letter is required"
-      ),
-    }),
-  });
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      type: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-      website: "",
-      phone: "",
-      documents: {
-        [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
-          file: null,
-          preview: null,
-        },
-        [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
-          file: null,
-          preview: null,
-        },
-      },
-    },
+  const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
+    [DocumentType.INSTITUTION_ID]: { file: null, preview: null },
+    [DocumentType.AUTHORIZATION_LETTER]: { file: null, preview: null },
   });
 
   const handleFileChange = (
@@ -113,10 +68,13 @@ const InstitutionAdminForm = () => {
     const file = e.target.files?.[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      form.setValue(`documents.${type}`, {
-        file,
-        preview: previewUrl,
-      });
+      setDocuments((prev) => ({
+        ...prev,
+        [type]: {
+          file,
+          preview: previewUrl,
+        },
+      }));
     }
   };
 
@@ -138,6 +96,31 @@ const InstitutionAdminForm = () => {
       fileInputRefs.current[type].value = "";
     }
   };
+
+  const formSchema = z.object({
+    name: z.string().min(2).max(50),
+    type: z.string().min(2),
+    address: z.string().min(10),
+    city: z.string().min(2),
+    state: z.string().min(2),
+    pincode: z.string().length(6),
+    website: z.string().url().optional(),
+    phone: z.string().min(10),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      type: "",
+      address: "",
+      city: "",
+      state: "",
+      pincode: "",
+      website: "",
+      phone: "",
+    },
+  });
 
   const formatDocumentType = (type: string): string => {
     return type
@@ -308,15 +291,13 @@ const InstitutionAdminForm = () => {
                   accept="image/*,.pdf"
                   onChange={(e) => handleFileChange(e, type)}
                   className="w-full cursor-pointer"
-                  ref={(el) => {
-                    fileInputRefs.current[type] = el;
-                  }}
+                  ref={(el) => (fileInputRefs.current[type] = el)}
                 />
               </div>
               {documents[type]?.preview && (
                 <div className="mt-2 relative">
                   <div className="relative w-full h-40 border rounded-md overflow-hidden">
-                    {documents[type].file?.type.startsWith("image/") ? (
+                    {documents[type]?.file?.type.startsWith("image/") ? (
                       <Image
                         src={documents[type]?.preview}
                         alt={`${type} Preview`}
@@ -332,11 +313,12 @@ const InstitutionAdminForm = () => {
                       </div>
                     )}
                     <Button
-                      type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeDocument(type)}
-                      className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors h-8 w-8"
+                      onClick={() =>
+                        removeDocument(type as InstitutionAdminDocumentsType)
+                      }
+                      className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
                     >
                       <X className="h-4 w-4 text-foreground" />
                     </Button>
