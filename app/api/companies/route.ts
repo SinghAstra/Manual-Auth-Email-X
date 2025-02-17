@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const company = await prisma.company.create({
       data: {
         name: data.name,
-        website: data.website || null,
+        website: data.website,
         address: data.address,
         city: data.city,
         state: data.state,
