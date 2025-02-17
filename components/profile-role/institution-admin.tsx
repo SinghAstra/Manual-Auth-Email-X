@@ -1,347 +1,125 @@
-import { formatDocumentType } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { X } from "lucide-react";
-import Image from "next/image";
-import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { FaSpinner } from "react-icons/fa";
-import { z } from "zod";
-import { Button } from "../ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
-enum InstitutionAdminDocumentsType {
-  INSTITUTION_ID = "INSTITUTION_ID",
-  AUTHORIZATION_LETTER = "AUTHORIZATION_LETTER",
+interface Institution {
+  id: string;
+  name: string;
 }
 
-export interface DocumentFile {
-  file: File | null;
-  preview: string | null;
-  error: string | null;
-}
+const InstitutionAdmin = () => {
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [filteredInstitutions, setFilteredInstitutions] = useState<
+    Institution[]
+  >([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState<string | null>(null);
 
-type InstitutionAdminDocumentsFiles = {
-  [key in InstitutionAdminDocumentsType]?: DocumentFile;
-};
+  const router = useRouter();
+  const params = useParams();
+  const role = params.role as string;
 
-const InstitutionAdminForm = () => {
-  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-  const fileInputRefs = useRef<
-    Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
-  >({
-    [InstitutionAdminDocumentsType.INSTITUTION_ID]: null,
-    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
-  });
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/institutions");
 
-  const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
-    [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
-      file: null,
-      preview: null,
-      error: null,
-    },
-    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
-      file: null,
-      preview: null,
-      error: null,
-    },
-  });
+        if (!response.ok) {
+          throw new Error("Failed to fetch institutions");
+        }
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: InstitutionAdminDocumentsType
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setDocuments((prev) => ({
-        ...prev,
-        [type]: {
-          file,
-          preview: previewUrl,
-          error: null,
-        },
-      }));
-    }
-  };
-
-  const removeDocument = (type: InstitutionAdminDocumentsType) => {
-    const currentPreview = documents[type]?.preview;
-    if (currentPreview) {
-      URL.revokeObjectURL(currentPreview);
-    }
-
-    setDocuments((prev) => ({
-      ...prev,
-      [type]: {
-        file: null,
-        preview: null,
-        error: null,
-      },
-    }));
-
-    if (fileInputRefs.current[type]) {
-      fileInputRefs.current[type].value = "";
-    }
-  };
-
-  const validateDocuments = (): boolean => {
-    let isValid = true;
-
-    Object.values(InstitutionAdminDocumentsType).forEach((type) => {
-      if (!documents[type]?.file) {
-        setDocuments((prev) => ({
-          ...prev,
-          [type]: {
-            file: null,
-            preview: null,
-            error: `${formatDocumentType(type)} is required`,
-          },
-        }));
-        isValid = false;
-      } else {
-        setDocuments((prev) => ({
-          ...prev,
-          [type]: {
-            ...documents[type],
-            error: null,
-          },
-        }));
+        const data = await response.json();
+        setInstitutions(data);
+        setFilteredInstitutions(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
+        setMessage("Error loading institutions. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
-    });
+    };
 
-    return isValid;
+    fetchInstitutions();
+  }, []);
+
+  useEffect(() => {
+    // Filter institutions based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredInstitutions(institutions);
+    } else {
+      const filtered = institutions.filter((institution) =>
+        institution.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredInstitutions(filtered);
+    }
+  }, [searchQuery, institutions]);
+
+  const handleInstitutionSelect = (institutionId: string) => {
+    router.push(`/auth/profile/${role}/${institutionId}/upload-docs`);
   };
 
-  const formSchema = z.object({
-    name: z.string().min(2).max(50),
-    type: z.string().min(2),
-    address: z.string().min(10),
-    city: z.string().min(2),
-    state: z.string().min(2),
-    website: z.string().url().optional(),
-  });
+  const handleCreateInstitution = () => {
+    router.push("/create-institute");
+  };
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      type: "",
-      address: "",
-      city: "",
-      state: "",
-      website: "",
-    },
-  });
-
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-    // Validate documents
-    const isValidDocuments = validateDocuments();
-
-    if (!isValidDocuments) {
-      return;
-    }
-
-    setIsFormSubmitting(true);
-    // Handle form submission
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   return (
-    <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4">
-      <div className="mb-4">
-        <h2 className="text-2xl">Institution Administrator Profile</h2>
-        <span className="text-sm text-muted-foreground">
-          Provide details about your educational institution
-        </span>
-      </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm transition-colors font-normal">
-                  Institution Name
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter institution name" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-6 border">
+      <Input
+        placeholder="Search institutions..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+        className="w-full bg-secondary/50"
+      />
 
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm transition-colors font-normal">
-                  Institution Type
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select institution type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="university">University</SelectItem>
-                    <SelectItem value="college">College</SelectItem>
-                    <SelectItem value="institute">
-                      Technical Institute
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm transition-colors font-normal">
-                  Address
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter complete address" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm transition-colors font-normal">
-                    City
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm transition-colors font-normal">
-                    State
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter state" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <FormField
-            control={form.control}
-            name="website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm transition-colors font-normal">
-                  Website (Optional)
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter institution website" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          {Object.values(InstitutionAdminDocumentsType).map((type) => (
-            <div key={type}>
-              <FormLabel
-                className={`text-sm transition-colors font-normal ${
-                  documents[type] && documents[type].error
-                    ? "text-destructive"
-                    : ""
-                }`}
-              >
-                {formatDocumentType(type)}
-              </FormLabel>
-              <div className="mt-2">
-                <Input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleFileChange(e, type)}
-                  className={`w-full cursor-pointer ${
-                    documents[type] && documents[type].error
-                      ? "border-destructive"
-                      : ""
-                  }`}
-                  ref={(el) => {
-                    fileInputRefs.current[type] = el;
-                  }}
-                />
-              </div>
-              {documents[type]?.preview && (
-                <div className="mt-2 relative">
-                  <div className="relative w-full h-40 border rounded-md overflow-hidden">
-                    {documents[type]?.file?.type.startsWith("image/") ? (
-                      <Image
-                        src={documents[type]?.preview}
-                        alt={`${type} Preview`}
-                        width={320}
-                        height={160}
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <p className="text-sm text-muted-foreground">
-                          PDF Document
-                        </p>
-                      </div>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        removeDocument(type as InstitutionAdminDocumentsType)
-                      }
-                      className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
-                    >
-                      <X className="h-4 w-4 text-foreground" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+      {isLoading ? (
+        <div className="text-center text-sm text-muted-foreground py-4">
+          Loading institutions...
+        </div>
+      ) : message ? (
+        <div className="text-center text-sm text-destructive py-4">
+          {message}
+        </div>
+      ) : filteredInstitutions.length > 0 ? (
+        <div className="max-h-60 overflow-y-auto border border-secondary rounded-md">
+          {filteredInstitutions.map((institution) => (
+            <button
+              key={institution.id}
+              className="w-full text-left px-4 py-2 hover:bg-secondary/70 focus:outline-none focus:bg-secondary/70 transition"
+              onClick={() => handleInstitutionSelect(institution.id)}
+            >
+              {institution.name}
+            </button>
           ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center py-4">
+          <p className="mb-4 text-muted-foreground">No institutions found</p>
+        </div>
+      )}
 
-          <Button type="submit" className="w-full" disabled={isFormSubmitting}>
-            {isFormSubmitting ? (
-              <>
-                <FaSpinner className="animate-spin" /> Wait ....
-              </>
-            ) : (
-              "Submit"
-            )}
+      {!isLoading && !message && filteredInstitutions.length === 0 && (
+        <div className="pt-4">
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={handleCreateInstitution}
+          >
+            Create New Institution
           </Button>
-        </form>
-      </Form>
+        </div>
+      )}
     </div>
   );
 };
 
-export default InstitutionAdminForm;
+export default InstitutionAdmin;

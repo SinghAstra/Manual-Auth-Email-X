@@ -9,44 +9,54 @@ import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import { DocumentFile } from "./institution-admin-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
-enum CompanyRepresentativeDocumentsType {
-  COMPANY_ID = "COMPANY_ID",
-  BUSINESS_CARD = "BUSINESS_CARD",
+enum InstitutionAdminDocumentsType {
+  INSTITUTION_ID = "INSTITUTION_ID",
+  AUTHORIZATION_LETTER = "AUTHORIZATION_LETTER",
 }
 
-type CompanyRepresentativeDocumentsFiles = {
-  [key in CompanyRepresentativeDocumentsType]?: DocumentFile;
+export interface DocumentFile {
+  file: File | null;
+  preview: string | null;
+  error: string | null;
+}
+
+type InstitutionAdminDocumentsFiles = {
+  [key in InstitutionAdminDocumentsType]?: DocumentFile;
 };
 
-const CompanyRepresentativeForm = () => {
+const InstitutionAdminForm = () => {
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-
   const fileInputRefs = useRef<
-    Record<CompanyRepresentativeDocumentsType, HTMLInputElement | null>
+    Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
   >({
-    [CompanyRepresentativeDocumentsType.COMPANY_ID]: null,
-    [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: null,
+    [InstitutionAdminDocumentsType.INSTITUTION_ID]: null,
+    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
   });
 
-  const [documents, setDocuments] =
-    useState<CompanyRepresentativeDocumentsFiles>({
-      [CompanyRepresentativeDocumentsType.COMPANY_ID]: {
-        file: null,
-        preview: null,
-        error: null,
-      },
-      [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: {
-        file: null,
-        preview: null,
-        error: null,
-      },
-    });
+  const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
+    [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
+      file: null,
+      preview: null,
+      error: null,
+    },
+    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
+      file: null,
+      preview: null,
+      error: null,
+    },
+  });
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: CompanyRepresentativeDocumentsType
+    type: InstitutionAdminDocumentsType
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -62,7 +72,7 @@ const CompanyRepresentativeForm = () => {
     }
   };
 
-  const removeDocument = (type: CompanyRepresentativeDocumentsType) => {
+  const removeDocument = (type: InstitutionAdminDocumentsType) => {
     const currentPreview = documents[type]?.preview;
     if (currentPreview) {
       URL.revokeObjectURL(currentPreview);
@@ -85,7 +95,7 @@ const CompanyRepresentativeForm = () => {
   const validateDocuments = (): boolean => {
     let isValid = true;
 
-    Object.values(CompanyRepresentativeDocumentsType).forEach((type) => {
+    Object.values(InstitutionAdminDocumentsType).forEach((type) => {
       if (!documents[type]?.file) {
         setDocuments((prev) => ({
           ...prev,
@@ -107,28 +117,27 @@ const CompanyRepresentativeForm = () => {
       }
     });
 
-    console.log("isValid is ", isValid);
-    console.log("documents is ", documents);
-
     return isValid;
   };
 
   const formSchema = z.object({
-    companyName: z.string().min(2),
-    website: z.union([z.literal(""), z.string().trim().url()]),
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
+    name: z.string().min(2).max(50),
+    type: z.string().min(2),
+    address: z.string().min(10),
+    city: z.string().min(2),
+    state: z.string().min(2),
+    website: z.string().url().optional(),
   });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      companyName: "",
-      website: "",
+      name: "",
+      type: "",
       address: "",
       city: "",
       state: "",
+      website: "",
     },
   });
 
@@ -148,27 +157,57 @@ const CompanyRepresentativeForm = () => {
   return (
     <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4">
       <div className="mb-4">
-        <h2 className="text-2xl">Company Representative Profile</h2>
+        <h2 className="text-2xl">Institution Administrator Profile</h2>
         <span className="text-sm text-muted-foreground">
-          Provide your company and role details
+          Provide details about your educational institution
         </span>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="companyName"
+            name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm transition-colors font-normal">
-                  Company Name
+                  Institution Name
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter company name" {...field} />
+                  <Input placeholder="Enter institution name" {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm transition-colors font-normal">
+                  Institution Type
+                </FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select institution type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="university">University</SelectItem>
+                    <SelectItem value="college">College</SelectItem>
+                    <SelectItem value="institute">
+                      Technical Institute
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="address"
@@ -183,6 +222,7 @@ const CompanyRepresentativeForm = () => {
               </FormItem>
             )}
           />
+
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -228,7 +268,8 @@ const CompanyRepresentativeForm = () => {
               </FormItem>
             )}
           />
-          {Object.values(CompanyRepresentativeDocumentsType).map((type) => (
+
+          {Object.values(InstitutionAdminDocumentsType).map((type) => (
             <div key={type}>
               <FormLabel
                 className={`text-sm transition-colors font-normal ${
@@ -276,9 +317,7 @@ const CompanyRepresentativeForm = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() =>
-                        removeDocument(
-                          type as CompanyRepresentativeDocumentsType
-                        )
+                        removeDocument(type as InstitutionAdminDocumentsType)
                       }
                       className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
                     >
@@ -289,6 +328,7 @@ const CompanyRepresentativeForm = () => {
               )}
             </div>
           ))}
+
           <Button type="submit" className="w-full" disabled={isFormSubmitting}>
             {isFormSubmitting ? (
               <>
@@ -304,4 +344,4 @@ const CompanyRepresentativeForm = () => {
   );
 };
 
-export default CompanyRepresentativeForm;
+export default InstitutionAdminForm;

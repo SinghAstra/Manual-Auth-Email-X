@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/home/navbar";
 import CompanyRepresentativeForm from "@/components/profile-role/comapny-representative";
-import InstitutionAdminForm from "@/components/profile-role/institution-admin";
+import InstitutionAdmin from "@/components/profile-role/institution-admin";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -204,7 +204,7 @@ const ProfileRolePage = () => {
   console.log("parsedRole is ", parsedRole);
 
   const roleComponents: Record<string, React.FC> = {
-    institutionAdmin: InstitutionAdminForm,
+    institutionAdmin: InstitutionAdmin,
     companyRepresentative: CompanyRepresentativeForm,
     student: StudentForm,
     government: GovernmentForm,
