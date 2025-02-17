@@ -1,7 +1,7 @@
 "use client";
 
 import { Navbar } from "@/components/home/navbar";
-import CompanyRepresentativeForm from "@/components/profile-role/comapny-representative";
+import CompanyRepresentativeForm from "@/components/profile-role/comapny-representative-form";
 import InstitutionAdmin from "@/components/profile-role/institution-admin";
 import { Button } from "@/components/ui/button";
 import {
