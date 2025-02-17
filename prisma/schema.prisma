@@ -115,16 +115,14 @@ enum DocumentType {
 model Institution {
   id            String    @id @default(cuid())
   name          String
-  type          String    // University, College, etc.
   address       String
   city          String
   state         String
-  website       String?
+  website       String
 
   // Relations
   admins        InstitutionProfile[]
   students      StudentProfile[]
-  courses       Course[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -174,35 +172,16 @@ model GovernmentProfile {
   user          User      @relation(fields: [userId], references: [id])
 }
 
-model Course {
-  id            String    @id @default(cuid())
-  name          String
-  type          String    // B.Tech, M.Tech, etc.
-  duration      Int       // in years
-  institutionId String
-
-  // Relations
-  institution   Institution     @relation(fields: [institutionId], references: [id])
-  students      StudentProfile[]
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
 model StudentProfile {
   id            String    @id @default(cuid())
   userId        String    @unique
   institutionId String
   enrollmentNo  String
   graduationYear Int
-  skills        String[]
-  courseId      String
-  cgpa          Float?
 
   // Relations
   user          User        @relation(fields: [userId], references: [id])
   institution   Institution @relation(fields: [institutionId], references: [id])
-  course        Course      @relation(fields: [courseId], references: [id])
   placements    PlacementRecord[]
 
   createdAt     DateTime  @default(now())
