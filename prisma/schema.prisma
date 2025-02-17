@@ -110,6 +110,7 @@ enum DocumentType {
   BUSINESS_CARD
   GOVERNMENT_ID
   DEPARTMENT_LETTER
+  STUDENT_ID
 }
 
 model Institution {
@@ -140,7 +141,7 @@ model InstitutionProfile {
 model Company {
   id            String    @id @default(cuid())
   name          String
-  website       String?
+  website       String
   address       String
   city          String
   state         String

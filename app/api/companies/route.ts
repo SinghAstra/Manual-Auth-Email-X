@@ -43,7 +43,7 @@ export async function GET() {
 
 const companySchema = z.object({
   name: z.string().min(2),
-  website: z.string().url().optional(),
+  website: z.string().url(),
   address: z.string().min(5),
   city: z.string().min(2),
   state: z.string().min(2),

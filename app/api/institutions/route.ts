@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
         address: data.address,
         city: data.city,
         state: data.state,
-        website: data.website || null,
+        website: data.website,
       },
     });
 

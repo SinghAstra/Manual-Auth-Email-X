@@ -1,8 +1,8 @@
 "use client";
 
 import { Navbar } from "@/components/home/navbar";
-import CompanyRepresentativeForm from "@/components/profile-role/comapny-representative-form";
-import InstitutionAdmin from "@/components/profile-role/institution-admin";
+import SelectCompany from "@/components/select/company";
+import SelectInstitute from "@/components/select/institute";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -204,8 +204,8 @@ const ProfileRolePage = () => {
   console.log("parsedRole is ", parsedRole);
 
   const roleComponents: Record<string, React.FC> = {
-    institutionAdmin: InstitutionAdmin,
-    companyRepresentative: CompanyRepresentativeForm,
+    institutionAdmin: SelectInstitute,
+    companyRepresentative: SelectCompany,
     student: StudentForm,
     government: GovernmentForm,
   };

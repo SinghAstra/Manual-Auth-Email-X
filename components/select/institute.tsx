@@ -8,7 +8,7 @@ interface Institution {
   name: string;
 }
 
-const InstitutionAdmin = () => {
+const SelectInstitute = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [filteredInstitutions, setFilteredInstitutions] = useState<
     Institution[]
@@ -122,4 +122,4 @@ const InstitutionAdmin = () => {
   );
 };
 
-export default InstitutionAdmin;
+export default SelectInstitute;

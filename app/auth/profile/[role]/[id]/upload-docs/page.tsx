@@ -33,7 +33,7 @@ const UploadDocs = () => {
 
   if (!roleComponents[parsedRole]) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="p-8 bg-secondary/20 border border-border rounded-lg text-center shadow-md">
@@ -53,7 +53,7 @@ const UploadDocs = () => {
   const FormComponent = roleComponents[parsedRole];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background bg-grid-white">
+    <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
       <div className="flex-1 flex items-center justify-center">
         <FormComponent />
