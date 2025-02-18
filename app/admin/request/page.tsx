@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Institution } from "@prisma/client";
-import { Briefcase, Building, Check, Landmark, X } from "lucide-react";
+import { Briefcase, Building, Check, Landmark, Loader2, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 type TabsOptions = "institutions" | "companies" | "government";
@@ -23,7 +23,23 @@ const AdminRequestPage = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [isFetchingInstitutions, setIsFetchingInstitutions] = useState(false);
   const [message, setMessage] = useState<string>();
+  const [processingIds, setProcessingIds] = useState<string[]>();
   const { toast } = useToast();
+
+  const addToProcessing = (id: string) => {
+    if (!processingIds) return;
+    const newProcessingIds = processingIds;
+    newProcessingIds.push(id);
+    setProcessingIds(newProcessingIds);
+  };
+
+  const removeFromProcessing = (id: string) => {
+    if (!processingIds) return;
+    const filteredProcessingIds = processingIds.filter(
+      (itemId) => itemId !== id
+    );
+    setProcessingIds(filteredProcessingIds);
+  };
 
   // Mock data for companies and government
   const companies = [
@@ -112,6 +128,7 @@ const AdminRequestPage = () => {
   const handleApprove = async (id: string, type: TabsOptions) => {
     if (type === ("institution" as TabsOptions)) {
       try {
+        addToProcessing(id);
         const response = await fetch(`/api/institutions/${id}/verify`, {
           method: "PUT",
           headers: {
@@ -133,6 +150,8 @@ const AdminRequestPage = () => {
         }
         setMessage("Internal Server Error --handleApprove");
         // You might want to show an error toast here
+      } finally {
+        removeFromProcessing(id);
       }
     } else {
       console.log(`Approving ${type} with ID: ${id}`);
@@ -143,6 +162,7 @@ const AdminRequestPage = () => {
   const handleReject = async (id: string, type: TabsOptions) => {
     if (type === ("institution" as TabsOptions)) {
       try {
+        addToProcessing(id);
         const response = await fetch(`/api/institutions/${id}/verify`, {
           method: "PUT",
           headers: {
@@ -163,6 +183,8 @@ const AdminRequestPage = () => {
           console.log("error.message is ", error.message);
         }
         setMessage("Internal Server Error --handleReject");
+      } finally {
+        removeFromProcessing(id);
       }
     } else {
       console.log(`Rejecting ${type} with ID: ${id}`);
@@ -208,67 +230,87 @@ const AdminRequestPage = () => {
       );
     }
 
-    return institutions.map((institution) => (
-      <div
-        key={institution.id}
-        className="mb-4 border rounded-md p-4 space-y-4"
-      >
-        <div className="flex flex-row items-start justify-between">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Building className="h-5 w-5" />
-              <span className="text-lg">{institution.name}</span>
+    return institutions.map((institution) => {
+      const isProcessing =
+        processingIds && processingIds.includes(institution.id);
+      return (
+        <div
+          key={institution.id}
+          className="mb-4 border rounded-md p-4 space-y-4"
+        >
+          <div className="flex flex-row items-start justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                <span className="text-lg">{institution.name}</span>
+              </div>
+              <span className="text-muted-foreground text-sm">
+                {institution.address}, {institution.city}, {institution.state}
+              </span>
+              {institution.website && (
+                <a
+                  href={
+                    institution.website.startsWith("http")
+                      ? institution.website
+                      : `https://${institution.website}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary/80 hover:text-primary text-sm"
+                >
+                  {institution.website}
+                </a>
+              )}
             </div>
-            <span className="text-muted-foreground text-sm">
-              {institution.address}, {institution.city}, {institution.state}
-            </span>
-            {institution.website && (
-              <a
-                href={
-                  institution.website.startsWith("http")
-                    ? institution.website
-                    : `https://${institution.website}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary/80 hover:text-primary text-sm"
-              >
-                {institution.website}
-              </a>
-            )}
+            <Badge variant="outline" className="text-muted-foreground">
+              {institution.verificationStatus === "NOT_VERIFIED"
+                ? "Pending"
+                : institution.verificationStatus}
+            </Badge>
           </div>
-          <Badge variant="outline" className="text-muted-foreground">
-            {institution.verificationStatus === "NOT_VERIFIED"
-              ? "Pending"
-              : institution.verificationStatus}
-          </Badge>
-        </div>
-        <div>
-          <div className="flex justify-end gap-2 mt-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10"
-              onClick={() =>
-                handleReject(institution.id, "institution" as TabsOptions)
-              }
-            >
-              <X className="h-4 w-4 mr-1" /> Reject
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-emerald-500 hover:bg-emerald-500/10"
-              onClick={() =>
-                handleApprove(institution.id, "institution" as TabsOptions)
-              }
-            >
-              <Check className="h-4 w-4 mr-1" /> Approve
-            </Button>
+          <div>
+            <div className="flex justify-end gap-2 mt-2">
+              {isProcessing ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled
+                  className="min-w-[146px]"
+                >
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Wait...
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() =>
+                      handleReject(institution.id, "institution" as TabsOptions)
+                    }
+                  >
+                    <X className="h-4 w-4 mr-1" /> Reject
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-emerald-500 hover:bg-emerald-500/10"
+                    onClick={() =>
+                      handleApprove(
+                        institution.id,
+                        "institution" as TabsOptions
+                      )
+                    }
+                  >
+                    <Check className="h-4 w-4 mr-1" /> Approve
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   const renderCompanyCards = () => {
