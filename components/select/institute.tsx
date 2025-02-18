@@ -65,7 +65,7 @@ const SelectInstitute = () => {
   };
 
   const handleNewInstitutionRequest = () => {
-    router.push("/request-institute");
+    router.push("/request/institute");
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

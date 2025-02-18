@@ -26,11 +26,11 @@ const formSchema = z.object({
   website: z.string().url(),
 });
 
-const CreateInstitute = () => {
+const CreateCompany = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const [message, setMessage] = useState<string>();
+  const [message, setMessage] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,17 +46,18 @@ const CreateInstitute = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/institutions", {
+      const response = await fetch("/api/companies", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
       });
+
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Failed to create institution");
+        setMessage(data.message || "Failed to create company");
         return;
       }
 
@@ -78,6 +79,7 @@ const CreateInstitute = () => {
     toast({
       title: message,
     });
+    setMessage(null);
   }, [message, toast]);
 
   return (
@@ -85,9 +87,9 @@ const CreateInstitute = () => {
       <Navbar />
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
-          <h2 className="text-2xl">Institution Profile</h2>
+          <h2 className="text-2xl">Company Profile</h2>
           <span className="text-sm text-muted-foreground">
-            Provide details about your educational institution
+            Provide details about your company
           </span>
         </div>
         <Form {...form}>
@@ -98,10 +100,10 @@ const CreateInstitute = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm transition-colors font-normal">
-                    Institution Name
+                    Company Name
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter institution name" {...field} />
+                    <Input placeholder="Enter company name" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -116,7 +118,7 @@ const CreateInstitute = () => {
                     Address
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter institution address" {...field} />
+                    <Input placeholder="Enter company address" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -161,7 +163,7 @@ const CreateInstitute = () => {
                     Website (Optional)
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.edu" {...field} />
+                    <Input placeholder="https://example.com" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -173,7 +175,7 @@ const CreateInstitute = () => {
                   <FaSpinner className="animate-spin" /> Submitting Request...
                 </>
               ) : (
-                "Request New Institution"
+                "Create Company"
               )}
             </Button>
           </form>
@@ -183,4 +185,4 @@ const CreateInstitute = () => {
   );
 };
 
-export default CreateInstitute;
+export default CreateCompany;

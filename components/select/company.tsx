@@ -62,8 +62,8 @@ const SelectCompany = () => {
     router.push(`/auth/profile/${role}/${companyId}/upload-docs`);
   };
 
-  const handleCreateCompany = () => {
-    router.push("/create-company");
+  const handleNewCompanyRequest = () => {
+    router.push("/request/company");
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,9 +111,9 @@ const SelectCompany = () => {
           <Button
             className="w-full"
             variant="outline"
-            onClick={handleCreateCompany}
+            onClick={handleNewCompanyRequest}
           >
-            Create New Company
+            Request New Company
           </Button>
         </div>
       )}

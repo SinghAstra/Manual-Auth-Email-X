@@ -1,10 +1,11 @@
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/utils/prisma";
+import { VerificationStatus } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Get the session to check if user is authenticated
     const session = await getServerSession(authOptions);
@@ -13,17 +14,30 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch all companies
+    // Get verification status from query parameters
+    const url = new URL(request.url);
+    const verificationStatus =
+      (url.searchParams.get("verificationStatus") as VerificationStatus) ||
+      "VERIFIED";
+
+    // Prepare select options
+    const select = {
+      id: true,
+      name: true,
+      website: true,
+      address: true,
+      city: true,
+      state: true,
+      verificationStatus: true,
+      createdAt: true,
+      updatedAt: true,
+    };
+
+    // Fetch companies based on query
     const companies = await prisma.company.findMany({
-      select: {
-        id: true,
-        name: true,
-        website: true,
-        address: true,
-        city: true,
-        state: true,
-        createdAt: true,
-        updatedAt: true,
+      select,
+      where: {
+        verificationStatus,
       },
     });
 
@@ -64,20 +78,50 @@ export async function POST(req: NextRequest) {
     // Check if user has appropriate role
     const user = await prisma.user.findUnique({
       where: { id: session.user.id as string },
+      select: { id: true, role: true },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { message: "Not authorized to create companies" },
-        { status: 403 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Parse and validate the request body
     const body = await req.json();
     const data = companySchema.parse(body);
 
-    // Create the company
+    // Check if company already exists
+    const existingCompany = await prisma.company.findFirst({
+      where: { name: data.name },
+    });
+
+    if (existingCompany) {
+      // Handle existing company
+      if (user.role === "SUPER_ADMIN") {
+        // Super admin can update existing company
+        const updatedCompany = await prisma.company.update({
+          where: { id: existingCompany.id },
+          data: {
+            name: data.name,
+            website: data.website,
+            address: data.address,
+            city: data.city,
+            state: data.state,
+            verificationStatus: "VERIFIED",
+          },
+        });
+        return NextResponse.json(updatedCompany, { status: 200 });
+      } else {
+        // Other roles can't modify existing companies
+        return NextResponse.json(
+          { message: "Request already made for this company" },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Create new company with status based on user role
+    const status = user.role === "SUPER_ADMIN" ? "VERIFIED" : "NOT_VERIFIED";
+
     const company = await prisma.company.create({
       data: {
         name: data.name,
@@ -85,6 +129,7 @@ export async function POST(req: NextRequest) {
         address: data.address,
         city: data.city,
         state: data.state,
+        verificationStatus: status,
       },
     });
 

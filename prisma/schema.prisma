@@ -151,6 +151,8 @@ model Company {
   address       String
   city          String
   state         String
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
+
 
   // Relations
   representatives CompanyProfile[]
