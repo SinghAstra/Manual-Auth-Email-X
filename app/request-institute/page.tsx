@@ -53,15 +53,14 @@ const CreateInstitute = () => {
         },
         body: JSON.stringify(values),
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        setMessage("Failed to create institution");
+        setMessage(data.message || "Failed to create institution");
         return;
       }
 
-      const data = await response.json();
-
-      setMessage(data.message || "Institution created successfully");
+      setMessage(data.message || "Request Submitted successfully.");
       router.push(`/auth/profile-setup`);
     } catch (error) {
       if (error instanceof Error) {
@@ -82,9 +81,9 @@ const CreateInstitute = () => {
   }, [message, toast]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
-      <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto">
+      <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
           <h2 className="text-2xl">Institution Profile</h2>
           <span className="text-sm text-muted-foreground">
@@ -171,10 +170,10 @@ const CreateInstitute = () => {
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (
                 <>
-                  <FaSpinner className="animate-spin" /> Creating...
+                  <FaSpinner className="animate-spin" /> Submitting Request...
                 </>
               ) : (
-                "Create Institution"
+                "Request New Institution"
               )}
             </Button>
           </form>

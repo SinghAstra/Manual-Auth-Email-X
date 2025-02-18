@@ -9,35 +9,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { Institution } from "@prisma/client";
 import { Briefcase, Building, Check, Landmark, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+type TabsOptions = "institutions" | "companies" | "government";
 
 const AdminRequestPage = () => {
   const [activeTab, setActiveTab] = useState("institutions");
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [isFetchingInstitutions, setIsFetchingInstitutions] = useState(false);
+  const [message, setMessage] = useState<string>();
+  const { toast } = useToast();
 
-  // Mock data - in a real app, you would fetch this from your API
-  const institutions = [
-    {
-      id: "1",
-      name: "University of Technology",
-      address: "123 Tech Avenue, San Francisco, CA",
-      verificationStatus: "NOT_VERIFIED",
-    },
-    {
-      id: "2",
-      name: "State College",
-      address: "456 Education Lane, Boston, MA",
-      verificationStatus: "NOT_VERIFIED",
-    },
-    {
-      id: "3",
-      name: "Innovation Institute",
-      address: "789 Research Road, Austin, TX",
-      verificationStatus: "NOT_VERIFIED",
-    },
-  ];
-
+  // Mock data for companies and government
   const companies = [
     {
       id: "1",
@@ -86,45 +74,184 @@ const AdminRequestPage = () => {
     },
   ];
 
-  const handleApprove = (id, type) => {
-    console.log(`Approving ${type} with ID: ${id}`);
-    // Implement your approval logic here
+  useEffect(() => {
+    const fetchUnverifiedInstitutions = async () => {
+      if (activeTab !== "institutions") return;
+
+      try {
+        setIsFetchingInstitutions(true);
+        const response = await fetch(
+          "/api/institutions?verificationStatus=NOT_VERIFIED"
+        );
+        if (!response.ok) {
+          setMessage("Failed to fetch institutions");
+        }
+        const data = await response.json();
+        setInstitutions(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
+        setMessage("Internal Server Error");
+      } finally {
+        setIsFetchingInstitutions(false);
+      }
+    };
+
+    fetchUnverifiedInstitutions();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+  }, [toast, message]);
+
+  const handleApprove = async (id: string, type: TabsOptions) => {
+    if (type === ("institution" as TabsOptions)) {
+      try {
+        const response = await fetch(`/api/institutions/${id}/verify`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ verificationStatus: "VERIFIED" }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setMessage(data.message || "Failed to approve institution");
+        }
+
+        // Remove the approved institution from the list
+        setInstitutions(institutions.filter((inst) => inst.id !== id));
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
+        setMessage("Internal Server Error --handleApprove");
+        // You might want to show an error toast here
+      }
+    } else {
+      console.log(`Approving ${type} with ID: ${id}`);
+      // Implement approval logic for other entity types here
+    }
   };
 
-  const handleReject = (id, type) => {
-    console.log(`Rejecting ${type} with ID: ${id}`);
-    // Implement your rejection logic here
+  const handleReject = async (id: string, type: TabsOptions) => {
+    if (type === ("institution" as TabsOptions)) {
+      try {
+        const response = await fetch(`/api/institutions/${id}/verify`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ verificationStatus: "REJECTED" }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setMessage(data.message || "Failed to reject institution");
+        }
+
+        // Remove the rejected institution from the list
+        setInstitutions(institutions.filter((inst) => inst.id !== id));
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
+        setMessage("Internal Server Error --handleReject");
+      }
+    } else {
+      console.log(`Rejecting ${type} with ID: ${id}`);
+      // Implement rejection logic for other entity types here
+    }
   };
 
   const renderInstitutionCards = () => {
+    if (isFetchingInstitutions) {
+      return Array(3)
+        .fill(0)
+        .map((_, index) => (
+          <div key={index} className="mb-4 border rounded-md p-4 space-y-4">
+            <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-6 w-40" />
+                </div>
+                <Skeleton className="h-4 w-72" />
+              </div>
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <div>
+              <div className="flex justify-end gap-2 mt-2">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-32" />
+              </div>
+            </div>
+          </div>
+        ));
+    }
+
+    if (institutions.length === 0) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-10">
+            <p className="text-muted-foreground text-center">
+              No pending institution verification requests.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
     return institutions.map((institution) => (
-      <Card key={institution.id} className="mb-4">
-        <CardHeader className="flex flex-row items-start justify-between">
-          <div>
+      <div
+        key={institution.id}
+        className="mb-4 border rounded-md p-4 space-y-4"
+      >
+        <div className="flex flex-row items-start justify-between">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <Building className="h-5 w-5" />
-              <CardTitle className="text-lg">{institution.name}</CardTitle>
+              <span className="text-lg">{institution.name}</span>
             </div>
-            <CardDescription className="mt-1">
-              {institution.address}
-            </CardDescription>
+            <span className="text-muted-foreground text-sm">
+              {institution.address}, {institution.city}, {institution.state}
+            </span>
+            {institution.website && (
+              <a
+                href={
+                  institution.website.startsWith("http")
+                    ? institution.website
+                    : `https://${institution.website}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary/80 hover:text-primary text-sm"
+              >
+                {institution.website}
+              </a>
+            )}
           </div>
-          <Badge
-            variant="outline"
-            className="bg-secondary text-secondary-foreground"
-          >
+          <Badge variant="outline" className="text-muted-foreground">
             {institution.verificationStatus === "NOT_VERIFIED"
-              ? "Pending Verification"
+              ? "Pending"
               : institution.verificationStatus}
           </Badge>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div>
           <div className="flex justify-end gap-2 mt-2">
             <Button
               variant="outline"
               size="sm"
               className="text-destructive hover:bg-destructive/10"
-              onClick={() => handleReject(institution.id, "institution")}
+              onClick={() =>
+                handleReject(institution.id, "institution" as TabsOptions)
+              }
             >
               <X className="h-4 w-4 mr-1" /> Reject
             </Button>
@@ -132,13 +259,15 @@ const AdminRequestPage = () => {
               variant="outline"
               size="sm"
               className="text-emerald-500 hover:bg-emerald-500/10"
-              onClick={() => handleApprove(institution.id, "institution")}
+              onClick={() =>
+                handleApprove(institution.id, "institution" as TabsOptions)
+              }
             >
               <Check className="h-4 w-4 mr-1" /> Approve
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     ));
   };
 
@@ -179,7 +308,7 @@ const AdminRequestPage = () => {
               variant="outline"
               size="sm"
               className="text-destructive hover:bg-destructive/10"
-              onClick={() => handleReject(company.id, "company")}
+              onClick={() => handleReject(company.id, "companies")}
             >
               <X className="h-4 w-4 mr-1" /> Reject
             </Button>
@@ -187,7 +316,7 @@ const AdminRequestPage = () => {
               variant="outline"
               size="sm"
               className="text-emerald-500 hover:bg-emerald-500/10"
-              onClick={() => handleApprove(company.id, "company")}
+              onClick={() => handleApprove(company.id, "companies")}
             >
               <Check className="h-4 w-4 mr-1" /> Approve
             </Button>
@@ -244,9 +373,9 @@ const AdminRequestPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
+    <div className="container mx-auto py-8 px-4 max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Verification Requests</h1>
+        <h1 className="text-3xl mb-2">Verification Requests</h1>
         <p className="text-muted-foreground">
           Review and approve verification requests from institutions, companies,
           and government entities.
@@ -272,51 +401,15 @@ const AdminRequestPage = () => {
         </TabsList>
 
         <TabsContent value="institutions" className="mt-0">
-          <div className="space-y-4">
-            {institutions.length > 0 ? (
-              renderInstitutionCards()
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <p className="text-muted-foreground text-center">
-                    No pending institution verification requests.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <div className="space-y-4">{renderInstitutionCards()}</div>
         </TabsContent>
 
         <TabsContent value="companies" className="mt-0">
-          <div className="space-y-4">
-            {companies.length > 0 ? (
-              renderCompanyCards()
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <p className="text-muted-foreground text-center">
-                    No pending company verification requests.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <div className="space-y-4">{renderCompanyCards()}</div>
         </TabsContent>
 
         <TabsContent value="government" className="mt-0">
-          <div className="space-y-4">
-            {government.length > 0 ? (
-              renderGovernmentCards()
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <p className="text-muted-foreground text-center">
-                    No pending government verification requests.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <div className="space-y-4">{renderGovernmentCards()}</div>
         </TabsContent>
       </Tabs>
     </div>
