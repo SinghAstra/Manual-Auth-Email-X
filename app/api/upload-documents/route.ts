@@ -22,8 +22,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Check if the user's verification status is already applied
-    if (user.verificationStatus !== "NOT_APPLIED") {
+    // Allow uploads for users who have never applied or have been rejected
+    if (
+      user.verificationStatus !== "NOT_APPLIED" &&
+      user.verificationStatus !== "REJECTED"
+    ) {
       return NextResponse.json(
         {
           message: `Verification already ${user.verificationStatus.toLowerCase()}`,
@@ -43,9 +46,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Determine required document types based on the role
-    // const requiredDocTypes = getRequiredDocumentTypes(role as Role);
 
     // Check if all required documents are provided
     const fileEntries: [string, File][] = [];
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     for (const [fieldName, file] of fileEntries) {
       // Validate document type
       const docType = formData.get(`${fieldName}_type`) as string | null;
+      console.log("docType is ", docType);
       if (
         !docType ||
         !Object.values(DocumentType).includes(docType as DocumentType)
@@ -108,7 +109,10 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error uploading documents:", error);
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
     return NextResponse.json(
       { message: "Error uploading documents", error },
       { status: 500 }
@@ -116,115 +120,99 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to determine required document types based on role
-// function getRequiredDocumentTypes(role: Role): DocumentType[] {
-//   switch (role) {
-//     case "INSTITUTION_ADMIN":
-//       return [DocumentType.INSTITUTION_ID, DocumentType.AUTHORIZATION_LETTER];
-//     case "COMPANY_REPRESENTATIVE":
-//       return [DocumentType.COMPANY_ID, DocumentType.BUSINESS_CARD];
-//     case "STUDENT":
-//       return [DocumentType.STUDENT_ID];
-//     case "GOVERNMENT":
-//       return [DocumentType.GOVERNMENT_ID, DocumentType.DEPARTMENT_LETTER];
-//     default:
-//       return [];
-//   }
-// }
-
 // // Helper function to create the appropriate profile based on role
-// async function createProfileBasedOnRole(
-//   userId: string,
-//   role: Role,
-//   formData: FormData
-// ): Promise<void> {
-//   switch (role) {
-//     case "INSTITUTION_ADMIN":
-//       // Create or find institution and link to admin
-//       const institutionId = formData.get("institutionId") as string | null;
-//       if (institutionId) {
-//         await prisma.institutionProfile.create({
-//           data: {
-//             userId,
-//             institutionId,
-//           },
-//         });
-//       } else {
-//         const institution = await prisma.institution.create({
-//           data: {
-//             name: formData.get("institutionName") as string,
-//             address: formData.get("institutionAddress") as string,
-//             city: formData.get("institutionCity") as string,
-//             state: formData.get("institutionState") as string,
-//             website: formData.get("institutionWebsite") as string,
-//           },
-//         });
+async function createProfileBasedOnRole(
+  userId: string,
+  role: Role,
+  formData: FormData
+): Promise<void> {
+  switch (role) {
+    case "INSTITUTION_ADMIN":
+      // Create or find institution and link to admin
+      const institutionId = formData.get("institutionId") as string | null;
+      if (institutionId) {
+        await prisma.institutionProfile.create({
+          data: {
+            userId,
+            institutionId,
+          },
+        });
+      } else {
+        const institution = await prisma.institution.create({
+          data: {
+            name: formData.get("institutionName") as string,
+            address: formData.get("institutionAddress") as string,
+            city: formData.get("institutionCity") as string,
+            state: formData.get("institutionState") as string,
+            website: formData.get("institutionWebsite") as string,
+          },
+        });
 
-//         await prisma.institutionProfile.create({
-//           data: {
-//             userId,
-//             institutionId: institution.id,
-//           },
-//         });
-//       }
-//       break;
+        await prisma.institutionProfile.create({
+          data: {
+            userId,
+            institutionId: institution.id,
+          },
+        });
+      }
+      break;
 
-//     case "COMPANY_REPRESENTATIVE":
-//       // Create or find company and link to representative
-//       const companyId = formData.get("companyId") as string | null;
-//       if (companyId) {
-//         await prisma.companyProfile.create({
-//           data: {
-//             userId,
-//             companyId,
-//           },
-//         });
-//       } else {
-//         const company = await prisma.company.create({
-//           data: {
-//             name: formData.get("companyName") as string,
-//             website: formData.get("companyWebsite") as string,
-//             address: formData.get("companyAddress") as string,
-//             city: formData.get("companyCity") as string,
-//             state: formData.get("companyState") as string,
-//           },
-//         });
+    case "COMPANY_REPRESENTATIVE":
+      // Create or find company and link to representative
+      const companyId = formData.get("companyId") as string | null;
+      if (companyId) {
+        await prisma.companyProfile.create({
+          data: {
+            userId,
+            companyId,
+          },
+        });
+      } else {
+        const company = await prisma.company.create({
+          data: {
+            name: formData.get("companyName") as string,
+            website: formData.get("companyWebsite") as string,
+            address: formData.get("companyAddress") as string,
+            city: formData.get("companyCity") as string,
+            state: formData.get("companyState") as string,
+          },
+        });
 
-//         await prisma.companyProfile.create({
-//           data: {
-//             userId,
-//             companyId: company.id,
-//           },
-//         });
-//       }
-//       break;
+        await prisma.companyProfile.create({
+          data: {
+            userId,
+            companyId: company.id,
+          },
+        });
+      }
+      break;
 
-//     case "STUDENT":
-//       await prisma.studentProfile.create({
-//         data: {
-//           userId,
-//           institutionId: formData.get("institutionId") as string,
-//           enrollmentNo: formData.get("enrollmentNo") as string,
-//           graduationYear: parseInt(
-//             formData.get("graduationYear") as string,
-//             10
-//           ),
-//         },
-//       });
-//       break;
+    case "STUDENT":
+      await prisma.studentProfile.create({
+        data: {
+          userId,
+          institutionId: formData.get("institutionId") as string,
+          enrollmentNo: formData.get("enrollmentNo") as string,
+          graduationYear: parseInt(
+            formData.get("graduationYear") as string,
+            10
+          ),
+        },
+      });
+      break;
 
-//     case "GOVERNMENT":
-//       await prisma.governmentProfile.create({
-//         data: {
-//           userId,
-//           department: formData.get("department") as string,
-//           designation: formData.get("designation") as string,
-//           jurisdiction: formData.get("jurisdiction") as string,
-//         },
-//       });
-//       break;
+    case "GOVERNMENT":
+      await prisma.governmentProfile.create({
+        data: {
+          userId,
+          department: formData.get("department") as string,
+          designation: formData.get("designation") as string,
+          jurisdiction: formData.get("jurisdiction") as string,
+        },
+      });
+      break;
 
-//     default:
-//       break;
-//   }
-// }
+    default:
+      break;
+  }
+}

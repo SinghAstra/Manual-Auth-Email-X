@@ -33,7 +33,7 @@ const UploadDocs = () => {
 
   if (!roleComponents[parsedRole]) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-grid-white">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="p-8 bg-secondary/20 border border-border rounded-lg text-center shadow-md">

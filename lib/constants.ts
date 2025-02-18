@@ -5,7 +5,7 @@ type DashboardRoutesType = {
 };
 
 export const dashboardRoutes: DashboardRoutesType = {
-  SUPER_ADMIN: "/admin/dashboard",
+  SUPER_ADMIN: "/admin",
   INSTITUTION_ADMIN: "/institution/dashboard",
   COMPANY_REPRESENTATIVE: "/company/dashboard",
   STUDENT: "/student/dashboard",

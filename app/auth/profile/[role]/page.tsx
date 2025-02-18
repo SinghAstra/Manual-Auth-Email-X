@@ -33,88 +33,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-const StudentForm = () => {
-  const formSchema = z.object({
-    enrollmentNo: z.string(),
-    institutionId: z.string(),
-    courseId: z.string(),
-    graduationYear: z.number().min(2024).max(2030),
-    cgpa: z.number().min(0).max(10).optional(),
-    skills: z.string(),
-  });
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      enrollmentNo: "",
-      institutionId: "",
-      courseId: "",
-      graduationYear: 2024,
-      cgpa: undefined,
-      skills: "",
-    },
-  });
-
-  return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Student Profile</CardTitle>
-        <CardDescription>Complete your academic profile</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form className="space-y-4">
-            <FormField
-              control={form.control}
-              name="enrollmentNo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Enrollment Number</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="graduationYear"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Graduation Year</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cgpa"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CGPA</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-};
-
 const GovernmentForm = () => {
   const formSchema = z.object({
     department: z.string(),
@@ -206,7 +124,7 @@ const ProfileRolePage = () => {
   const roleComponents: Record<string, React.FC> = {
     institutionAdmin: SelectInstitute,
     companyRepresentative: SelectCompany,
-    student: StudentForm,
+    student: SelectInstitute,
     government: GovernmentForm,
   };
   if (!roleComponents[parsedRole]) {
@@ -215,7 +133,7 @@ const ProfileRolePage = () => {
   const FormComponent = roleComponents[parsedRole];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
       <div className="flex-1 flex items-center justify-center">
         <FormComponent />

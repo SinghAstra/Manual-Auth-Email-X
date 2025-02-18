@@ -16,7 +16,7 @@ model User {
   name          String?
   image         String?
   role          Role      @default(UNVERIFIED)
-  verificationStatus VerificationStatus @default(NOT_APPLIED)
+  verificationStatus UserVerificationStatus @default(NOT_APPLIED)
   feedback     String?
 
   // Auth Relationships
@@ -82,11 +82,16 @@ enum Role {
   GOVERNMENT
 }
 
-enum VerificationStatus {
+enum UserVerificationStatus {
   NOT_APPLIED
   PENDING
   APPROVED
   REJECTED
+}
+
+enum VerificationStatus {
+  NOT_VERIFIED
+  VERIFIED
 }
 
 model Document {
@@ -120,6 +125,7 @@ model Institution {
   city          String
   state         String
   website       String
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
 
   // Relations
   admins        InstitutionProfile[]
@@ -198,7 +204,7 @@ model PlacementRecord {
   joiningDate     DateTime?
   offerLetterUrl  String?
   status          PlacementStatus @default(IN_PROCESS)
-  verificationStatus VerificationStatus @default(PENDING)
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
   verificationFeedback String?
 
   // Relations

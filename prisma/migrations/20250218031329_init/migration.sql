@@ -2,10 +2,13 @@
 CREATE TYPE "Role" AS ENUM ('UNVERIFIED', 'SUPER_ADMIN', 'INSTITUTION_ADMIN', 'COMPANY_REPRESENTATIVE', 'STUDENT', 'GOVERNMENT');
 
 -- CreateEnum
-CREATE TYPE "VerificationStatus" AS ENUM ('NOT_APPLIED', 'PENDING', 'APPROVED', 'REJECTED');
+CREATE TYPE "UserVerificationStatus" AS ENUM ('NOT_APPLIED', 'PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "DocumentType" AS ENUM ('INSTITUTION_ID', 'AUTHORIZATION_LETTER', 'COMPANY_ID', 'BUSINESS_CARD', 'GOVERNMENT_ID', 'DEPARTMENT_LETTER');
+CREATE TYPE "VerificationStatus" AS ENUM ('NOT_VERIFIED', 'VERIFIED');
+
+-- CreateEnum
+CREATE TYPE "DocumentType" AS ENUM ('INSTITUTION_ID', 'AUTHORIZATION_LETTER', 'COMPANY_ID', 'BUSINESS_CARD', 'GOVERNMENT_ID', 'DEPARTMENT_LETTER', 'STUDENT_ID');
 
 -- CreateEnum
 CREATE TYPE "PlacementStatus" AS ENUM ('PLACED', 'UNPLACED', 'IN_PROCESS');
@@ -18,7 +21,7 @@ CREATE TABLE "User" (
     "name" TEXT,
     "image" TEXT,
     "role" "Role" NOT NULL DEFAULT 'UNVERIFIED',
-    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_APPLIED',
+    "verificationStatus" "UserVerificationStatus" NOT NULL DEFAULT 'NOT_APPLIED',
     "feedback" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -77,13 +80,11 @@ CREATE TABLE "Document" (
 CREATE TABLE "Institution" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "state" TEXT NOT NULL,
-    "pincode" TEXT NOT NULL,
-    "website" TEXT,
-    "phone" TEXT NOT NULL,
+    "website" TEXT NOT NULL,
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_VERIFIED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -103,13 +104,10 @@ CREATE TABLE "InstitutionProfile" (
 CREATE TABLE "Company" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "industry" TEXT NOT NULL,
-    "description" TEXT,
-    "website" TEXT,
+    "website" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "state" TEXT NOT NULL,
-    "pincode" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -121,8 +119,6 @@ CREATE TABLE "CompanyProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "companyId" TEXT NOT NULL,
-    "designation" TEXT NOT NULL,
-    "department" TEXT,
 
     CONSTRAINT "CompanyProfile_pkey" PRIMARY KEY ("id")
 );
@@ -139,28 +135,12 @@ CREATE TABLE "GovernmentProfile" (
 );
 
 -- CreateTable
-CREATE TABLE "Course" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
-    "duration" INTEGER NOT NULL,
-    "institutionId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "StudentProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "institutionId" TEXT NOT NULL,
     "enrollmentNo" TEXT NOT NULL,
     "graduationYear" INTEGER NOT NULL,
-    "skills" TEXT[],
-    "courseId" TEXT NOT NULL,
-    "cgpa" DOUBLE PRECISION,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -177,7 +157,7 @@ CREATE TABLE "PlacementRecord" (
     "joiningDate" TIMESTAMP(3),
     "offerLetterUrl" TEXT,
     "status" "PlacementStatus" NOT NULL DEFAULT 'IN_PROCESS',
-    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_VERIFIED',
     "verificationFeedback" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -237,16 +217,10 @@ ALTER TABLE "CompanyProfile" ADD CONSTRAINT "CompanyProfile_companyId_fkey" FORE
 ALTER TABLE "GovernmentProfile" ADD CONSTRAINT "GovernmentProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Course" ADD CONSTRAINT "Course_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "Institution"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "StudentProfile" ADD CONSTRAINT "StudentProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StudentProfile" ADD CONSTRAINT "StudentProfile_institutionId_fkey" FOREIGN KEY ("institutionId") REFERENCES "Institution"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "StudentProfile" ADD CONSTRAINT "StudentProfile_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PlacementRecord" ADD CONSTRAINT "PlacementRecord_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "StudentProfile"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

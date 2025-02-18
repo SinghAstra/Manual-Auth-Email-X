@@ -64,8 +64,8 @@ const SelectInstitute = () => {
     router.push(`/auth/profile/${role}/${institutionId}/upload-docs`);
   };
 
-  const handleCreateInstitution = () => {
-    router.push("/create-institute");
+  const handleNewInstitutionRequest = () => {
+    router.push("/request-institute");
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,12 +73,13 @@ const SelectInstitute = () => {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-6 border">
+    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-4 border bg-background">
+      <h2 className="text-2xl">Search For Institution</h2>
       <Input
         placeholder="Search institutions..."
         value={searchQuery}
         onChange={handleSearchChange}
-        className="w-full bg-secondary/50"
+        className="w-full"
       />
 
       {isLoading ? (
@@ -112,9 +113,9 @@ const SelectInstitute = () => {
           <Button
             className="w-full"
             variant="outline"
-            onClick={handleCreateInstitution}
+            onClick={handleNewInstitutionRequest}
           >
-            Create New Institution
+            Request New Institute
           </Button>
         </div>
       )}

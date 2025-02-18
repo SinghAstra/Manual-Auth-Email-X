@@ -59,7 +59,9 @@ const CreateInstitute = () => {
         return;
       }
 
-      setMessage("Institution created successfully");
+      const data = await response.json();
+
+      setMessage(data.message || "Institution created successfully");
       router.push(`/auth/profile-setup`);
     } catch (error) {
       if (error instanceof Error) {

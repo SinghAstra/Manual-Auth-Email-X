@@ -1,6 +1,5 @@
 "use client";
 import { Navbar } from "@/components/home/navbar";
-import { dashboardRoutes } from "@/lib/constants";
 import { Role } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -9,21 +8,21 @@ import React from "react";
 const ProfileSetup = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const user = session?.user;
+  // const user = session?.user;
 
   if (status === "loading") {
     return <span className="mt-32 mx-auto">Loading...</span>;
   }
 
-  if (user?.verificationStatus === "PENDING") {
-    router.push("/auth/verification-pending");
-    return null;
-  }
+  // if (user?.verificationStatus === "PENDING") {
+  //   router.push("/auth/verification-pending");
+  //   return null;
+  // }
 
-  if (user?.verificationStatus === "APPROVED") {
-    router.push(dashboardRoutes[user.role]);
-    return null;
-  }
+  // if (user?.verificationStatus === "APPROVED") {
+  //   router.push(dashboardRoutes[user.role]);
+  //   return null;
+  // }
 
   // if verification Status is rejected just show a modal with reason
   // if (user?.verificationStatus === 'REJECTED') {
@@ -71,10 +70,10 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
       <div className="mt-8 flex items-center justify-center">
-        <div className="max-w-2xl p-4 border rounded-md ">
+        <div className="max-w-2xl p-4 border rounded-md bg-background">
           <h2 className="text-2xl">Complete Your Profile</h2>
           <span className="text-muted-foreground">
             Select your role to begin the verification process

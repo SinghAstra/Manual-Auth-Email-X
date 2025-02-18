@@ -71,12 +71,13 @@ const SelectCompany = () => {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-6 border">
+    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-6 border bg-background">
+      <h2 className="text-2xl">Search For Company</h2>
       <Input
         placeholder="Search companies..."
         value={searchQuery}
         onChange={handleSearchChange}
-        className="w-full bg-secondary/50"
+        className="w-full"
       />
 
       {isLoading ? (

@@ -3,12 +3,13 @@
 import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
+import { dashboardRoutes } from "@/lib/constants";
 import { Code2, FileSearch, Lightbulb } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const features = [
   {
@@ -33,17 +34,14 @@ const features = [
 
 export default function SignIn() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/auth/profile-setup";
-
-  console.log("callbackUrl is ", callbackUrl);
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   const handleGoogleSignIn = async () => {
     try {
       setIsGoogleLoading(true);
       await signIn("google", {
-        callbackUrl,
-        redirect: true,
+        redirect: false,
       });
     } catch (error) {
       console.error("GitHub Sign-In Error:", error);
@@ -52,12 +50,26 @@ export default function SignIn() {
     }
   };
 
-  console.log("Testing Purpose.");
+  // Handle redirects based on verification status when session loads
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      const user = session.user;
+
+      if (user.verificationStatus === "PENDING") {
+        router.push("/auth/verification-pending");
+      } else if (user.verificationStatus === "APPROVED") {
+        router.push(dashboardRoutes[user.role]);
+      } else {
+        // For NEW or REJECTED, go to profile setup
+        router.push("/auth/profile-setup");
+      }
+    }
+  }, [session, status, router]);
 
   return (
     <div className="flex min-h-screen overflow-hidden">
       {/* Left Panel - Info Section */}
-      <div className="hidden lg:flex lg:w-3/5 z-20 bg-card bg-grid-white">
+      <div className="hidden lg:flex lg:w-3/5 z-20 bg-card">
         <div className="w-full  flex flex-col justify-between">
           <div className="backdrop-blur-md p-6">
             <Link href="/">
