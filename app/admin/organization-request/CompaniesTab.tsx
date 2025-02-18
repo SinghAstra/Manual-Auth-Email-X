@@ -30,6 +30,7 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [processingIds, setProcessingIds] = useState<string[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -41,25 +42,33 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
         const response = await fetch(
           "/api/companies?verificationStatus=NOT_VERIFIED"
         );
+        const data = await response.json();
         if (!response.ok) {
-          toast({ title: "Failed to fetch companies" });
+          setMessage(data.message || "Failed to fetch companies");
           return;
         }
-        const data = await response.json();
         setCompanies(data);
       } catch (error) {
         if (error instanceof Error) {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        toast({ title: "Internal Server Error" });
+        setMessage("Internal Server Error");
       } finally {
         setIsFetching(false);
       }
     };
 
     fetchUnverifiedCompanies();
-  }, [active, toast]);
+  }, [active]);
+
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+    setMessage(null);
+  }, [message, toast]);
 
   const addToProcessing = (id: string) => {
     setProcessingIds((prev) => [...prev, id]);
@@ -77,19 +86,19 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        toast({ title: data.message || "Failed to approve company" });
+        setMessage(data.message || "Failed to approve company");
         return;
       }
 
       // Remove the approved company from the list
       setCompanies(companies.filter((company) => company.id !== id));
-      toast({ title: "Company approved successfully" });
+      setMessage("Company approved successfully");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      toast({ title: "Failed to approve company" });
+      setMessage("Internal Server Error --handleApprove");
     }
   };
 
@@ -105,19 +114,19 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        toast({ title: data.message || "Failed to reject company" });
+        setMessage(data.message || "Failed to reject company");
         return;
       }
 
       // Remove the rejected company from the list
       setCompanies(companies.filter((company) => company.id !== id));
-      toast({ title: "Company rejected successfully" });
+      setMessage("Company rejected successfully");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      toast({ title: "Failed to reject company" });
+      setMessage("Internal Server Error --handleReject");
     }
   };
 

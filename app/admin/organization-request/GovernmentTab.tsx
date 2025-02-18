@@ -21,6 +21,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
   const [government, setGovernment] = useState<Government[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [processingIds, setProcessingIds] = useState<string[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -32,25 +33,33 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
         const response = await fetch(
           "/api/governments?verificationStatus=NOT_VERIFIED"
         );
+        const data = await response.json();
         if (!response.ok) {
-          toast({ title: "Failed to fetch government entities" });
+          setMessage(data.message || "Failed to fetch government entities");
           return;
         }
-        const data = await response.json();
         setGovernment(data);
       } catch (error) {
         if (error instanceof Error) {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        toast({ title: "Internal Server Error" });
+        setMessage("Internal Server Error");
       } finally {
         setIsFetching(false);
       }
     };
 
     fetchUnverifiedGovernments();
-  }, [active, toast]);
+  }, [active]);
+
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+    setMessage(null);
+  }, [message, toast]);
 
   const addToProcessing = (id: string) => {
     setProcessingIds((prev) => [...prev, id]);
@@ -68,19 +77,19 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        toast({ title: data.message || "Failed to approve government entity" });
+        setMessage(data.message || "Failed to approve government entity");
         return;
       }
 
       // Remove the approved entity from the list
       setGovernment(government.filter((gov) => gov.id !== id));
-      toast({ title: "Government entity approved successfully" });
+      setMessage("Government entity approved successfully");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      toast({ title: "Failed to approve government entity" });
+      setMessage("Internal Server Error - handleApprove");
     }
   };
 
@@ -96,19 +105,19 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        toast({ title: data.message || "Failed to reject government entity" });
+        setMessage(data.message || "Failed to reject government entity");
         return;
       }
 
       // Remove the rejected entity from the list
       setGovernment(government.filter((gov) => gov.id !== id));
-      toast({ title: "Government entity rejected successfully" });
+      setMessage("Government entity rejected successfully");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      toast({ title: "Failed to reject government entity" });
+      setMessage("Internal Server Error - handleReject");
     }
   };
 
@@ -167,7 +176,23 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
                 </div>
                 <CardDescription className="mt-1 flex flex-col gap-2">
                   <div>• {gov.level.toLowerCase()} Jurisdiction</div>
-                  <div>• {gov.website} </div>
+                  <div>
+                    •{" "}
+                    {gov.website && (
+                      <a
+                        href={
+                          gov.website.startsWith("http")
+                            ? gov.website
+                            : `https://${gov.website}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary/80 hover:text-primary text-sm"
+                      >
+                        {gov.website}
+                      </a>
+                    )}
+                  </div>
                 </CardDescription>
               </div>
               <Badge variant="outline" className="text-muted-foreground">

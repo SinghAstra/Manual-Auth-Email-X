@@ -43,8 +43,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log("institutions is ", institutions);
-
     return NextResponse.json(institutions);
   } catch (error) {
     console.log("Error fetching institutions.");

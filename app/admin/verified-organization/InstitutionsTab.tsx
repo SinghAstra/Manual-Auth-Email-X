@@ -1,20 +1,33 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Institution } from "@prisma/client";
-import { Building, Check, Loader2, X } from "lucide-react";
+import { Building, Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface InstitutionsTabProps {
+interface VerifiedInstitutionsTabProps {
   active: boolean;
 }
 
-export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
+const VerifiedInstitutionsTab = ({ active }: VerifiedInstitutionsTabProps) => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [processingIds, setProcessingIds] = useState<string[]>([]);
+  const [institutionToDelete, setInstitutionToDelete] = useState<string | null>(
+    null
+  );
   const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -23,13 +36,13 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
   };
 
   useEffect(() => {
-    const fetchUnverifiedInstitutions = async () => {
+    const fetchVerifiedInstitutions = async () => {
       if (!active) return;
 
       try {
         setIsFetching(true);
         const response = await fetch(
-          "/api/institutions?verificationStatus=NOT_VERIFIED"
+          "/api/institutions?verificationStatus=VERIFIED"
         );
         const data = await response.json();
         if (!response.ok) {
@@ -48,7 +61,7 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
       }
     };
 
-    fetchUnverifiedInstitutions();
+    fetchVerifiedInstitutions();
   }, [active]);
 
   useEffect(() => {
@@ -59,54 +72,22 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
     setMessage(null);
   }, [message, toast]);
 
-  const handleApprove = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/institutions/${id}/verify`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ verificationStatus: "VERIFIED" }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setMessage(data.message || "Failed to approve institution");
-        return;
-      }
 
-      // Remove the approved institution from the list
+      // Remove the deleted institution from the list
       setInstitutions(institutions.filter((inst) => inst.id !== id));
+      setMessage("Institution successfully deleted");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      setMessage("Internal Server Error --handleApprove");
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      addToProcessing(id);
-      const response = await fetch(`/api/institutions/${id}/verify`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ verificationStatus: "REJECTED" }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setMessage(data.message || "Failed to reject institution");
-        return;
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("error.stack is ", error.stack);
-        console.log("error.message is ", error.message);
-      }
-      setMessage("Internal Server Error --handleReject");
+      setMessage("Internal Server Error --handleDelete");
+    } finally {
+      setProcessingIds((prev) => prev.filter((i) => i !== id));
+      setInstitutionToDelete(null);
     }
   };
 
@@ -130,7 +111,6 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
               <div>
                 <div className="flex justify-end gap-2 mt-2">
                   <Skeleton className="h-9 w-24" />
-                  <Skeleton className="h-9 w-32" />
                 </div>
               </div>
             </div>
@@ -144,7 +124,7 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-10">
           <p className="text-muted-foreground text-center">
-            No pending institution verification requests.
+            No verified institutions found.
           </p>
         </CardContent>
       </Card>
@@ -184,10 +164,8 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
                   </a>
                 )}
               </div>
-              <Badge variant="outline" className="text-muted-foreground">
-                {institution.verificationStatus === "NOT_VERIFIED"
-                  ? "Pending"
-                  : institution.verificationStatus}
+              <Badge variant="outline" className="text-emerald-500">
+                Verified
               </Badge>
             </div>
             <div>
@@ -197,35 +175,54 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
                     variant="outline"
                     size="sm"
                     disabled
-                    className="min-w-[146px]"
+                    className="min-w-[110px]"
                   >
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Wait...
                   </Button>
                 ) : (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleReject(institution.id)}
-                    >
-                      <X className="h-4 w-4 mr-1" /> Reject
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-emerald-500 hover:bg-emerald-500/10"
-                      onClick={() => handleApprove(institution.id)}
-                    >
-                      <Check className="h-4 w-4 mr-1" /> Approve
-                    </Button>
-                  </>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => setInstitutionToDelete(institution.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
                 )}
               </div>
             </div>
           </div>
         );
       })}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!institutionToDelete}
+        onOpenChange={(open: boolean) => !open && setInstitutionToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              institution and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() =>
+                institutionToDelete && handleDelete(institutionToDelete)
+              }
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
+
+export default VerifiedInstitutionsTab;
