@@ -63,6 +63,7 @@ const CreateGovernment = () => {
 
       if (!response.ok) {
         setMessage(data.message || "Failed to create government entity");
+        router.push(`/auth/profile-setup`);
         return;
       }
 

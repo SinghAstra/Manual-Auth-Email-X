@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
       (url.searchParams.get("verificationStatus") as VerificationStatus) ||
       "VERIFIED";
 
+    console.log("verificationStatus is ", verificationStatus);
+
     // Prepare select options
     const select = {
       id: true,
@@ -40,6 +42,8 @@ export async function GET(request: NextRequest) {
         verificationStatus,
       },
     });
+
+    console.log("institutions is ", institutions);
 
     return NextResponse.json(institutions);
   } catch (error) {

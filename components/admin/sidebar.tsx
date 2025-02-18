@@ -7,7 +7,8 @@ import React from "react";
 
 const Sidebar = () => {
   const sidebarLinks = [
-    { name: "Request", href: "/admin/request" },
+    { name: "Organization Request", href: "/admin/organization-request" },
+    { name: "Verified Organization ", href: "/admin/verified-organization" },
     { name: "Pending Verification", href: "/admin/verification" },
     { name: "Verified", href: "/admin/users" },
   ];

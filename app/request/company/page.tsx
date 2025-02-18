@@ -58,6 +58,7 @@ const CreateCompany = () => {
 
       if (!response.ok) {
         setMessage(data.message || "Failed to create company");
+        router.push(`/auth/profile-setup`);
         return;
       }
 

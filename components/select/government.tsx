@@ -3,15 +3,15 @@ import { Input } from "@/components/ui/input";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-interface Institution {
+interface Government {
   id: string;
   name: string;
 }
 
-const SelectInstitute = () => {
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [filteredInstitutions, setFilteredInstitutions] = useState<
-    Institution[]
+const SelectGovernment = () => {
+  const [governments, setGovernments] = useState<Government[]>([]);
+  const [filteredGovernments, setFilteredGovernments] = useState<
+    Government[]
   >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -22,51 +22,51 @@ const SelectInstitute = () => {
   const role = params.role as string;
 
   useEffect(() => {
-    const fetchInstitutions = async () => {
+    const fetchGovernments = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/institutions");
+        const response = await fetch("/api/governments");
 
         if (!response.ok) {
-          throw new Error("Failed to fetch institutions");
+          throw new Error("Failed to fetch governments");
         }
 
         const data = await response.json();
         console.log("data is ", data);
-        setInstitutions(data);
-        setFilteredInstitutions(data);
+        setGovernments(data);
+        setFilteredGovernments(data);
       } catch (error) {
         if (error instanceof Error) {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        setMessage("Error loading institutions. Please try again later.");
+        setMessage("Error loading governments. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchInstitutions();
+    fetchGovernments();
   }, []);
 
   useEffect(() => {
-    // Filter institutions based on search query
+    // Filter governments based on search query
     if (searchQuery.trim() === "") {
-      setFilteredInstitutions(institutions);
+      setFilteredGovernments(governments);
     } else {
-      const filtered = institutions.filter((institution) =>
-        institution.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = governments.filter((government) =>
+        government.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredInstitutions(filtered);
+      setFilteredGovernments(filtered);
     }
-  }, [searchQuery, institutions]);
+  }, [searchQuery, governments]);
 
-  const handleInstitutionSelect = (institutionId: string) => {
-    router.push(`/auth/profile/${role}/${institutionId}/upload-docs`);
+  const handleGovernmentSelect = (governmentId: string) => {
+    router.push(`/auth/profile/${role}/${governmentId}/upload-docs`);
   };
 
-  const handleNewInstitutionRequest = () => {
-    router.push("/request/institute");
+  const handleNewGovernmentRequest = () => {
+    router.push("/request/government");
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,9 +75,9 @@ const SelectInstitute = () => {
 
   return (
     <div className="w-full max-w-lg rounded-md p-4 mt-4 space-y-4 border bg-background">
-      <h2 className="text-2xl">Search For Institution</h2>
+      <h2 className="text-2xl">Search For Government</h2>
       <Input
-        placeholder="Search institutions..."
+        placeholder="Search governments..."
         value={searchQuery}
         onChange={handleSearchChange}
         className="w-full"
@@ -85,38 +85,38 @@ const SelectInstitute = () => {
 
       {isLoading ? (
         <div className="text-center text-sm text-muted-foreground py-4">
-          Loading institutions...
+          Loading governments...
         </div>
       ) : message ? (
         <div className="text-center text-sm text-destructive py-4">
           {message}
         </div>
-      ) : filteredInstitutions.length > 0 ? (
+      ) : filteredGovernments.length > 0 ? (
         <div className="max-h-60 overflow-y-auto border border-secondary rounded-md">
-          {filteredInstitutions.map((institution) => (
+          {filteredGovernments.map((government) => (
             <button
-              key={institution.id}
+              key={government.id}
               className="w-full text-left px-4 py-2 hover:bg-secondary/70 focus:outline-none focus:bg-secondary/70 transition"
-              onClick={() => handleInstitutionSelect(institution.id)}
+              onClick={() => handleGovernmentSelect(government.id)}
             >
-              {institution.name}
+              {government.name}
             </button>
           ))}
         </div>
       ) : (
         <div className="flex flex-col items-center py-4">
-          <p className="mb-4 text-muted-foreground">No institutions found</p>
+          <p className="mb-4 text-muted-foreground">No governments found</p>
         </div>
       )}
 
-      {!isLoading && !message && filteredInstitutions.length === 0 && (
+      {!isLoading && !message && filteredGovernments.length === 0 && (
         <div className="pt-4">
           <Button
             className="w-full"
             variant="outline"
-            onClick={handleNewInstitutionRequest}
+            onClick={handleNewGovernmentRequest}
           >
-            Request New Institute
+            Request New Government
           </Button>
         </div>
       )}
@@ -124,4 +124,4 @@ const SelectInstitute = () => {
   );
 };
 
-export default SelectInstitute;
+export default SelectGovernment;

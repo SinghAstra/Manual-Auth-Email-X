@@ -57,6 +57,7 @@ const CreateInstitute = () => {
 
       if (!response.ok) {
         setMessage(data.message || "Failed to create institution");
+        router.push(`/auth/profile-setup`);
         return;
       }
 
