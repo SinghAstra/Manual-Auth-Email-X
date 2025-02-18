@@ -10,8 +10,16 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GovernmentLevel } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,14 +27,14 @@ import { FaSpinner } from "react-icons/fa6";
 import { z } from "zod";
 
 const formSchema = z.object({
-  name: z.string().min(2),
-  address: z.string().min(5),
-  city: z.string().min(2),
-  state: z.string().min(2),
-  website: z.string().url(),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  level: z.nativeEnum(GovernmentLevel, {
+    errorMap: () => ({ message: "Please select a government level" }),
+  }),
+  website: z.string().url("Please enter a valid URL"),
 });
 
-const CreateCompany = () => {
+const CreateGovernment = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -36,9 +44,7 @@ const CreateCompany = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      address: "",
-      city: "",
-      state: "",
+      level: undefined,
       website: "",
     },
   });
@@ -46,22 +52,21 @@ const CreateCompany = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/companies", {
+      const response = await fetch("/api/governments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
       });
-
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.message || "Failed to create company");
+        setMessage(data.message || "Failed to create government entity");
         return;
       }
 
-      setMessage(data.message || "Request Submitted successfully.");
+      setMessage(data.message || "Request submitted successfully.");
       router.push(`/auth/profile-setup`);
     } catch (error) {
       if (error instanceof Error) {
@@ -87,9 +92,9 @@ const CreateCompany = () => {
       <Navbar />
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
-          <h2 className="text-2xl">Company Profile</h2>
+          <h2 className="text-2xl">Government Entity Profile</h2>
           <span className="text-sm text-muted-foreground">
-            Provide details about your company
+            Provide details about your government entity
           </span>
         </div>
         <Form {...form}>
@@ -100,10 +105,13 @@ const CreateCompany = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm transition-colors font-normal">
-                    Company Name
+                    Government Name
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter company name" {...field} />
+                    <Input
+                      placeholder="Enter government entity name"
+                      {...field}
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -111,45 +119,27 @@ const CreateCompany = () => {
 
             <FormField
               control={form.control}
-              name="address"
+              name="level"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm transition-colors font-normal">
-                    Address
+                    Government Level
                   </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter company address" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm transition-colors font-normal">
-                    City
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter city" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm transition-colors font-normal">
-                    State/Province
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter state or province" {...field} />
-                  </FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select government level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="FEDERAL">Federal</SelectItem>
+                      <SelectItem value="STATE">State</SelectItem>
+                      <SelectItem value="LOCAL">Local</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormItem>
               )}
             />
@@ -160,10 +150,10 @@ const CreateCompany = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm transition-colors font-normal">
-                    Website (Optional)
+                    Website
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com" {...field} />
+                    <Input placeholder="https://example.gov" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -175,7 +165,7 @@ const CreateCompany = () => {
                   <FaSpinner className="animate-spin" /> Submitting Request...
                 </>
               ) : (
-                "Request New Company"
+                "Request New Government Entity"
               )}
             </Button>
           </form>
@@ -185,4 +175,4 @@ const CreateCompany = () => {
   );
 };
 
-export default CreateCompany;
+export default CreateGovernment;

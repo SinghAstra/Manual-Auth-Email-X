@@ -171,14 +171,36 @@ model CompanyProfile {
   company       Company   @relation(fields: [companyId], references: [id])
 }
 
+model Government {
+  id            String    @id @default(cuid())
+  name          String
+  level         GovernmentLevel
+  website       String
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
+
+  // Relations
+  representatives GovernmentProfile[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum GovernmentLevel {
+  FEDERAL
+  STATE
+  LOCAL
+}
+
 model GovernmentProfile {
   id            String    @id @default(cuid())
   userId        String    @unique
+  governmentId  String
   department    String
   designation   String
-  jurisdiction  String    // National, State, etc.
 
-  user          User      @relation(fields: [userId], references: [id])
+  // Relations
+  user          User       @relation(fields: [userId], references: [id])
+  government    Government @relation(fields: [governmentId], references: [id])
 }
 
 model StudentProfile {

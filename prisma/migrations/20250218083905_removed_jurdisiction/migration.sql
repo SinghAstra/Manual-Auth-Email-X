@@ -11,6 +11,9 @@ CREATE TYPE "VerificationStatus" AS ENUM ('NOT_VERIFIED', 'VERIFIED');
 CREATE TYPE "DocumentType" AS ENUM ('INSTITUTION_ID', 'AUTHORIZATION_LETTER', 'COMPANY_ID', 'BUSINESS_CARD', 'GOVERNMENT_ID', 'DEPARTMENT_LETTER', 'STUDENT_ID');
 
 -- CreateEnum
+CREATE TYPE "GovernmentLevel" AS ENUM ('FEDERAL', 'STATE', 'LOCAL');
+
+-- CreateEnum
 CREATE TYPE "PlacementStatus" AS ENUM ('PLACED', 'UNPLACED', 'IN_PROCESS');
 
 -- CreateTable
@@ -108,6 +111,7 @@ CREATE TABLE "Company" (
     "address" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "state" TEXT NOT NULL,
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_VERIFIED',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -124,12 +128,25 @@ CREATE TABLE "CompanyProfile" (
 );
 
 -- CreateTable
+CREATE TABLE "Government" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "level" "GovernmentLevel" NOT NULL,
+    "website" TEXT NOT NULL,
+    "verificationStatus" "VerificationStatus" NOT NULL DEFAULT 'NOT_VERIFIED',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Government_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "GovernmentProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "governmentId" TEXT NOT NULL,
     "department" TEXT NOT NULL,
     "designation" TEXT NOT NULL,
-    "jurisdiction" TEXT NOT NULL,
 
     CONSTRAINT "GovernmentProfile_pkey" PRIMARY KEY ("id")
 );
@@ -215,6 +232,9 @@ ALTER TABLE "CompanyProfile" ADD CONSTRAINT "CompanyProfile_companyId_fkey" FORE
 
 -- AddForeignKey
 ALTER TABLE "GovernmentProfile" ADD CONSTRAINT "GovernmentProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GovernmentProfile" ADD CONSTRAINT "GovernmentProfile_governmentId_fkey" FOREIGN KEY ("governmentId") REFERENCES "Government"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StudentProfile" ADD CONSTRAINT "StudentProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

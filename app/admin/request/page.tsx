@@ -15,10 +15,9 @@ const AdminRequestPage = () => {
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl mb-2">Verification Requests</h1>
+        <h1 className="text-3xl mb-2">Profile Requests</h1>
         <p className="text-muted-foreground">
-          Review and approve verification requests from institutions, companies,
-          and government entities.
+          Review and approve new Organization requests.
         </p>
       </div>
 

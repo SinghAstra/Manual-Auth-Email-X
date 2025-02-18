@@ -73,7 +73,7 @@ const ProfileSetup = () => {
     <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
       <div className="mt-8 flex items-center justify-center">
-        <div className="max-w-2xl p-4 border rounded-md bg-background">
+        <div className="max-w-lg w-full p-4 border rounded-md bg-background">
           <h2 className="text-2xl">Complete Your Profile</h2>
           <span className="text-muted-foreground">
             Select your role to begin the verification process

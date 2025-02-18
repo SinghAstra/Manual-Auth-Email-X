@@ -71,7 +71,7 @@ const SelectCompany = () => {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-md p-4 mt-4 space-y-6 border bg-background">
+    <div className="w-full max-w-lg rounded-md p-4 mt-4 space-y-6 border bg-background">
       <h2 className="text-2xl">Search For Company</h2>
       <Input
         placeholder="Search companies..."
