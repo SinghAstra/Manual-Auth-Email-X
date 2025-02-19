@@ -5,6 +5,7 @@ import { formatDocumentType } from "@/lib/utils";
 import { X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
@@ -28,6 +29,7 @@ const InstitutionAdminUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
+  const params = useParams();
 
   const fileInputRefs = useRef<
     Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
@@ -130,6 +132,7 @@ const InstitutionAdminUploadDocs = () => {
 
       // Add role to FormData
       formData.append("role", "INSTITUTION_ADMIN");
+      formData.append("institutionId", params.id as string);
 
       // Add each document to FormData with its type
       Object.entries(documents).forEach(([type, doc]) => {

@@ -92,6 +92,23 @@ export async function POST(request: NextRequest) {
       uploadedDocuments.push(document);
     }
 
+    // Create role-specific profile
+    try {
+      await createProfileBasedOnRole(user.id, role as Role, formData);
+    } catch (profileError) {
+      console.error("Error creating profile:", profileError);
+      return NextResponse.json(
+        {
+          message: "Error creating user profile",
+          error:
+            profileError instanceof Error
+              ? profileError.message
+              : String(profileError),
+        },
+        { status: 400 }
+      );
+    }
+
     // Update user role and verification status
     await prisma.user.update({
       where: { id: user.id },
@@ -119,8 +136,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// // Helper function to create the appropriate profile based on role
 async function createProfileBasedOnRole(
   userId: string,
   role: Role,
@@ -128,33 +143,14 @@ async function createProfileBasedOnRole(
 ): Promise<void> {
   switch (role) {
     case "INSTITUTION_ADMIN":
-      // Create or find institution and link to admin
-      const institutionId = formData.get("institutionId") as string | null;
-      if (institutionId) {
-        await prisma.institutionProfile.create({
-          data: {
-            userId,
-            institutionId,
-          },
-        });
-      } else {
-        const institution = await prisma.institution.create({
-          data: {
-            name: formData.get("institutionName") as string,
-            address: formData.get("institutionAddress") as string,
-            city: formData.get("institutionCity") as string,
-            state: formData.get("institutionState") as string,
-            website: formData.get("institutionWebsite") as string,
-          },
-        });
-
-        await prisma.institutionProfile.create({
-          data: {
-            userId,
-            institutionId: institution.id,
-          },
-        });
-      }
+      const institutionId = formData.get("institutionId") as string;
+      console.log("institutionId is ", institutionId);
+      await prisma.institutionProfile.create({
+        data: {
+          userId,
+          institutionId,
+        },
+      });
       break;
 
     case "COMPANY_REPRESENTATIVE":
@@ -201,13 +197,13 @@ async function createProfileBasedOnRole(
       });
       break;
 
-    case "GOVERNMENT":
+    case "GOVERNMENT_REPRESENTATIVE":
       await prisma.governmentProfile.create({
         data: {
           userId,
-          department: formData.get("department") as string,
+          governmentId: formData.get("governmentId") as string,
           designation: formData.get("designation") as string,
-          jurisdiction: formData.get("jurisdiction") as string,
+          department: formData.get("department") as string,
         },
       });
       break;
