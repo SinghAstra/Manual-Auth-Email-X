@@ -24,10 +24,10 @@ export async function PUT(
     const awaitedParams = await params;
 
     // Check if user has appropriate role (SUPER_ADMIN)
-    const user = await prisma.user.findUnique({
-      where: { id: session.user?.id as string },
-      select: { id: true, role: true },
-    });
+    // const user = await prisma.user.findUnique({
+    //   where: { id: session.user?.id as string },
+    //   select: { id: true, role: true },
+    // });
 
     // if (!user || user.role !== "SUPER_ADMIN") {
     //   return NextResponse.json(
