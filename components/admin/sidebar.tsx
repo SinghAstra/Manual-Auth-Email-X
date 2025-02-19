@@ -9,7 +9,7 @@ const Sidebar = () => {
   const sidebarLinks = [
     { name: "Organization Request", href: "/admin/organization-request" },
     { name: "Verified Organization ", href: "/admin/verified-organization" },
-    { name: "Pending Verification", href: "/admin/verification" },
+    { name: "Pending Verification", href: "/admin/pending-verification" },
     { name: "Verified", href: "/admin/users" },
   ];
 

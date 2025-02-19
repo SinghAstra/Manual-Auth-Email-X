@@ -9,19 +9,34 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" });
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch all institutions
-    const institutions = await prisma.document.findMany({});
+    // Fetch all documents with their associated users
+    const documents = await prisma.document.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            verificationStatus: true,
+          },
+        },
+      },
+    });
 
-    return NextResponse.json(institutions);
+    return NextResponse.json(documents);
   } catch (error) {
-    console.log("Error fetching documents.");
+    console.log("Error fetching documents with users.");
     if (error instanceof Error) {
       console.log("error.stack is ", error.stack);
       console.log("error.message is ", error.message);
     }
-    return NextResponse.json({ message: "Internal server error" });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
