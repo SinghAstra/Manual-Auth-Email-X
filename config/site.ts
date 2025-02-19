@@ -1,7 +1,7 @@
 import { SiteConfig } from "@/interfaces/site";
 
 export const siteConfig: SiteConfig = {
-  name: "PlacementX",
+  name: "UniLink",
   description:
     "Track and analyze campus placement data across technical institutes and universities nationwide.",
   tagline: "Empowering campuses with centralized placement analytics.",
@@ -17,8 +17,8 @@ export const siteConfig: SiteConfig = {
     "Data visualization tools",
   ],
   links: {
-    twitter: "https://twitter.com/XSinghAstra",
-    github: "https://github.com/SinghAstra/PlacementX",
+    twitter: "https://x.com/Rajsing40134152",
+    github: "https://x.com/Rajsing40134152",
     linkedIn: "https://linkedin.com/in/singhastra",
   },
 };
