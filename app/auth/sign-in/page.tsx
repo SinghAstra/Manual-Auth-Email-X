@@ -4,6 +4,7 @@ import { Icons } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { dashboardRoutes } from "@/lib/constants";
+import { VerificationStatus } from "@prisma/client";
 import { Code2, FileSearch, Lightbulb } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
@@ -55,12 +56,13 @@ export default function SignIn() {
     if (status === "authenticated" && session?.user) {
       const user = session.user;
 
-      if (user.verificationStatus === "PENDING") {
+      if (user.verificationStatus === ("PENDING" as VerificationStatus)) {
         router.push("/auth/verification-pending");
-      } else if (user.verificationStatus === "APPROVED") {
+      } else if (
+        user.verificationStatus === ("APPROVED" as VerificationStatus)
+      ) {
         router.push(dashboardRoutes[user.role]);
       } else {
-        // For NEW or REJECTED, go to profile setup
         router.push("/auth/profile-setup");
       }
     }

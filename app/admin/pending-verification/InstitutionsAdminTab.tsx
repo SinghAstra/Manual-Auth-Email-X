@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -15,55 +15,53 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import {
+  Document,
+  Institution,
+  InstitutionProfile,
+  User,
+} from "@prisma/client";
 import { CheckCircle, ExternalLink, FileText, XCircle } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
-
-type Document = {
-  id: string;
-  type: string;
-  fileUrl: string;
-  createdAt: string;
-};
-
-type Institution = {
-  id: string;
-  name: string;
-  verificationStatus: string;
-};
-
-type InstitutionProfile = {
-  id: string;
-  institution: Institution;
-  institutionId: string;
-};
-
-type PendingUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  verificationStatus: string;
-  documents: Document[];
-  institutionProfile: InstitutionProfile;
-};
 
 interface InstitutionsAdminTabProps {
   active: boolean;
 }
 
+interface InstitutionProfileWithInstitution extends InstitutionProfile {
+  institution: Institution;
+}
+
+interface UserWithInstitutionProfileAndDocuments extends User {
+  institutionProfile: InstitutionProfileWithInstitution;
+  documents: Document[];
+}
+
 const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
   active,
 }) => {
-  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<
+    UserWithInstitutionProfileAndDocuments[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null);
+  const [selectedUser, setSelectedUser] =
+    useState<UserWithInstitutionProfileAndDocuments | null>(null);
   const [feedback, setFeedback] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>();
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log("inside useEffect")
-    console.log("active is ",active)
+    if (!message) return;
+    toast({
+      title: message,
+    });
+    setMessage(null);
+  }, [message, toast]);
+
+  useEffect(() => {
     if (!active) {
       return;
     }
@@ -76,16 +74,15 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
         const data = await response.json();
         console.log("data is ", data);
         if (!response.ok) {
-          throw new Error("Failed to fetch pending users");
+          setMessage(data.message || "Failed to fetch pending users");
         }
         setPendingUsers(data.users || []);
       } catch (error) {
-        console.error("Error fetching pending users:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load pending verification requests",
-          variant: "destructive",
-        });
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
+        setMessage("Internal Server Error -- fetchPendingUsers");
       } finally {
         setLoading(false);
       }
@@ -116,29 +113,21 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
         throw new Error("Failed to update verification status");
       }
 
-      // Refresh the list
-      // TODO : Remove the Institute
+      const updatedUsers = pendingUsers.filter((user) => user.id !== userId);
+      setPendingUsers(updatedUsers);
+
       setSelectedUser(null);
       setFeedback("");
-      toast({
-        title: `User ${status.toLowerCase()}`,
-        description: `The user has been successfully ${status.toLowerCase()}`,
-        variant: status === "APPROVED" ? "default" : "destructive",
-      });
+      setMessage(`The user has been successfully ${status.toLowerCase()}`);
     } catch (error) {
-      console.error("Error updating verification status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update verification status",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        console.log("error.stack is ", error.stack);
+        console.log("error.message is ", error.message);
+      }
+      setMessage("Internal Server Error -- handleVerificationUpdate");
     } finally {
       setProcessingId(null);
     }
-  };
-
-  const openDocumentInNewTab = (url: string) => {
-    window.open(url, "_blank");
   };
 
   if (loading) {
@@ -169,25 +158,20 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
       {pendingUsers.map((user) => (
         <Card key={user.id} className="overflow-hidden">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-4">
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between space-y-4">
                 <div>
                   <h3 className="text-lg font-medium">{user.name}</h3>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
-                <div>
-                  <Badge
-                    variant="outline"
-                    className="bg-secondary text-secondary-foreground"
-                  >
+
+                <div className="flex flex-col gap-2">
+                  <Badge variant="outline" className="text-sm">
+                    {user.institutionProfile?.institution.name || "N/A"}
+                  </Badge>
+                  <Badge variant="outline" className=" text-muted-foreground">
                     {user.role.replace("_", " ")}
                   </Badge>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Institution</h4>
-                  <p className="text-sm">
-                    {user.institutionProfile?.institution.name || "N/A"}
-                  </p>
                 </div>
               </div>
 
@@ -197,16 +181,19 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
                   <div className="space-y-2">
                     {user.documents.map((doc) => (
                       <div key={doc.id} className="flex items-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start gap-2"
-                          onClick={() => openDocumentInNewTab(doc.fileUrl)}
+                        <Link
+                          className={cn(
+                            buttonVariants({ variant: "outline" }),
+                            "w-full justify-start gap-2"
+                          )}
+                          href={doc.fileUrl}
+                          rel="noopener noreferrer"
+                          target="_blank"
                         >
                           <FileText className="h-4 w-4" />
                           <span className="truncate">{doc.type}</span>
                           <ExternalLink className="h-3 w-3 ml-auto" />
-                        </Button>
+                        </Link>
                       </div>
                     ))}
                   </div>
