@@ -20,7 +20,7 @@ export interface DocumentFile {
 }
 
 export type StudentDocumentsFiles = {
-  [key in StudentDocumentsType]?: DocumentFile;
+  [key in StudentDocumentsType]: DocumentFile;
 };
 
 const StudentUploadDocs = () => {
