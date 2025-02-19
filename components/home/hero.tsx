@@ -4,6 +4,7 @@ import { siteConfig } from "@/config/site";
 import { useToast } from "@/hooks/use-toast";
 import { dashboardRoutes } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { VerificationStatus } from "@prisma/client";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -39,16 +40,16 @@ export function Hero() {
     console.log("user --handleGetStarted is ", user);
 
     if (user) {
-      if (user.verificationStatus === "NOT_APPLIED") {
+      if (user.verificationStatus === ("NOT_APPLIED" as VerificationStatus)) {
         router.push("/auth/profile-setup");
         return;
       }
 
-      if (user.verificationStatus === "PENDING") {
+      if (user.verificationStatus === ("PENDING" as VerificationStatus)) {
         router.push("/auth/verification-pending");
       }
 
-      if (user.verificationStatus === "APPROVED") {
+      if (user.verificationStatus === ("APPROVED" as VerificationStatus)) {
         router.push(dashboardRoutes[user.role]);
       }
     }
