@@ -62,7 +62,7 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
   const handleApprove = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/institutions/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/institution`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
   const handleReject = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/institutions/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/institution`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

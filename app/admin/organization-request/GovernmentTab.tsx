@@ -68,7 +68,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
   const handleApprove = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/governments/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/government`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
   const handleReject = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/governments/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/government`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -175,9 +175,8 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
                   <CardTitle className="text-lg">{gov.name}</CardTitle>
                 </div>
                 <CardDescription className="mt-1 flex flex-col gap-2">
-                  <div>• {gov.level.toLowerCase()} Jurisdiction</div>
+                  <div>{gov.level.toLowerCase()} Jurisdiction</div>
                   <div>
-                    •{" "}
                     {gov.website && (
                       <a
                         href={

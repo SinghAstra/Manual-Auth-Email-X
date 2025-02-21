@@ -77,7 +77,7 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
   const handleApprove = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/companies/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/company`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +105,7 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
   const handleReject = async (id: string) => {
     try {
       addToProcessing(id);
-      const response = await fetch(`/api/companies/${id}/verify`, {
+      const response = await fetch(`/api/admin/verify/${id}/company`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -5,13 +5,14 @@ import { formatDocumentType } from "@/lib/utils";
 import { X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
 
-export enum CompanyRepresentativeDocumentsType {
-  COMPANY_ID = "COMPANY_ID",
-  BUSINESS_CARD = "BUSINESS_CARD",
+export enum InstitutionAdminDocumentsType {
+  INSTITUTION_ID = "INSTITUTION_ID",
+  AUTHORIZATION_LETTER = "AUTHORIZATION_LETTER",
 }
 
 export interface DocumentFile {
@@ -20,39 +21,39 @@ export interface DocumentFile {
   error: string | null;
 }
 
-export type CompanyRepresentativeDocumentsFiles = {
-  [key in CompanyRepresentativeDocumentsType]?: DocumentFile;
+export type InstitutionAdminDocumentsFiles = {
+  [key in InstitutionAdminDocumentsType]?: DocumentFile;
 };
 
-const CompanyRepresentativeUploadDocs = () => {
+const InstitutionAdminUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
+  const params = useParams();
 
   const fileInputRefs = useRef<
-    Record<CompanyRepresentativeDocumentsType, HTMLInputElement | null>
+    Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
   >({
-    [CompanyRepresentativeDocumentsType.COMPANY_ID]: null,
-    [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: null,
+    [InstitutionAdminDocumentsType.INSTITUTION_ID]: null,
+    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
   });
 
-  const [documents, setDocuments] =
-    useState<CompanyRepresentativeDocumentsFiles>({
-      [CompanyRepresentativeDocumentsType.COMPANY_ID]: {
-        file: null,
-        preview: null,
-        error: null,
-      },
-      [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: {
-        file: null,
-        preview: null,
-        error: null,
-      },
-    });
+  const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
+    [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
+      file: null,
+      preview: null,
+      error: null,
+    },
+    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
+      file: null,
+      preview: null,
+      error: null,
+    },
+  });
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: CompanyRepresentativeDocumentsType
+    type: InstitutionAdminDocumentsType
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -68,7 +69,7 @@ const CompanyRepresentativeUploadDocs = () => {
     }
   };
 
-  const removeDocument = (type: CompanyRepresentativeDocumentsType) => {
+  const removeDocument = (type: InstitutionAdminDocumentsType) => {
     const currentPreview = documents[type]?.preview;
     if (currentPreview) {
       URL.revokeObjectURL(currentPreview);
@@ -91,7 +92,7 @@ const CompanyRepresentativeUploadDocs = () => {
   const validateDocuments = (): boolean => {
     let isValid = true;
 
-    Object.values(CompanyRepresentativeDocumentsType).forEach((type) => {
+    Object.values(InstitutionAdminDocumentsType).forEach((type) => {
       if (!documents[type]?.file) {
         setDocuments((prev) => ({
           ...prev,
@@ -130,7 +131,8 @@ const CompanyRepresentativeUploadDocs = () => {
       const formData = new FormData();
 
       // Add role to FormData
-      formData.append("role", "COMPANY_REPRESENTATIVE");
+      formData.append("role", "INSTITUTION_ADMIN");
+      formData.append("institutionId", params.id as string);
 
       // Add each document to FormData with its type
       Object.entries(documents).forEach(([type, doc]) => {
@@ -144,7 +146,7 @@ const CompanyRepresentativeUploadDocs = () => {
       });
 
       // Send POST request to API endpoint
-      const response = await fetch("/api/upload-documents", {
+      const response = await fetch("/api/auth/upload-documents", {
         method: "POST",
         body: formData,
       });
@@ -159,7 +161,7 @@ const CompanyRepresentativeUploadDocs = () => {
       signOut({ callbackUrl: "/" });
 
       // Reset form after successful upload
-      Object.values(CompanyRepresentativeDocumentsType).forEach((type) => {
+      Object.values(InstitutionAdminDocumentsType).forEach((type) => {
         removeDocument(type);
       });
     } catch (error) {
@@ -186,13 +188,12 @@ const CompanyRepresentativeUploadDocs = () => {
       <div className="mb-4">
         <h2 className="text-xl font-medium">Required Documents</h2>
         <span className="text-sm text-muted-foreground">
-          Please upload the following documents to verify your company
-          affiliation
+          Please upload the following documents to verify your institution
         </span>
       </div>
 
       <div className="space-y-6">
-        {Object.values(CompanyRepresentativeDocumentsType).map((type) => (
+        {Object.values(InstitutionAdminDocumentsType).map((type) => (
           <div key={type} className="space-y-2">
             <Label
               className={`text-sm transition-colors font-normal ${
@@ -236,7 +237,7 @@ const CompanyRepresentativeUploadDocs = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() =>
-                      removeDocument(type as CompanyRepresentativeDocumentsType)
+                      removeDocument(type as InstitutionAdminDocumentsType)
                     }
                     className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
                   >
@@ -269,4 +270,4 @@ const CompanyRepresentativeUploadDocs = () => {
   );
 };
 
-export default CompanyRepresentativeUploadDocs;
+export default InstitutionAdminUploadDocs;

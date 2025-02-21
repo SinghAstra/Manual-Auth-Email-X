@@ -4,10 +4,10 @@ import { useParams } from "next/navigation";
 import React from "react";
 
 import { Navbar } from "@/components/home/navbar";
-import CompanyRepresentativeUploadDocs from "@/components/uploads/CompanyRepresentativeUploadDocs";
-import GovernmentUploadDocs from "@/components/uploads/GovernmentUploadDocs";
-import InstitutionAdminUploadDocs from "@/components/uploads/InstitutionAdminUploadDocs";
-import StudentUploadDocs from "@/components/uploads/StudentUploadDocs";
+import CompanyRepresentativeUploadDocs from "@/components/upload-docs/company-rep";
+import GovernmentUploadDocs from "@/components/upload-docs/gov-rep";
+import InstitutionAdminUploadDocs from "@/components/upload-docs/institution-admin";
+import StudentUploadDocs from "@/components/upload-docs/student";
 
 const UploadDocs = () => {
   const params = useParams();

@@ -9,8 +9,9 @@ import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
 
-export enum StudentDocumentsType {
-  STUDENT_ID = "STUDENT_ID",
+export enum CompanyRepresentativeDocumentsType {
+  COMPANY_ID = "COMPANY_ID",
+  BUSINESS_CARD = "BUSINESS_CARD",
 }
 
 export interface DocumentFile {
@@ -19,32 +20,39 @@ export interface DocumentFile {
   error: string | null;
 }
 
-export type StudentDocumentsFiles = {
-  [key in StudentDocumentsType]: DocumentFile;
+export type CompanyRepresentativeDocumentsFiles = {
+  [key in CompanyRepresentativeDocumentsType]?: DocumentFile;
 };
 
-const StudentUploadDocs = () => {
+const CompanyRepresentativeUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
 
   const fileInputRefs = useRef<
-    Record<StudentDocumentsType, HTMLInputElement | null>
+    Record<CompanyRepresentativeDocumentsType, HTMLInputElement | null>
   >({
-    [StudentDocumentsType.STUDENT_ID]: null,
+    [CompanyRepresentativeDocumentsType.COMPANY_ID]: null,
+    [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: null,
   });
 
-  const [documents, setDocuments] = useState<StudentDocumentsFiles>({
-    [StudentDocumentsType.STUDENT_ID]: {
-      file: null,
-      preview: null,
-      error: null,
-    },
-  });
+  const [documents, setDocuments] =
+    useState<CompanyRepresentativeDocumentsFiles>({
+      [CompanyRepresentativeDocumentsType.COMPANY_ID]: {
+        file: null,
+        preview: null,
+        error: null,
+      },
+      [CompanyRepresentativeDocumentsType.BUSINESS_CARD]: {
+        file: null,
+        preview: null,
+        error: null,
+      },
+    });
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: StudentDocumentsType
+    type: CompanyRepresentativeDocumentsType
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -60,7 +68,7 @@ const StudentUploadDocs = () => {
     }
   };
 
-  const removeDocument = (type: StudentDocumentsType) => {
+  const removeDocument = (type: CompanyRepresentativeDocumentsType) => {
     const currentPreview = documents[type]?.preview;
     if (currentPreview) {
       URL.revokeObjectURL(currentPreview);
@@ -83,7 +91,7 @@ const StudentUploadDocs = () => {
   const validateDocuments = (): boolean => {
     let isValid = true;
 
-    Object.values(StudentDocumentsType).forEach((type) => {
+    Object.values(CompanyRepresentativeDocumentsType).forEach((type) => {
       if (!documents[type]?.file) {
         setDocuments((prev) => ({
           ...prev,
@@ -122,7 +130,7 @@ const StudentUploadDocs = () => {
       const formData = new FormData();
 
       // Add role to FormData
-      formData.append("role", "STUDENT");
+      formData.append("role", "COMPANY_REPRESENTATIVE");
 
       // Add each document to FormData with its type
       Object.entries(documents).forEach(([type, doc]) => {
@@ -135,23 +143,8 @@ const StudentUploadDocs = () => {
         }
       });
 
-      // Add student-specific fields
-      const institutionId = (
-        document.getElementById("institutionId") as HTMLInputElement
-      )?.value;
-      const enrollmentNo = (
-        document.getElementById("enrollmentNo") as HTMLInputElement
-      )?.value;
-      const graduationYear = (
-        document.getElementById("graduationYear") as HTMLInputElement
-      )?.value;
-
-      if (institutionId) formData.append("institutionId", institutionId);
-      if (enrollmentNo) formData.append("enrollmentNo", enrollmentNo);
-      if (graduationYear) formData.append("graduationYear", graduationYear);
-
       // Send POST request to API endpoint
-      const response = await fetch("/api/upload-documents", {
+      const response = await fetch("/api/auth/upload-documents", {
         method: "POST",
         body: formData,
       });
@@ -166,7 +159,7 @@ const StudentUploadDocs = () => {
       signOut({ callbackUrl: "/" });
 
       // Reset form after successful upload
-      Object.values(StudentDocumentsType).forEach((type) => {
+      Object.values(CompanyRepresentativeDocumentsType).forEach((type) => {
         removeDocument(type);
       });
     } catch (error) {
@@ -191,54 +184,15 @@ const StudentUploadDocs = () => {
   return (
     <div className="w-full max-w-xl border rounded-md py-4 px-5 bg-background">
       <div className="mb-4">
-        <h2 className="text-xl font-medium">Student Verification</h2>
+        <h2 className="text-xl font-medium">Required Documents</h2>
         <span className="text-sm text-muted-foreground">
-          Please upload your student ID and provide enrollment details
+          Please upload the following documents to verify your company
+          affiliation
         </span>
       </div>
 
       <div className="space-y-6">
-        {/* Student Details */}
-        <div className="space-y-2">
-          <Label htmlFor="institutionId" className="text-sm font-normal">
-            Institution ID
-          </Label>
-          <Input
-            id="institutionId"
-            type="text"
-            placeholder="Enter your institution ID"
-            className="w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="enrollmentNo" className="text-sm font-normal">
-            Enrollment Number
-          </Label>
-          <Input
-            id="enrollmentNo"
-            type="text"
-            placeholder="Enter your enrollment number"
-            className="w-full"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="graduationYear" className="text-sm font-normal">
-            Expected Graduation Year
-          </Label>
-          <Input
-            id="graduationYear"
-            type="number"
-            placeholder="e.g., 2025"
-            className="w-full"
-            min="2000"
-            max="2100"
-          />
-        </div>
-
-        {/* Document Uploads */}
-        {Object.values(StudentDocumentsType).map((type) => (
+        {Object.values(CompanyRepresentativeDocumentsType).map((type) => (
           <div key={type} className="space-y-2">
             <Label
               className={`text-sm transition-colors font-normal ${
@@ -281,7 +235,9 @@ const StudentUploadDocs = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeDocument(type as StudentDocumentsType)}
+                    onClick={() =>
+                      removeDocument(type as CompanyRepresentativeDocumentsType)
+                    }
                     className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
                   >
                     <X className="h-4 w-4 text-foreground" />
@@ -305,7 +261,7 @@ const StudentUploadDocs = () => {
               <FaSpinner className="animate-spin mr-2" /> Uploading...
             </>
           ) : (
-            "Submit Verification"
+            "Upload Documents"
           )}
         </Button>
       </div>
@@ -313,4 +269,4 @@ const StudentUploadDocs = () => {
   );
 };
 
-export default StudentUploadDocs;
+export default CompanyRepresentativeUploadDocs;

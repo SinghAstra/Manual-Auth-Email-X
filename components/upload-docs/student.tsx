@@ -5,14 +5,12 @@ import { formatDocumentType } from "@/lib/utils";
 import { X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
 
-export enum InstitutionAdminDocumentsType {
-  INSTITUTION_ID = "INSTITUTION_ID",
-  AUTHORIZATION_LETTER = "AUTHORIZATION_LETTER",
+export enum StudentDocumentsType {
+  STUDENT_ID = "STUDENT_ID",
 }
 
 export interface DocumentFile {
@@ -21,30 +19,23 @@ export interface DocumentFile {
   error: string | null;
 }
 
-export type InstitutionAdminDocumentsFiles = {
-  [key in InstitutionAdminDocumentsType]?: DocumentFile;
+export type StudentDocumentsFiles = {
+  [key in StudentDocumentsType]: DocumentFile;
 };
 
-const InstitutionAdminUploadDocs = () => {
+const StudentUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
-  const params = useParams();
 
   const fileInputRefs = useRef<
-    Record<InstitutionAdminDocumentsType, HTMLInputElement | null>
+    Record<StudentDocumentsType, HTMLInputElement | null>
   >({
-    [InstitutionAdminDocumentsType.INSTITUTION_ID]: null,
-    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: null,
+    [StudentDocumentsType.STUDENT_ID]: null,
   });
 
-  const [documents, setDocuments] = useState<InstitutionAdminDocumentsFiles>({
-    [InstitutionAdminDocumentsType.INSTITUTION_ID]: {
-      file: null,
-      preview: null,
-      error: null,
-    },
-    [InstitutionAdminDocumentsType.AUTHORIZATION_LETTER]: {
+  const [documents, setDocuments] = useState<StudentDocumentsFiles>({
+    [StudentDocumentsType.STUDENT_ID]: {
       file: null,
       preview: null,
       error: null,
@@ -53,7 +44,7 @@ const InstitutionAdminUploadDocs = () => {
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: InstitutionAdminDocumentsType
+    type: StudentDocumentsType
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -69,7 +60,7 @@ const InstitutionAdminUploadDocs = () => {
     }
   };
 
-  const removeDocument = (type: InstitutionAdminDocumentsType) => {
+  const removeDocument = (type: StudentDocumentsType) => {
     const currentPreview = documents[type]?.preview;
     if (currentPreview) {
       URL.revokeObjectURL(currentPreview);
@@ -92,7 +83,7 @@ const InstitutionAdminUploadDocs = () => {
   const validateDocuments = (): boolean => {
     let isValid = true;
 
-    Object.values(InstitutionAdminDocumentsType).forEach((type) => {
+    Object.values(StudentDocumentsType).forEach((type) => {
       if (!documents[type]?.file) {
         setDocuments((prev) => ({
           ...prev,
@@ -131,8 +122,7 @@ const InstitutionAdminUploadDocs = () => {
       const formData = new FormData();
 
       // Add role to FormData
-      formData.append("role", "INSTITUTION_ADMIN");
-      formData.append("institutionId", params.id as string);
+      formData.append("role", "STUDENT");
 
       // Add each document to FormData with its type
       Object.entries(documents).forEach(([type, doc]) => {
@@ -145,8 +135,23 @@ const InstitutionAdminUploadDocs = () => {
         }
       });
 
+      // Add student-specific fields
+      const institutionId = (
+        document.getElementById("institutionId") as HTMLInputElement
+      )?.value;
+      const enrollmentNo = (
+        document.getElementById("enrollmentNo") as HTMLInputElement
+      )?.value;
+      const graduationYear = (
+        document.getElementById("graduationYear") as HTMLInputElement
+      )?.value;
+
+      if (institutionId) formData.append("institutionId", institutionId);
+      if (enrollmentNo) formData.append("enrollmentNo", enrollmentNo);
+      if (graduationYear) formData.append("graduationYear", graduationYear);
+
       // Send POST request to API endpoint
-      const response = await fetch("/api/upload-documents", {
+      const response = await fetch("/api/auth/upload-documents", {
         method: "POST",
         body: formData,
       });
@@ -161,7 +166,7 @@ const InstitutionAdminUploadDocs = () => {
       signOut({ callbackUrl: "/" });
 
       // Reset form after successful upload
-      Object.values(InstitutionAdminDocumentsType).forEach((type) => {
+      Object.values(StudentDocumentsType).forEach((type) => {
         removeDocument(type);
       });
     } catch (error) {
@@ -186,14 +191,54 @@ const InstitutionAdminUploadDocs = () => {
   return (
     <div className="w-full max-w-xl border rounded-md py-4 px-5 bg-background">
       <div className="mb-4">
-        <h2 className="text-xl font-medium">Required Documents</h2>
+        <h2 className="text-xl font-medium">Student Verification</h2>
         <span className="text-sm text-muted-foreground">
-          Please upload the following documents to verify your institution
+          Please upload your student ID and provide enrollment details
         </span>
       </div>
 
       <div className="space-y-6">
-        {Object.values(InstitutionAdminDocumentsType).map((type) => (
+        {/* Student Details */}
+        <div className="space-y-2">
+          <Label htmlFor="institutionId" className="text-sm font-normal">
+            Institution ID
+          </Label>
+          <Input
+            id="institutionId"
+            type="text"
+            placeholder="Enter your institution ID"
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="enrollmentNo" className="text-sm font-normal">
+            Enrollment Number
+          </Label>
+          <Input
+            id="enrollmentNo"
+            type="text"
+            placeholder="Enter your enrollment number"
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="graduationYear" className="text-sm font-normal">
+            Expected Graduation Year
+          </Label>
+          <Input
+            id="graduationYear"
+            type="number"
+            placeholder="e.g., 2025"
+            className="w-full"
+            min="2000"
+            max="2100"
+          />
+        </div>
+
+        {/* Document Uploads */}
+        {Object.values(StudentDocumentsType).map((type) => (
           <div key={type} className="space-y-2">
             <Label
               className={`text-sm transition-colors font-normal ${
@@ -236,9 +281,7 @@ const InstitutionAdminUploadDocs = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                      removeDocument(type as InstitutionAdminDocumentsType)
-                    }
+                    onClick={() => removeDocument(type as StudentDocumentsType)}
                     className="absolute top-2 right-2 p-1 bg-background rounded-full shadow-md hover:bg-accent transition-colors"
                   >
                     <X className="h-4 w-4 text-foreground" />
@@ -262,7 +305,7 @@ const InstitutionAdminUploadDocs = () => {
               <FaSpinner className="animate-spin mr-2" /> Uploading...
             </>
           ) : (
-            "Upload Documents"
+            "Submit Verification"
           )}
         </Button>
       </div>
@@ -270,4 +313,4 @@ const InstitutionAdminUploadDocs = () => {
   );
 };
 
-export default InstitutionAdminUploadDocs;
+export default StudentUploadDocs;
