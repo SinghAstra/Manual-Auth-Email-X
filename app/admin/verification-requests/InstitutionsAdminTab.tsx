@@ -69,7 +69,7 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
       try {
         setLoading(true);
         const response = await fetch(
-          "/api/admin/pending-verification?role=INSTITUTION_ADMIN&status=PENDING"
+          "/api/admin/verification-requests?role=INSTITUTION_ADMIN&status=PENDING"
         );
         const data = await response.json();
         console.log("data is ", data);
@@ -97,7 +97,7 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
   ) => {
     try {
       setProcessingId(userId);
-      const response = await fetch("/api/admin/pending-verification", {
+      const response = await fetch("/api/admin/verification-requests", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

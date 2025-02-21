@@ -5,25 +5,46 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { dashboardRoutes } from "@/lib/constants";
-import { Role } from "@prisma/client";
+import {
+  Company,
+  CompanyProfile,
+  GovernmentProfile,
+  Institution,
+  InstitutionProfile,
+  StudentProfile,
+  User,
+} from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface VerificationData {
-  role: Role;
-  verificationStatus: string;
-  feedback: string | null;
-  institutionProfile?: { institution: { name: string } };
-  companyProfile?: { company: { name: string } };
-  studentProfile?: { institution: { name: string } };
-  governmentProfile?: { government: { name: string } };
+interface InstitutionProfileWithInstitution extends InstitutionProfile {
+  institution: Institution;
+}
+
+interface CompanyProfileWithCompany extends CompanyProfile {
+  company: Company;
+}
+
+interface StudentProfileWithInstitution extends StudentProfile {
+  institution: Institution;
+}
+
+interface GovernmentProfileWithGovernment extends GovernmentProfile {
+  government: GovernmentProfile;
+}
+
+interface UserWithProfile extends User {
+  institutionProfile?: InstitutionProfileWithInstitution;
+  companyProfile?: CompanyProfileWithCompany;
+  studentProfile?: StudentProfileWithInstitution;
+  governmentProfile?: GovernmentProfileWithGovernment;
 }
 
 const VerificationPending = () => {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<VerificationData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserWithProfile | null>(null);
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const { toast } = useToast();
@@ -39,32 +60,36 @@ const VerificationPending = () => {
   useEffect(() => {
     const fetchVerificationStatus = async () => {
       try {
-        const response = await fetch("/api/auth/verification-pending");
+        const response = await fetch("/api/auth/user");
+        const data = await response.json();
+        console.log("data is ", data);
 
         if (!response.ok) {
-          setMessage("Failed to fetch");
+          setMessage(data.message || "Failed to fetch");
           return;
         }
 
-        const userData = await response.json();
-        setData(userData);
+        setUser(data);
 
         // Redirect if user is already verified
-        if (data?.verificationStatus === "APPROVED") {
-          router.push(dashboardRoutes[data.role]);
+        if (user?.verificationStatus === "APPROVED") {
+          router.push(dashboardRoutes[user?.role]);
           return;
         }
       } catch (error) {
-        console.error("Error fetching verification status:", error);
+        if (error instanceof Error) {
+          console.log("error.stack is ", error.stack);
+          console.log("error.message is ", error.message);
+        }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchVerificationStatus();
-  }, [router, data?.role, data?.verificationStatus]);
+  }, [router, user?.role, user?.verificationStatus]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -76,19 +101,20 @@ const VerificationPending = () => {
   }
 
   const getOrganizationName = () => {
-    if (!data) return "";
+    if (!user) return "";
 
-    if (data.institutionProfile)
-      return data.institutionProfile.institution.name;
-    if (data.companyProfile) return data.companyProfile.company.name;
-    if (data.studentProfile) return data.studentProfile.institution.name;
-    if (data.governmentProfile) return data.governmentProfile.government.name;
+    if (user.institutionProfile)
+      return user.institutionProfile.institution.name;
+    if (user.companyProfile) return user.companyProfile.company.name;
+    if (user.studentProfile) return user.studentProfile.institution.name;
+    if (user.governmentProfile)
+      return user.governmentProfile.government.department;
 
     return "";
   };
 
   const getRoleDisplay = () => {
-    if (!data) return "";
+    if (!user) return "";
 
     const roleMap: { [key: string]: string } = {
       INSTITUTION_ADMIN: "Institution Administrator",
@@ -97,7 +123,7 @@ const VerificationPending = () => {
       GOVERNMENT_REPRESENTATIVE: "Government Representative",
     };
 
-    return roleMap[data.role] || data.role;
+    return roleMap[user.role] || user.role;
   };
 
   return (
@@ -107,11 +133,11 @@ const VerificationPending = () => {
         <Card className="max-w-2xl w-full">
           <CardHeader>
             <CardTitle>
-              Verification Status: {data?.verificationStatus}
+              Verification Status: {user?.verificationStatus}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {data?.verificationStatus === "PENDING" && (
+            {user?.verificationStatus === "PENDING" && (
               <div className="space-y-2">
                 <p className="text-lg">
                   Your verification as{" "}
@@ -133,11 +159,11 @@ const VerificationPending = () => {
                 </p>
               </div>
             )}
-            {data?.feedback && (
+            {user?.feedback && (
               <div className="flex justify-between gap-2 p-4 border rounded-lg">
                 <div className="flex flex-col">
                   <p className="font-medium">Feedback from reviewers:</p>
-                  <p className="mt-2">{data.feedback}</p>
+                  <p className="mt-2">{user.feedback}</p>
                 </div>
                 <Link
                   className={buttonVariants({ variant: "outline" })}

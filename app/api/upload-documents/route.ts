@@ -92,18 +92,19 @@ export async function POST(request: NextRequest) {
       uploadedDocuments.push(document);
     }
 
+    console.log("uploadedDocuments is ", uploadedDocuments);
+
     // Create role-specific profile
     try {
       await createProfileBasedOnRole(user.id, role as Role, formData);
-    } catch (profileError) {
-      console.error("Error creating profile:", profileError);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("error.stack is ", error.stack);
+        console.log("error.message is ", error.message);
+      }
       return NextResponse.json(
         {
           message: "Error creating user profile",
-          error:
-            profileError instanceof Error
-              ? profileError.message
-              : String(profileError),
         },
         { status: 400 }
       );
@@ -145,6 +146,7 @@ async function createProfileBasedOnRole(
     case "INSTITUTION_ADMIN":
       const institutionId = formData.get("institutionId") as string;
       console.log("institutionId is ", institutionId);
+      console.log("userId is ", userId);
       await prisma.institutionProfile.create({
         data: {
           userId,
