@@ -46,7 +46,7 @@ export function Hero() {
       }
 
       if (user.verificationStatus === ("PENDING" as VerificationStatus)) {
-        router.push("/auth/verification-pending");
+        router.push("/auth/verification-status");
       }
 
       if (user.verificationStatus === ("APPROVED" as VerificationStatus)) {

@@ -132,10 +132,44 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-6">
+                {/* Header with name, email and badges */}
+                <div className="flex justify-between">
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-[150px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-5 w-[120px]" />
+                    <Skeleton className="h-5 w-[100px]" />
+                  </div>
+                </div>
+
+                {/* Documents section */}
+                <div className="space-y-4">
+                  <Skeleton className="h-5 w-[140px]" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+
+                {/* Footer with buttons and date */}
+                <div className="flex flex-col space-y-4 md:items-end">
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <Skeleton className="h-10 w-[120px]" />
+                    <Skeleton className="h-10 w-[120px]" />
+                  </div>
+                  <Skeleton className="h-4 w-[180px]" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }

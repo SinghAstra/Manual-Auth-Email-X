@@ -1,19 +1,19 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -22,9 +22,10 @@ import {
   InstitutionProfile,
   User,
 } from "@prisma/client";
-import { CheckCircle, ExternalLink, FileText, XCircle } from "lucide-react";
+import { CheckCircle, ExternalLink, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface InstitutionsAdminTabProps {
   active: boolean;
@@ -39,19 +40,64 @@ interface UserWithInstitutionProfileAndDocuments extends User {
   documents: Document[];
 }
 
+const InstitutionsAdminSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      {[1, 2, 3, 4].map((i) => (
+        <Card key={i} className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6">
+              {/* Header section with name, email and badges */}
+              <div className="flex justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-[180px]" />
+                  <Skeleton className="h-4 w-[220px]" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-5 w-[140px]" />
+                  <Skeleton className="h-5 w-[120px]" />
+                  <Skeleton className="h-5 w-[100px]" />
+                </div>
+              </div>
+
+              {/* Documents section */}
+              <div className="space-y-4">
+                <Skeleton className="h-5 w-[140px]" />
+                <div className="space-y-2">
+                  {[1, 2].map((doc) => (
+                    <Skeleton key={doc} className="h-10 w-full" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer section */}
+              <div className="flex flex-col space-y-4 md:items-end">
+                <Skeleton className="h-9 w-[100px] ml-auto" />
+                <Skeleton className="h-4 w-[180px] ml-auto" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
   active,
 }) => {
-  const [pendingUsers, setPendingUsers] = useState<
+  const [verifiedUsers, setVerifiedUsers] = useState<
     UserWithInstitutionProfileAndDocuments[]
   >([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] =
-    useState<UserWithInstitutionProfileAndDocuments | null>(null);
-  const [feedback, setFeedback] = useState("");
-  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(true);
+  const [processingIds, setProcessingIds] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>();
+  const [userToDeleteId, setUserToDeleteId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const addToProcessing = (id: string) => {
+    setProcessingIds((prev) => [...prev, id]);
+  };
 
   useEffect(() => {
     if (!message) return;
@@ -67,7 +113,7 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
     }
     const fetchPendingUsers = async () => {
       try {
-        setLoading(true);
+        setIsFetching(true);
         const response = await fetch(
           "/api/admin/verification-requests?role=INSTITUTION_ADMIN&status=APPROVED"
         );
@@ -76,7 +122,7 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
         if (!response.ok) {
           setMessage(data.message || "Failed to fetch pending users");
         }
-        setPendingUsers(data.users || []);
+        setVerifiedUsers(data.users || []);
       } catch (error) {
         if (error instanceof Error) {
           console.log("error.stack is ", error.stack);
@@ -84,69 +130,43 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
         }
         setMessage("Internal Server Error -- fetchPendingUsers");
       } finally {
-        setLoading(false);
+        setIsFetching(false);
       }
     };
 
     fetchPendingUsers();
   }, [active, toast]);
 
-  const handleVerificationUpdate = async (
-    userId: string,
-    status: "APPROVED" | "REJECTED"
-  ) => {
+  const handleDelete = async (id: string) => {
     try {
-      setProcessingId(userId);
-      const response = await fetch("/api/admin/verification-requests", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId,
-          status,
-          feedback: status === "REJECTED" ? feedback : undefined,
-        }),
-      });
+      addToProcessing(id);
 
-      if (!response.ok) {
-        throw new Error("Failed to update verification status");
-      }
-
-      const updatedUsers = pendingUsers.filter((user) => user.id !== userId);
-      setPendingUsers(updatedUsers);
-
-      setSelectedUser(null);
-      setFeedback("");
-      setMessage(`The user has been successfully ${status.toLowerCase()}`);
+      // Remove the deleted institution from the list
+      setVerifiedUsers(verifiedUsers.filter((user) => user.id !== id));
+      setMessage("User successfully deleted");
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      setMessage("Internal Server Error -- handleVerificationUpdate");
+      setMessage("Internal Server Error --handleDelete");
     } finally {
-      setProcessingId(null);
+      setProcessingIds((prev) => prev.filter((i) => i !== id));
+      setUserToDeleteId(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
+  if (isFetching) {
+    return <InstitutionsAdminSkeleton />;
   }
 
-  if (pendingUsers.length === 0) {
+  if (verifiedUsers.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-10">
           <CheckCircle className="h-10 w-10 text-muted-foreground mb-4" />
           <p className="text-muted-foreground text-center">
-            No pending verification requests at the moment.
+            No verified Institution Admin at the moment.
           </p>
         </CardContent>
       </Card>
@@ -155,138 +175,122 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {pendingUsers.map((user) => (
-        <Card key={user.id} className="overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-6">
-              <div className="flex justify-between space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Badge variant="outline" className="text-sm">
-                    {user.institutionProfile?.institution.name || "N/A"}
-                  </Badge>
-                  <Badge variant="outline" className=" text-muted-foreground">
-                    {user.role.replace("_", " ")}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Submitted Documents</h4>
-                {user.documents.length > 0 ? (
-                  <div className="space-y-2">
-                    {user.documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center">
-                        <Link
-                          className={cn(
-                            buttonVariants({ variant: "outline" }),
-                            "w-full justify-start gap-2"
-                          )}
-                          href={doc.fileUrl}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          <FileText className="h-4 w-4" />
-                          <span className="truncate">{doc.type}</span>
-                          <ExternalLink className="h-3 w-3 ml-auto" />
-                        </Link>
-                      </div>
-                    ))}
+      {verifiedUsers.map((user) => {
+        const isProcessing = processingIds.includes(user.id);
+        return (
+          <Card key={user.id} className="overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-6">
+                <div className="flex justify-between space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium">{user.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No documents submitted
-                  </p>
-                )}
-              </div>
 
-              <div className="flex flex-col space-y-4 md:items-end md:justify-end">
-                <div className="flex gap-2 w-full md:w-auto">
-                  <Button
-                    variant="outline"
-                    className="flex-1 md:flex-none"
-                    onClick={() =>
-                      handleVerificationUpdate(user.id, "APPROVED")
-                    }
-                    disabled={!!processingId}
-                  >
-                    {processingId === user.id ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Processing...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" /> Approve
-                      </span>
-                    )}
-                  </Button>
-
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        className="flex-1 md:flex-none"
-                        onClick={() => setSelectedUser(user)}
-                      >
-                        <XCircle className="h-4 w-4 mr-2" /> Reject
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Reject Verification Request</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="feedback">Feedback (Optional)</Label>
-                          <Textarea
-                            id="feedback"
-                            placeholder="Provide feedback on why the verification is being rejected"
-                            value={feedback}
-                            onChange={(e) => setFeedback(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button
-                          variant="destructive"
-                          onClick={() =>
-                            selectedUser &&
-                            handleVerificationUpdate(
-                              selectedUser.id,
-                              "REJECTED"
-                            )
-                          }
-                          disabled={!!processingId}
-                        >
-                          {processingId === selectedUser?.id ? (
-                            <span className="flex items-center gap-2">
-                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                              Processing...
-                            </span>
-                          ) : (
-                            "Confirm Rejection"
-                          )}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <div className="flex flex-col gap-2">
+                    <Badge variant="outline" className="text-sm">
+                      {user.institutionProfile?.institution.name || "N/A"}
+                    </Badge>
+                    <Badge variant="outline" className=" text-muted-foreground">
+                      {user.role.replace("_", " ")}
+                    </Badge>
+                    <Badge variant="outline" className="text-emerald-500">
+                      Verified
+                    </Badge>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Submitted on{" "}
-                  {new Date(
-                    user.documents[0]?.createdAt || Date.now()
-                  ).toLocaleDateString()}
-                </p>
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Submitted Documents</h4>
+                  {user.documents.length > 0 ? (
+                    <div className="space-y-2">
+                      {user.documents.map((doc) => (
+                        <div key={doc.id} className="flex items-center">
+                          <Link
+                            className={cn(
+                              buttonVariants({ variant: "outline" }),
+                              "w-full justify-start gap-2"
+                            )}
+                            href={doc.fileUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <FileText className="h-4 w-4" />
+                            <span className="truncate">{doc.type}</span>
+                            <ExternalLink className="h-3 w-3 ml-auto" />
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No documents submitted
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col space-y-4 md:items-end md:justify-end">
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <div className="flex justify-end gap-2 mt-2">
+                      {isProcessing ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled
+                          className="min-w-[110px]"
+                        >
+                          <FaSpinner className="h-4 w-4 mr-2 animate-spin" />
+                          Wait...
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => setUserToDeleteId(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Submitted on{" "}
+                    {new Date(
+                      user.documents[0]?.createdAt || Date.now()
+                    ).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        );
+      })}
+      <AlertDialog
+        open={!!userToDeleteId}
+        onOpenChange={(open: boolean) => !open && setUserToDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              institution Admin and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => userToDeleteId && handleDelete(userToDeleteId)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

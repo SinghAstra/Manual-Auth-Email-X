@@ -21,6 +21,43 @@ interface VerifiedInstitutionsTabProps {
   active: boolean;
 }
 
+const VerifiedInstitutionsSkeleton = () => {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i} className="mb-4">
+          <CardContent className="p-4 space-y-4">
+            {/* Institution header with name and badge */}
+            <div className="flex flex-row items-start justify-between">
+              <div className="flex flex-col gap-2">
+                {/* Institution name and icon */}
+                <div className="flex items-center gap-2">
+                  <Building className="h-5 w-5 text-muted-foreground/50" />
+                  <Skeleton className="h-6 w-[200px]" />
+                </div>
+
+                {/* Address */}
+                <Skeleton className="h-4 w-[350px]" />
+
+                {/* Website */}
+                <Skeleton className="h-4 w-[250px]" />
+              </div>
+
+              {/* Verified badge */}
+              <Skeleton className="h-6 w-[80px]" />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex justify-end gap-2">
+              <Skeleton className="h-9 w-[100px]" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 const VerifiedInstitutionsTab = ({ active }: VerifiedInstitutionsTabProps) => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -92,31 +129,7 @@ const VerifiedInstitutionsTab = ({ active }: VerifiedInstitutionsTabProps) => {
   };
 
   if (isFetching) {
-    return (
-      <div className="space-y-4">
-        {Array(3)
-          .fill(0)
-          .map((_, index) => (
-            <div key={index} className="mb-4 border rounded-md p-4 space-y-4">
-              <div className="flex flex-row items-start justify-between">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <Skeleton className="h-5 w-5" />
-                    <Skeleton className="h-6 w-40" />
-                  </div>
-                  <Skeleton className="h-4 w-72" />
-                </div>
-                <Skeleton className="h-6 w-32" />
-              </div>
-              <div>
-                <div className="flex justify-end gap-2 mt-2">
-                  <Skeleton className="h-9 w-24" />
-                </div>
-              </div>
-            </div>
-          ))}
-      </div>
-    );
+    return <VerifiedInstitutionsSkeleton />;
   }
 
   if (institutions.length === 0) {
