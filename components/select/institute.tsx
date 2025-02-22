@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { Skeleton } from "../ui/skeleton";
 
 interface Institution {
   id: string;
@@ -16,6 +18,7 @@ const SelectInstitute = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const router = useRouter();
   const params = useParams();
@@ -26,13 +29,12 @@ const SelectInstitute = () => {
       try {
         setIsLoading(true);
         const response = await fetch("/api/institutions");
+        const data = await response.json();
 
         if (!response.ok) {
-          throw new Error("Failed to fetch institutions");
+          setMessage(data.message || "Failed to fetch institutions");
         }
 
-        const data = await response.json();
-        console.log("data is ", data);
         setInstitutions(data);
         setFilteredInstitutions(data);
       } catch (error) {
@@ -73,6 +75,22 @@ const SelectInstitute = () => {
     setSearchQuery(e.target.value);
   };
 
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+    setMessage(null);
+  }, [message, toast]);
+
+  const LoadingSkeleton = () => (
+    <div className="space-y-2">
+      {[...Array(5)].map((_, index) => (
+        <Skeleton key={index} className="w-full h-10" />
+      ))}
+    </div>
+  );
+
   return (
     <div className="w-full max-w-lg rounded-md p-4 mt-4 space-y-4 border bg-background">
       <h2 className="text-2xl">Search For Institution</h2>
@@ -84,12 +102,8 @@ const SelectInstitute = () => {
       />
 
       {isLoading ? (
-        <div className="text-center text-sm text-muted-foreground py-4">
-          Loading institutions...
-        </div>
-      ) : message ? (
-        <div className="text-center text-sm text-destructive py-4">
-          {message}
+        <div className="max-h-60 overflow-y-auto border border-secondary rounded-md p-2">
+          <LoadingSkeleton />
         </div>
       ) : filteredInstitutions.length > 0 ? (
         <div className="max-h-60 overflow-y-auto border border-secondary rounded-md">

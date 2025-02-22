@@ -7,10 +7,10 @@ import React from "react";
 
 const Sidebar = () => {
   const sidebarLinks = [
-    { name: "Organization Request", href: "/admin/organization-request" },
-    { name: "Verified Organization ", href: "/admin/verified-organization" },
+    { name: "Organization Requests", href: "/admin/organization-requests" },
+    { name: "Verified Organizations ", href: "/admin/verified-organizations" },
     { name: "Verification Requests", href: "/admin/verification-requests" },
-    { name: "Verified", href: "/admin/users" },
+    { name: "Verified Requests", href: "/admin/verified-requests" },
   ];
 
   const pathname = usePathname();

@@ -3,19 +3,24 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Building, Landmark } from "lucide-react";
 import React, { useState } from "react";
-import CompaniesTab from "./CompaniesTab";
-import GovernmentTab from "./GovernmentTab";
-import InstitutionsTab from "./InstitutionsTab";
+import CompaniesRepTab from "./CompaniesRepTab";
+import GovernmentRepTab from "./GovernmentRepTab";
+import InstitutionsAdminTab from "./InstitutionAdminTab";
 
-export type TabsOptions = "institutions" | "companies" | "government";
+export type TabsOptions =
+  | "institutionsAdminTab"
+  | "companiesRepTab"
+  | "governmentRepTab";
 
-const AdminRequestPage = () => {
-  const [activeTab, setActiveTab] = useState<TabsOptions>("institutions");
+const PendingVerificationsPage = () => {
+  const [activeTab, setActiveTab] = useState<TabsOptions>(
+    "institutionsAdminTab"
+  );
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl mb-2">Verified Organizations.</h1>
+        <h1 className="text-3xl mb-2">Verified Requests</h1>
       </div>
 
       <Tabs
@@ -25,31 +30,31 @@ const AdminRequestPage = () => {
         className="w-full"
       >
         <TabsList className="w-full mb-6">
-          <TabsTrigger value="institutions" className="flex-1">
-            <Building className="h-4 w-4 mr-2" /> Institutions
+          <TabsTrigger value="institutionsAdminTab" className="flex-1">
+            <Building className="h-4 w-4 mr-2" /> Institutions Admin
           </TabsTrigger>
           <TabsTrigger value="companies" className="flex-1">
-            <Briefcase className="h-4 w-4 mr-2" /> Companies
+            <Briefcase className="h-4 w-4 mr-2" /> Companies Rep
           </TabsTrigger>
           <TabsTrigger value="government" className="flex-1">
-            <Landmark className="h-4 w-4 mr-2" /> Government
+            <Landmark className="h-4 w-4 mr-2" /> Government Rep
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="institutions" className="mt-0">
-          <InstitutionsTab active={activeTab === "institutions"} />
+        <TabsContent value="institutionsAdminTab" className="mt-0">
+          <InstitutionsAdminTab active={activeTab === "institutionsAdminTab"} />
         </TabsContent>
 
         <TabsContent value="companies" className="mt-0">
-          <CompaniesTab active={activeTab === "companies"} />
+          <CompaniesRepTab />
         </TabsContent>
 
         <TabsContent value="government" className="mt-0">
-          <GovernmentTab active={activeTab === "government"} />
+          <GovernmentRepTab />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default AdminRequestPage;
+export default PendingVerificationsPage;

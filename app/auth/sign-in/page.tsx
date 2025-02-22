@@ -57,7 +57,7 @@ export default function SignIn() {
       const user = session.user;
 
       if (user.verificationStatus === ("PENDING" as VerificationStatus)) {
-        router.push("/auth/verification-pending");
+        router.push("/auth/verification-status");
       } else if (
         user.verificationStatus === ("APPROVED" as VerificationStatus)
       ) {
