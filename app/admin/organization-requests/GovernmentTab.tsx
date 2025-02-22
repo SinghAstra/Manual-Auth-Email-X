@@ -10,8 +10,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Government } from "@prisma/client";
-import { Check, Landmark, Loader2, X } from "lucide-react";
+import { Check, Landmark, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface GovernmentTabProps {
   active: boolean;
@@ -209,7 +210,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
                     disabled
                     className="min-w-[146px]"
                   >
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                    <FaSpinner className="h-4 w-4 mr-2 animate-spin" />{" "}
                     Processing...
                   </Button>
                 ) : (

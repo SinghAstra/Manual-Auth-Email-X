@@ -10,6 +10,14 @@ interface Institution {
   name: string;
 }
 
+export const LoadingSelectSkeleton = () => (
+  <div className="space-y-2">
+    {[...Array(5)].map((_, index) => (
+      <Skeleton key={index} className="w-full h-10" />
+    ))}
+  </div>
+);
+
 const SelectInstitute = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [filteredInstitutions, setFilteredInstitutions] = useState<
@@ -42,7 +50,7 @@ const SelectInstitute = () => {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        setMessage("Error loading institutions. Please try again later.");
+        setMessage("Internal Server Error. Check Your Network Connectivity.");
       } finally {
         setIsLoading(false);
       }
@@ -83,14 +91,6 @@ const SelectInstitute = () => {
     setMessage(null);
   }, [message, toast]);
 
-  const LoadingSkeleton = () => (
-    <div className="space-y-2">
-      {[...Array(5)].map((_, index) => (
-        <Skeleton key={index} className="w-full h-10" />
-      ))}
-    </div>
-  );
-
   return (
     <div className="w-full max-w-lg rounded-md p-4 mt-4 space-y-4 border bg-background">
       <h2 className="text-2xl">Search For Institution</h2>
@@ -103,7 +103,7 @@ const SelectInstitute = () => {
 
       {isLoading ? (
         <div className="max-h-60 overflow-y-auto border border-secondary rounded-md p-2">
-          <LoadingSkeleton />
+          <LoadingSelectSkeleton />
         </div>
       ) : filteredInstitutions.length > 0 ? (
         <div className="max-h-60 overflow-y-auto border border-secondary rounded-md">

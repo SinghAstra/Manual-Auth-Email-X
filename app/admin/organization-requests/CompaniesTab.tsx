@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Check, Loader2, X } from "lucide-react";
+import { Briefcase, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface Company {
   id: string;
@@ -53,7 +54,7 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        setMessage("Internal Server Error");
+        setMessage("Internal Server Error. Check Your Network Connectivity");
       } finally {
         setIsFetching(false);
       }
@@ -215,7 +216,7 @@ export const CompaniesTab = ({ active }: CompaniesTabProps) => {
                     disabled
                     className="min-w-[146px]"
                   >
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                    <FaSpinner className="h-4 w-4 mr-2 animate-spin" />{" "}
                     Processing...
                   </Button>
                 ) : (

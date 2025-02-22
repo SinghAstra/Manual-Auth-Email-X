@@ -157,32 +157,13 @@ async function createProfileBasedOnRole(
 
     case "COMPANY_REPRESENTATIVE":
       // Create or find company and link to representative
-      const companyId = formData.get("companyId") as string | null;
-      if (companyId) {
-        await prisma.companyProfile.create({
-          data: {
-            userId,
-            companyId,
-          },
-        });
-      } else {
-        const company = await prisma.company.create({
-          data: {
-            name: formData.get("companyName") as string,
-            website: formData.get("companyWebsite") as string,
-            address: formData.get("companyAddress") as string,
-            city: formData.get("companyCity") as string,
-            state: formData.get("companyState") as string,
-          },
-        });
-
-        await prisma.companyProfile.create({
-          data: {
-            userId,
-            companyId: company.id,
-          },
-        });
-      }
+      const companyId = formData.get("companyId") as string;
+      await prisma.companyProfile.create({
+        data: {
+          userId,
+          companyId,
+        },
+      });
       break;
 
     case "STUDENT":

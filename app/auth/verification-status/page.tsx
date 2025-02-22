@@ -127,7 +127,7 @@ const VerificationPending = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-grid-white">
       <Navbar />
       <div className="flex-1 flex justify-center items-center p-4">
         <Card className="max-w-2xl w-full">

@@ -33,10 +33,10 @@ const PendingVerificationsPage = () => {
           <TabsTrigger value="institutionsAdminTab" className="flex-1">
             <Building className="h-4 w-4 mr-2" /> Institutions Admin
           </TabsTrigger>
-          <TabsTrigger value="companies" className="flex-1">
+          <TabsTrigger value="companiesRepTab" className="flex-1">
             <Briefcase className="h-4 w-4 mr-2" /> Companies Rep
           </TabsTrigger>
-          <TabsTrigger value="government" className="flex-1">
+          <TabsTrigger value="governmentRepTab" className="flex-1">
             <Landmark className="h-4 w-4 mr-2" /> Government Rep
           </TabsTrigger>
         </TabsList>
@@ -45,11 +45,11 @@ const PendingVerificationsPage = () => {
           <InstitutionsAdminTab active={activeTab === "institutionsAdminTab"} />
         </TabsContent>
 
-        <TabsContent value="companies" className="mt-0">
-          <CompaniesRepTab />
+        <TabsContent value="companiesRepTab" className="mt-0">
+          <CompaniesRepTab active={activeTab === "companiesRepTab"} />
         </TabsContent>
 
-        <TabsContent value="government" className="mt-0">
+        <TabsContent value="governmentRepTab" className="mt-0">
           <GovernmentRepTab />
         </TabsContent>
       </Tabs>

@@ -108,9 +108,10 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
           feedback: status === "REJECTED" ? feedback : undefined,
         }),
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("Failed to update verification status");
+        setMessage(data.message || "Failed to update verification status");
       }
 
       const updatedUsers = pendingUsers.filter((user) => user.id !== userId);

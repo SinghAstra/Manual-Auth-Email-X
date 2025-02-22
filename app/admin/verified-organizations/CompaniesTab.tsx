@@ -13,8 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Loader2, Trash2 } from "lucide-react";
+import { Briefcase, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface Company {
   id: string;
@@ -183,7 +184,7 @@ const CompaniesTab = ({ active }: CompaniesTabProps) => {
                     disabled
                     className="min-w-[110px]"
                   >
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Wait...
+                    <FaSpinner className="h-4 w-4 mr-2 animate-spin" /> Wait...
                   </Button>
                 ) : (
                   <Button

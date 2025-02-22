@@ -14,8 +14,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Government } from "@prisma/client";
-import { Building, Loader2, Trash2 } from "lucide-react";
+import { Building, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface GovernmentTabProps {
   active: boolean;
@@ -148,9 +149,8 @@ const GovernmentTab = ({ active }: GovernmentTabProps) => {
                   <span className="text-lg">{government.name}</span>
                 </div>
                 <div className="mt-1 flex flex-col gap-2">
-                  <div>• {government.level.toLowerCase()} Jurisdiction</div>
+                  <div>{government.level.toLowerCase()} Jurisdiction</div>
                   <div>
-                    •{" "}
                     {government.website && (
                       <a
                         href={
@@ -181,7 +181,7 @@ const GovernmentTab = ({ active }: GovernmentTabProps) => {
                     disabled
                     className="min-w-[110px]"
                   >
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Wait...
+                    <FaSpinner className="h-4 w-4 mr-2 animate-spin" /> Wait...
                   </Button>
                 ) : (
                   <Button

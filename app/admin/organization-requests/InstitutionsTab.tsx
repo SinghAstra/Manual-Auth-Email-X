@@ -4,8 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Institution } from "@prisma/client";
-import { Building, Check, Loader2, X } from "lucide-react";
+import { Building, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 
 interface InstitutionsTabProps {
   active: boolean;
@@ -199,7 +200,7 @@ export const InstitutionsTab = ({ active }: InstitutionsTabProps) => {
                     disabled
                     className="min-w-[146px]"
                   >
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Wait...
+                    <FaSpinner className="h-4 w-4 mr-2 animate-spin" /> Wait...
                   </Button>
                 ) : (
                   <>

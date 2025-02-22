@@ -128,7 +128,7 @@ const InstitutionsAdminTab: React.FC<InstitutionsAdminTabProps> = ({
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        setMessage("Internal Server Error -- fetchPendingUsers");
+        setMessage("Internal Server Error.Check Network Connectivity");
       } finally {
         setIsFetching(false);
       }
