@@ -139,6 +139,15 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
+    if (status === "REJECTED") {
+      await prisma.$transaction([
+        prisma.institutionProfile.deleteMany({ where: { userId } }),
+        prisma.companyProfile.deleteMany({ where: { userId } }),
+        prisma.governmentProfile.deleteMany({ where: { userId } }),
+        prisma.document.deleteMany({ where: { userId } }),
+      ]);
+    }
+
     return NextResponse.json(
       {
         message: `User verification status updated to ${status}`,

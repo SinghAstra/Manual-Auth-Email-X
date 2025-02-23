@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
       data: {
         role: role as Role,
         verificationStatus: "PENDING",
+        feedback: null,
       },
     });
 
