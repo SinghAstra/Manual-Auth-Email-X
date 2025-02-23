@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -5,6 +7,7 @@ import { formatDocumentType } from "@/lib/utils";
 import { X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
@@ -27,6 +30,7 @@ const StudentUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
+  const params = useParams();
 
   const fileInputRefs = useRef<
     Record<StudentDocumentsType, HTMLInputElement | null>
@@ -123,6 +127,7 @@ const StudentUploadDocs = () => {
 
       // Add role to FormData
       formData.append("role", "STUDENT");
+      formData.append("institutionId", params.id as string);
 
       // Add each document to FormData with its type
       Object.entries(documents).forEach(([type, doc]) => {
@@ -135,10 +140,6 @@ const StudentUploadDocs = () => {
         }
       });
 
-      // Add student-specific fields
-      const institutionId = (
-        document.getElementById("institutionId") as HTMLInputElement
-      )?.value;
       const enrollmentNo = (
         document.getElementById("enrollmentNo") as HTMLInputElement
       )?.value;
@@ -146,7 +147,6 @@ const StudentUploadDocs = () => {
         document.getElementById("graduationYear") as HTMLInputElement
       )?.value;
 
-      if (institutionId) formData.append("institutionId", institutionId);
       if (enrollmentNo) formData.append("enrollmentNo", enrollmentNo);
       if (graduationYear) formData.append("graduationYear", graduationYear);
 
@@ -198,19 +198,6 @@ const StudentUploadDocs = () => {
       </div>
 
       <div className="space-y-6">
-        {/* Student Details */}
-        <div className="space-y-2">
-          <Label htmlFor="institutionId" className="text-sm font-normal">
-            Institution ID
-          </Label>
-          <Input
-            id="institutionId"
-            type="text"
-            placeholder="Enter your institution ID"
-            className="w-full"
-          />
-        </div>
-
         <div className="space-y-2">
           <Label htmlFor="enrollmentNo" className="text-sm font-normal">
             Enrollment Number
