@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/select/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Building, Landmark } from "lucide-react";
 import React, { useState } from "react";
 import CompaniesRepTab from "./CompaniesRepTab";

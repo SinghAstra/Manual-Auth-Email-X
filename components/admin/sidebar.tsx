@@ -11,6 +11,7 @@ const Sidebar = () => {
     { name: "Verified Organizations ", href: "/admin/verified-organizations" },
     { name: "Verification Requests", href: "/admin/verification-requests" },
     { name: "Verified Requests", href: "/admin/verified-requests" },
+    { name: "Create Organization", href: "/admin/create-organization" },
   ];
 
   const pathname = usePathname();

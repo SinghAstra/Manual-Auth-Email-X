@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge } from "@/components/select/ui/badge";
-import { Button, buttonVariants } from "@/components/select/ui/button";
-import { Card, CardContent } from "@/components/select/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/select/ui/dialog";
-import { Label } from "@/components/select/ui/label";
-import { Skeleton } from "@/components/select/ui/skeleton";
-import { Textarea } from "@/components/select/ui/textarea";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {

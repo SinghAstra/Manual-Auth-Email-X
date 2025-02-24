@@ -1,6 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@/components/select/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AvatarMenu } from "../home/avatar-menu";
 import SignInButton from "../home/sign-in-button";
-import { Skeleton } from "../select/ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -25,7 +25,7 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-4">
           <Link
             className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-            href="/admin/new"
+            href="/admin/create-organization"
           >
             <Plus className="h-5 w-5" />
             New Profile

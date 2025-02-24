@@ -1,22 +1,21 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
-import { Button } from "@/components/select/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/select/ui/form";
-import { Input } from "@/components/select/ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/select/ui/select";
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GovernmentLevel } from "@prisma/client";
@@ -63,12 +62,12 @@ const CreateGovernment = () => {
 
       if (!response.ok) {
         setMessage(data.message || "Failed to create government entity");
-        router.push(`/auth/profile-setup`);
+        router.push(`/admin/create-organization`);
         return;
       }
 
-      setMessage(data.message || "Request submitted successfully.");
-      router.push(`/auth/profile-setup`);
+      setMessage(data.message || "Created Government Org successfully.");
+      router.push(`/admin/create-organization`);
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
@@ -89,8 +88,7 @@ const CreateGovernment = () => {
   }, [message, toast]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
+    <div className="py-3">
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
           <h2 className="text-2xl">Government Entity Profile</h2>
@@ -163,10 +161,11 @@ const CreateGovernment = () => {
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (
                 <>
-                  <FaSpinner className="animate-spin" /> Submitting Request...
+                  <FaSpinner className="animate-spin" /> Creating Government
+                  Entity...
                 </>
               ) : (
-                "Request New Government Entity"
+                "Create New Government Entity"
               )}
             </Button>
           </form>

@@ -1,7 +1,7 @@
-import { Badge } from "@/components/select/ui/badge";
-import { Button } from "@/components/select/ui/button";
-import { Card, CardContent } from "@/components/select/ui/card";
-import { Skeleton } from "@/components/select/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Institution } from "@prisma/client";
 import { Building, Check, X } from "lucide-react";

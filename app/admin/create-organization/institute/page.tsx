@@ -1,15 +1,14 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
-import { Button } from "@/components/select/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/select/ui/form";
-import { Input } from "@/components/select/ui/input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -57,12 +56,12 @@ const CreateInstitute = () => {
 
       if (!response.ok) {
         setMessage(data.message || "Failed to create institution");
-        router.push(`/auth/profile-setup`);
+        router.push(`/admin/create-organization`);
         return;
       }
 
-      setMessage(data.message || "Request Submitted successfully.");
-      router.push(`/auth/profile-setup`);
+      setMessage(data.message || "Created Institute successfully.");
+      router.push(`/admin/create-organization`);
     } catch (error) {
       if (error instanceof Error) {
         console.log("error.stack is ", error.stack);
@@ -83,8 +82,7 @@ const CreateInstitute = () => {
   }, [message, toast]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
+    <div className="py-3">
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
           <h2 className="text-2xl">Institution Profile</h2>
@@ -172,10 +170,11 @@ const CreateInstitute = () => {
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (
                 <>
-                  <FaSpinner className="animate-spin" /> Submitting Request...
+                  <FaSpinner className="animate-spin" /> Creating New
+                  Institution...
                 </>
               ) : (
-                "Request New Institution"
+                "Create New Institution"
               )}
             </Button>
           </form>

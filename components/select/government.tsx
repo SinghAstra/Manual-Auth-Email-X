@@ -1,5 +1,5 @@
-import { Button } from "@/components/select/ui/button";
-import { Input } from "@/components/select/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
