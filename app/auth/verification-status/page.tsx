@@ -1,8 +1,13 @@
 "use client";
 
 import { Navbar } from "@/components/home/navbar";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/select/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/select/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { dashboardRoutes } from "@/lib/constants";
 import {

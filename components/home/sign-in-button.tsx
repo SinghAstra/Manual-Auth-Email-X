@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Icons } from "../Icons";
-import { buttonVariants } from "../ui/button";
+import { buttonVariants } from "../select/ui/button";
 
 export default function SignInButton() {
   return (

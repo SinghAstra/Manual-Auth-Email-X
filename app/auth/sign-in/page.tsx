@@ -1,7 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/Icons";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/select/ui/button";
 import { siteConfig } from "@/config/site";
 import { dashboardRoutes } from "@/lib/constants";
 import { VerificationStatus } from "@prisma/client";

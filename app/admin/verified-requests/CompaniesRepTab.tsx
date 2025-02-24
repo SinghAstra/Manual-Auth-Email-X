@@ -9,11 +9,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/select/ui/alert-dialog";
+import { Badge } from "@/components/select/ui/badge";
+import { Button, buttonVariants } from "@/components/select/ui/button";
+import { Card, CardContent } from "@/components/select/ui/card";
+import { Skeleton } from "@/components/select/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Company, CompanyProfile, Document, User } from "@prisma/client";
@@ -117,7 +117,7 @@ const CompaniesRepTab: React.FC<CompaniesRepTabProps> = ({ active }) => {
           console.log("error.message is ", error.message);
           console.log("error.stack is ", error.stack);
         }
-        setMessage("Internal Server Error. Check Network Connectivity");
+        setMessage("Check Network Connection");
       } finally {
         setIsFetching(false);
       }
@@ -135,9 +135,10 @@ const CompaniesRepTab: React.FC<CompaniesRepTabProps> = ({ active }) => {
       setMessage("User successfully deleted");
     } catch (error) {
       if (error instanceof Error) {
-        console.error("Error deleting user:", error);
+        console.log("error.message is ", error.message);
+        console.log("error.stack is ", error.stack);
       }
-      setMessage("Internal Server Error -- handleDelete");
+      setMessage("Check Network Connection");
     } finally {
       setProcessingIds((prev) => prev.filter((i) => i !== id));
       setUserToDeleteId(null);

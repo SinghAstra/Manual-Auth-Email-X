@@ -1,15 +1,15 @@
 "use client";
 
 import { Navbar } from "@/components/home/navbar";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/select/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/select/ui/form";
+import { Input } from "@/components/select/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";

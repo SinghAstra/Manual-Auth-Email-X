@@ -1,13 +1,13 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/select/ui/badge";
+import { Button } from "@/components/select/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/select/ui/card";
+import { Skeleton } from "@/components/select/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";

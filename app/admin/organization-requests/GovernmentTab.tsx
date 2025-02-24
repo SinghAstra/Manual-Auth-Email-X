@@ -1,13 +1,13 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/select/ui/badge";
+import { Button } from "@/components/select/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/select/ui/card";
+import { Skeleton } from "@/components/select/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Government } from "@prisma/client";
 import { Check, Landmark, X } from "lucide-react";
@@ -90,7 +90,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      setMessage("Internal Server Error - handleApprove");
+      setMessage("Check Your Network Connectivity");
     }
   };
 
@@ -118,7 +118,7 @@ export const GovernmentTab = ({ active }: GovernmentTabProps) => {
         console.log("error.stack is ", error.stack);
         console.log("error.message is ", error.message);
       }
-      setMessage("Internal Server Error - handleReject");
+      setMessage("Check Your Network Connectivity");
     }
   };
 

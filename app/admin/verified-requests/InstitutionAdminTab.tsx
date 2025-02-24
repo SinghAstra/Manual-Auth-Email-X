@@ -9,11 +9,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/select/ui/alert-dialog";
+import { Badge } from "@/components/select/ui/badge";
+import { Button, buttonVariants } from "@/components/select/ui/button";
+import { Card, CardContent } from "@/components/select/ui/card";
+import { Skeleton } from "@/components/select/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {

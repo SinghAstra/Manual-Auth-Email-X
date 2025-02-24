@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/select/ui/button";
+import { Input } from "@/components/select/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatDocumentType } from "@/lib/utils";
 import { X } from "lucide-react";
@@ -10,7 +10,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
-import { Label } from "../ui/label";
+import { Label } from "../select/ui/label";
 
 export enum StudentDocumentsType {
   STUDENT_ID = "STUDENT_ID",

@@ -3,7 +3,7 @@
 import { siteConfig } from "@/config/site";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "../select/ui/skeleton";
 import { AvatarMenu } from "./avatar-menu";
 import SignInButton from "./sign-in-button";
 

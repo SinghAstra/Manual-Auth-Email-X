@@ -1,6 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/select/ui/tabs";
 import { Briefcase, Building, Landmark } from "lucide-react";
 import React, { useState } from "react";
 import CompaniesRepTab from "./CompaniesRepTab";
@@ -50,7 +55,7 @@ const PendingVerificationsPage = () => {
         </TabsContent>
 
         <TabsContent value="governmentRepTab" className="mt-0">
-          <GovernmentRepTab />
+          <GovernmentRepTab active={activeTab === "governmentRepTab"} />
         </TabsContent>
       </Tabs>
     </div>

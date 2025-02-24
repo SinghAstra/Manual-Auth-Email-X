@@ -1,7 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/select/ui/button";
+import { Input } from "@/components/select/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { LoadingSelectSkeleton } from "./institute";
 
 interface Government {
   id: string;
@@ -10,12 +12,13 @@ interface Government {
 
 const SelectGovernment = () => {
   const [governments, setGovernments] = useState<Government[]>([]);
-  const [filteredGovernments, setFilteredGovernments] = useState<
-    Government[]
-  >([]);
+  const [filteredGovernments, setFilteredGovernments] = useState<Government[]>(
+    []
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const router = useRouter();
   const params = useParams();
@@ -26,13 +29,12 @@ const SelectGovernment = () => {
       try {
         setIsLoading(true);
         const response = await fetch("/api/governments");
+        const data = await response.json();
 
         if (!response.ok) {
-          throw new Error("Failed to fetch governments");
+          setMessage(data.message || "Failed to fetch governments");
         }
 
-        const data = await response.json();
-        console.log("data is ", data);
         setGovernments(data);
         setFilteredGovernments(data);
       } catch (error) {
@@ -40,7 +42,7 @@ const SelectGovernment = () => {
           console.log("error.stack is ", error.stack);
           console.log("error.message is ", error.message);
         }
-        setMessage("Error loading governments. Please try again later.");
+        setMessage("Check Your Network Connectivity.");
       } finally {
         setIsLoading(false);
       }
@@ -73,6 +75,13 @@ const SelectGovernment = () => {
     setSearchQuery(e.target.value);
   };
 
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      title: message,
+    });
+  }, [message, toast]);
+
   return (
     <div className="w-full max-w-lg rounded-md p-4 mt-4 space-y-4 border bg-background">
       <h2 className="text-2xl">Search For Government</h2>
@@ -84,12 +93,8 @@ const SelectGovernment = () => {
       />
 
       {isLoading ? (
-        <div className="text-center text-sm text-muted-foreground py-4">
-          Loading governments...
-        </div>
-      ) : message ? (
-        <div className="text-center text-sm text-destructive py-4">
-          {message}
+        <div className="max-h-60 overflow-y-auto border border-secondary rounded-md p-2">
+          <LoadingSelectSkeleton />
         </div>
       ) : filteredGovernments.length > 0 ? (
         <div className="max-h-60 overflow-y-auto border border-secondary rounded-md">

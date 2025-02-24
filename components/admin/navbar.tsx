@@ -1,6 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/select/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AvatarMenu } from "../home/avatar-menu";
 import SignInButton from "../home/sign-in-button";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "../select/ui/skeleton";
 
 export function Navbar() {
   const { data: session, status } = useSession();
