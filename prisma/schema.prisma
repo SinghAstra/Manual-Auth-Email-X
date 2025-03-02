@@ -226,10 +226,7 @@ model PlacementRecord {
   position        String
   salary          Float?
   joiningDate     DateTime?
-  offerLetterUrl  String?
-  status          PlacementStatus @default(IN_PROCESS)
   verificationStatus VerificationStatus @default(NOT_VERIFIED)
-  verificationFeedback String?
 
   // Relations
   student        StudentProfile @relation(fields: [studentId], references: [id])
@@ -240,9 +237,3 @@ model PlacementRecord {
 }
 
 
-
-enum PlacementStatus {
-  PLACED
-  UNPLACED
-  IN_PROCESS
-}

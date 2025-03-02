@@ -1,5 +1,5 @@
 import Providers from "@/components/providers/provider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
