@@ -1,14 +1,14 @@
 "use client";
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -31,7 +31,7 @@ interface StudentProfileType {
   graduationYear: number;
 }
 
-interface UserWithStudentProfileAndDocuments extends User {
+export interface UserWithStudentProfileAndDocuments extends User {
   studentProfile: StudentProfileType;
   documents: Document[];
 }
