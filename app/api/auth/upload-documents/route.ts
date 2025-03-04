@@ -1,7 +1,7 @@
 import { authOptions } from "@/lib/auth/auth-options";
 import { prisma } from "@/lib/utils/prisma";
 import { uploadToBlob } from "@/lib/utils/upload-to-blob";
-import { DocumentType, Role } from "@prisma/client";
+import { Department, DocumentType, Gender, Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -171,6 +171,8 @@ async function createProfileBasedOnRole(
       await prisma.studentProfile.create({
         data: {
           userId,
+          gender: formData.get("gender") as Gender,
+          department: formData.get("department") as Department,
           institutionId: formData.get("institutionId") as string,
           enrollmentNo: formData.get("enrollmentNo") as string,
           graduationYear: parseInt(

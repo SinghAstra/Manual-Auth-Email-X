@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatDocumentType } from "@/lib/utils";
+import { Department, Gender } from "@prisma/client";
 import { X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
@@ -11,6 +12,13 @@ import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export enum StudentDocumentsType {
   STUDENT_ID = "STUDENT_ID",
@@ -30,6 +38,8 @@ const StudentUploadDocs = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const [message, setMessage] = useState<string>();
+  const [gender, setGender] = useState<Gender>("MALE");
+  const [department, setDepartment] = useState<Department>("CS");
   const params = useParams();
 
   const fileInputRefs = useRef<
@@ -109,6 +119,16 @@ const StudentUploadDocs = () => {
       }
     });
 
+    if (!gender) {
+      setMessage("Please select your gender");
+      isValid = false;
+    }
+
+    if (!department) {
+      setMessage("Please select your department");
+      isValid = false;
+    }
+
     return isValid;
   };
 
@@ -149,6 +169,10 @@ const StudentUploadDocs = () => {
 
       if (enrollmentNo) formData.append("enrollmentNo", enrollmentNo);
       if (graduationYear) formData.append("graduationYear", graduationYear);
+
+      // Add gender and department
+      if (gender) formData.append("gender", gender);
+      if (department) formData.append("department", department);
 
       // Send POST request to API endpoint
       const response = await fetch("/api/auth/upload-documents", {
@@ -222,6 +246,58 @@ const StudentUploadDocs = () => {
             min="2000"
             max="2100"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="gender" className="text-sm font-normal">
+            Gender
+          </Label>
+          <Select
+            value={gender}
+            onValueChange={(value) => setGender(value as Gender)}
+          >
+            <SelectTrigger id="gender" className="w-full">
+              <SelectValue placeholder="Select your gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={Gender.MALE}>Male</SelectItem>
+              <SelectItem value={Gender.FEMALE}>Female</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="department" className="text-sm font-normal">
+            Department
+          </Label>
+          <Select
+            value={department}
+            onValueChange={(value) => setDepartment(value as Department)}
+          >
+            <SelectTrigger id="department" className="w-full">
+              <SelectValue placeholder="Select your department" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={Department.CS}>
+                Computer Science (CS)
+              </SelectItem>
+              <SelectItem value={Department.IT}>
+                Information Technology (IT)
+              </SelectItem>
+              <SelectItem value={Department.ME}>
+                Mechanical Engineering (ME)
+              </SelectItem>
+              <SelectItem value={Department.EE}>
+                Electrical Engineering (EE)
+              </SelectItem>
+              <SelectItem value={Department.EC}>
+                Electronics & Communication (EC)
+              </SelectItem>
+              <SelectItem value={Department.CE}>
+                Civil Engineering (CE)
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Document Uploads */}
