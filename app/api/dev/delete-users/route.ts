@@ -7,6 +7,7 @@ export async function GET() {
     await prisma.session.deleteMany({});
     await prisma.account.deleteMany({});
     await prisma.document.deleteMany({});
+    await prisma.placementRecord.deleteMany({});
     await prisma.institutionProfile.deleteMany({});
     await prisma.companyProfile.deleteMany({});
     await prisma.governmentProfile.deleteMany({});
@@ -17,9 +18,12 @@ export async function GET() {
 
     return NextResponse.json({ message: "All users deleted successfully." });
   } catch (error) {
-    console.error("Error deleting users:", error);
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
     return NextResponse.json(
-      { error: "Failed to delete users." },
+      { message: "Failed to delete users." },
       { status: 500 }
     );
   }
