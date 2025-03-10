@@ -3,6 +3,7 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Company } from "@prisma/client";
 import { ExternalLink, FileText } from "lucide-react";
@@ -21,6 +22,21 @@ const UploadPlacementData = () => {
   >([]);
   const [isFetchingCompanies, setIsFetchingCompanies] = useState<boolean>(true);
   const [isFetchingStudents, setIsFetchingStudents] = useState<boolean>(true);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<UserWithStudentProfileAndDocuments | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!message) return;
+    toast({
+      description: message,
+    });
+    setMessage(null);
+  }, [message, toast]);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -48,10 +64,9 @@ const UploadPlacementData = () => {
     const fetchStudents = async () => {
       try {
         setIsFetchingStudents(true);
-        const res = await fetch(
-          "/api/institution-admin/verification?status=APPROVED"
-        );
+        const res = await fetch("/api/institution-admin/unplaced");
         const data = await res.json();
+        console.log("data --fetchStudents is ", data);
         setStudents(data.students);
         setFilteredStudents(data.students);
       } catch (error) {
@@ -73,6 +88,8 @@ const UploadPlacementData = () => {
     setFilteredCompanies(
       companies.filter((company) => company.name.toLowerCase().includes(value))
     );
+    // Clear selected company when searching
+    setSelectedCompany(null);
   };
 
   const handleStudentSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,6 +97,64 @@ const UploadPlacementData = () => {
     setFilteredStudents(
       students.filter((student) => student.name?.toLowerCase().includes(value))
     );
+    // Clear selected student when searching
+    setSelectedStudent(null);
+  };
+
+  const handleCompanySelect = (company: Company) => {
+    setSelectedCompany(company);
+  };
+
+  const handleStudentSelect = (student: UserWithStudentProfileAndDocuments) => {
+    setSelectedStudent(student);
+  };
+
+  const handleSubmitPlacementData = async () => {
+    if (!selectedCompany || !selectedStudent) {
+      setMessage("Please select both a company and a student to proceed.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const placementData = {
+        studentId: selectedStudent.id,
+        companyId: selectedCompany.id,
+      };
+
+      const response = await fetch("/api/placements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(placementData),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit placement data");
+      }
+
+      setMessage(
+        "Placement record has been successfully created with NOT_VERIFIED status"
+      );
+
+      // Reset selections and form
+      setSelectedCompany(null);
+      setSelectedStudent(null);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("error.stack is ", error.stack);
+        console.log("error.message is ", error.message);
+      }
+      setMessage(
+        "Failed to submit placement data: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -106,7 +181,14 @@ const UploadPlacementData = () => {
         ) : filteredCompanies.length > 0 ? (
           <ul>
             {filteredCompanies.map((company) => (
-              <li key={company.id} className="py-2 border-b">
+              <li
+                key={company.id}
+                className={cn(
+                  "py-2 px-3 border-b cursor-pointer hover:bg-muted",
+                  selectedCompany?.id === company.id && "bg-muted"
+                )}
+                onClick={() => handleCompanySelect(company)}
+              >
                 {company.name}
               </li>
             ))}
@@ -136,10 +218,27 @@ const UploadPlacementData = () => {
               <Skeleton key={i} className="h-6 w-full rounded-md" />
             ))}
           </div>
-        ) : filteredStudents.length > 0 ? (
+        ) : filteredStudents.length === 0 ? (
+          <div className="text-sm text-gray-400">
+            No such student found.{" "}
+            <Link
+              href="/institution-admin/verification"
+              className="text-blue-500 underline"
+            >
+              Check Verification
+            </Link>
+          </div>
+        ) : (
           <ul>
             {filteredStudents.map((student) => (
-              <li key={student.id} className="py-2 border-b">
+              <li
+                key={student.id}
+                className={cn(
+                  "p-2 border-b cursor-pointer hover:bg-muted",
+                  selectedStudent?.id === student.id && "bg-muted"
+                )}
+                onClick={() => handleStudentSelect(student)}
+              >
                 <div className="flex justify-between items-center">
                   <p className="tracking-wide">{student.name}</p>
                   {student.documents.length > 0 ? (
@@ -171,21 +270,16 @@ const UploadPlacementData = () => {
               </li>
             ))}
           </ul>
-        ) : (
-          <div className="text-sm text-gray-400">
-            No such student found.{" "}
-            <Link
-              href="/institution-admin/verification"
-              className="text-blue-500 underline"
-            >
-              Check Verification
-            </Link>
-          </div>
         )}
       </div>
 
-      <Button type="submit" className="mt-4 w-full">
-        Submit Placement Data
+      <Button
+        type="submit"
+        className="mt-4 w-full"
+        onClick={handleSubmitPlacementData}
+        disabled={isSubmitting || !selectedCompany || !selectedStudent}
+      >
+        {isSubmitting ? "Submitting..." : "Submit Placement Record"}
       </Button>
     </div>
   );

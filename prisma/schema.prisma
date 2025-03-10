@@ -225,9 +225,6 @@
     id              String    @id @default(cuid())
     studentId       String
     companyId       String
-    position        String
-    salary          Float?
-    joiningDate     DateTime?
     verificationStatus VerificationStatus @default(NOT_VERIFIED)
 
     // Relations
