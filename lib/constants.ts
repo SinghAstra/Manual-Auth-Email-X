@@ -7,7 +7,7 @@ type DashboardRoutesType = {
 export const dashboardRoutes: DashboardRoutesType = {
   SUPER_ADMIN: "/admin/organization-request",
   INSTITUTION_ADMIN: "/institution-admin/verification",
-  COMPANY_REPRESENTATIVE: "/company/dashboard",
+  COMPANY_REPRESENTATIVE: "/company-rep/verification",
   STUDENT: "/student/dashboard",
   GOVERNMENT_REPRESENTATIVE: "/government/dashboard",
   UNVERIFIED: "/auth/profile-setup",

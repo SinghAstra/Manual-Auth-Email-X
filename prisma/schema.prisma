@@ -92,6 +92,7 @@
   enum VerificationStatus {
     NOT_VERIFIED
     VERIFIED
+    REJECTED
   }
 
   model Document {
