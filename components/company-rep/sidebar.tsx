@@ -8,6 +8,7 @@ import React from "react";
 const Sidebar = () => {
   const sidebarLinks = [
     { name: "Verification", href: "/company-rep/verification" },
+    { name: "Profile", href: "/company-rep/profile" },
   ];
 
   const pathname = usePathname();
