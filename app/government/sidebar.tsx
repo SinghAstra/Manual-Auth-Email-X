@@ -7,14 +7,18 @@ import React from "react";
 
 const Sidebar = () => {
   const sidebarLinks = [
-    { name: "Verification", href: "/institution-admin/verification" },
+    { name: "Records", href: "/government/records" },
     {
-      name: "Upload Placement Data",
-      href: "/institution-admin/upload-placement-data",
+      name: "Data Analytics",
+      href: "/government/data-analytics",
     },
     {
       name: "Profile",
-      href: "/institution-admin/profile",
+      href: "/government/profile",
+    },
+    {
+      name: "AI Analysis",
+      href: "/government/ai-analysis",
     },
   ];
 
