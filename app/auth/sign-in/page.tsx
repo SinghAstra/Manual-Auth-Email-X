@@ -1,11 +1,13 @@
 "use client";
 
-import { Icons } from "@/components/Icons";
+import FadeIn from "@/components/global/fade-in";
+import FadeSlideIn from "@/components/global/fade-slide-in";
 import { Button } from "@/components/ui/button";
+import RotatingBorderBadge from "@/components/ui/rotating-border-badge";
 import { siteConfig } from "@/config/site";
 import { dashboardRoutes } from "@/lib/constants";
 import { VerificationStatus } from "@prisma/client";
-import { Code2, FileSearch, Lightbulb } from "lucide-react";
+import { Code2, FileSearch, Lightbulb, Loader } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -84,20 +86,21 @@ export default function SignIn() {
 
           <div className="space-y-4 max-w-2xl p-6">
             {features.map((feature, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 p-4 rounded-lg border backdrop-blur-md"
-              >
-                <div className="p-2 rounded-md border">
-                  <feature.icon />
+              <FadeSlideIn key={i} delay={i * 0.2}>
+                <div className="flex items-start gap-4 p-4 rounded-lg border backdrop-blur-md">
+                  <div className="p-2 rounded-md border">
+                    <feature.icon />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-foreground">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </div>
-              </div>
+              </FadeSlideIn>
             ))}
           </div>
 
@@ -109,46 +112,46 @@ export default function SignIn() {
 
       {/* Right Panel - Auth Section */}
       <div className="w-full lg:w-2/5 flex items-center justify-center">
-        <div className=" flex items-center justify-center p-8 relative">
+        <div className=" flex items-center justify-center relative">
           {/* Decorative elements */}
           <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
+          <FadeIn delay={0.1}>
+            <div className="w-[400px] p-8 bg-card/40 backdrop-blur-sm rounded-md border space-y-6">
+              <div className="space-y-2 text-center">
+                <RotatingBorderBadge title={`Welcome to ${siteConfig.name}`} />
+              </div>
 
-          <div className="w-full max-w-md p-8 bg-card/50 backdrop-blur-sm rounded-md border space-y-6">
-            <div className="space-y-2 text-center">
-              <h2 className="text-2xl font-semibold">
-                Welcome to{" "}
-                <span className="text-primary">{siteConfig.name}</span>
-              </h2>
+              <div className="space-y-4">
+                <Button
+                  variant="outline"
+                  className="w-full text-foreground"
+                  onClick={handleGoogleSignIn}
+                  disabled={isGoogleLoading}
+                >
+                  {isGoogleLoading ? (
+                    <>
+                      <Loader className="w-5 h-5 animate-spin" />
+                      Wait ...
+                    </>
+                  ) : (
+                    <>
+                      <Image
+                        src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                        alt="Google"
+                        width={18}
+                        height={18}
+                        className="mr-2"
+                      />
+                      <span className="text-center tracking-wide">
+                        Continue with Google
+                      </span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-
-            <div className="space-y-4">
-              <Button
-                variant="outline"
-                className="w-full text-primary"
-                onClick={handleGoogleSignIn}
-                disabled={isGoogleLoading}
-              >
-                {isGoogleLoading ? (
-                  <>
-                    <Icons.loader className="w-5 h-5 animate-spin" />
-                    Wait ...
-                  </>
-                ) : (
-                  <>
-                    <Image
-                      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                      alt="Google"
-                      width={18}
-                      height={18}
-                      className="mr-2"
-                    />
-                    Continue with Google
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
+          </FadeIn>
         </div>
       </div>
     </div>

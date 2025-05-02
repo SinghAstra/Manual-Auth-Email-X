@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  font-family: "Poppins", system-ui;
+body {
+  font-family: "Space Grotesk", "Space Mono", monospace;
 }
 
 @layer base {
@@ -28,11 +28,12 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 142 88% 28%;
-    --chart-2: 139 65% 20%;
-    --chart-3: 140 74% 24%;
-    --chart-4: 137 55% 15%;
-    --chart-5: 141 40% 9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    /* Radius */
     --radius: 0.875rem;
   }
 }
@@ -95,5 +96,119 @@ input:-webkit-autofill:not(:focus) {
 }
 
 .bg-grid-white {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' width='64' height='64' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H63.5V64'/%3e%3c/svg%3e");
+}
+
+/* Prism Syntax Highlight */
+
+.keyword {
+  color: #f97583; /* GitHub Light Red */
+}
+
+.function {
+  color: #d2a8ff; /* GitHub Light Purple */
+}
+
+.punctuation {
+  color: #c9d1d9; /* GitHub Light Gray */
+}
+
+.comment {
+  color: #8b949e; /* GitHub Muted Gray */
+}
+
+.string,
+.constant,
+.annotation,
+.boolean,
+.number {
+  color: #79c0ff; /* GitHub Light Blue */
+}
+
+.tag {
+  color: #a5d6ff; /* GitHub Cyan */
+}
+
+.attr-name {
+  color: #d2a8ff; /* GitHub Light Purple */
+}
+
+.attr-value {
+  color: #ffa657; /* GitHub Light Orange */
+}
+
+pre > code {
+  display: grid;
+  max-width: inherit !important;
+  padding: 10px 14px !important;
+}
+
+.rehype-code-title {
+  margin-top: 1rem;
+  margin-bottom: -1rem;
+  border: 1px solid hsl(var(--border));
+  letter-spacing: 0.05em;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 4px;
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+/* Custom animations for loading state */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  .animate-width-grow {
+    animation: widthGrow 1.5s ease-in-out infinite;
+  }
+
+  .animate-loading-dot {
+    animation: loadingDot 1.4s infinite;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes widthGrow {
+  0% {
+    width: 0;
+    opacity: 0.7;
+  }
+  50% {
+    width: 100%;
+    opacity: 1;
+  }
+  100% {
+    width: 0;
+    opacity: 0.7;
+  }
+}
+
+@keyframes loadingDot {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
 }

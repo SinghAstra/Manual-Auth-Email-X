@@ -1,9 +1,12 @@
-import { Hero } from "@/components/home/hero";
+import HeroSection from "@/components/home/hero";
+import { authOptions } from "@/lib/auth/auth-options";
+import { getServerSession } from "next-auth";
 
-export default function Home() {
-  return (
-    <main className="flex-1 flex justify-center items-center ">
-      <Hero />
-    </main>
-  );
-}
+const HomePage = async () => {
+  const session = await getServerSession(authOptions);
+  const isAuthenticated = session ? true : false;
+
+  return <HeroSection isAuthenticated={isAuthenticated} />;
+};
+
+export default HomePage;

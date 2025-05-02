@@ -3,7 +3,7 @@ import { SiteConfig } from "@/interfaces/site";
 export const siteConfig: SiteConfig = {
   name: "UniLink",
   description:
-    "Track and analyze campus placement data across technical institutes and universities nationwide.",
+    "Track and analyze campus placement data across universities nationwide",
   tagline: "Empowering campuses with centralized placement analytics.",
   headline: "Streamline Campus Placements Nationwide",
   subHeadline:
