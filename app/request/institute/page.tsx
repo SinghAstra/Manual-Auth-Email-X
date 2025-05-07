@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -84,7 +83,6 @@ const CreateInstitute = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
           <h2 className="text-2xl">Institution Profile</h2>

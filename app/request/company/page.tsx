@@ -1,13 +1,12 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
 import { Button } from "@/components/ui/button";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -85,7 +84,6 @@ const CreateCompany = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="w-full max-w-xl border rounded-md py-2 px-4 mt-4 mx-auto bg-background">
         <div className="mb-4">
           <h2 className="text-2xl">Company Profile</h2>
