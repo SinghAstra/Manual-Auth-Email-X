@@ -71,7 +71,7 @@ export default function SignIn() {
   }, [session, status, router]);
 
   return (
-    <div className="flex min-h-screen overflow-hidden">
+    <div className="flex min-h-screen overflow-hidden ">
       {/* Left Panel - Info Section */}
       <div className="hidden lg:flex lg:w-3/5 z-20 bg-card">
         <div className="w-full  flex flex-col justify-between">

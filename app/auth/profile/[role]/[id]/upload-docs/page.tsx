@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import React from "react";
 
-import { Navbar } from "@/components/home/navbar";
 import CompanyRepresentativeUploadDocs from "@/components/upload-docs/company-rep";
 import GovernmentUploadDocs from "@/components/upload-docs/gov-rep";
 import InstitutionAdminUploadDocs from "@/components/upload-docs/institution-admin";
@@ -34,7 +33,6 @@ const UploadDocs = () => {
   if (!roleComponents[parsedRole]) {
     return (
       <div className="min-h-screen flex flex-col bg-grid-white">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="p-8 bg-secondary/20 border border-border rounded-lg text-center shadow-md">
             <h2 className="text-xl font-semibold text-destructive mb-2">
@@ -54,7 +52,6 @@ const UploadDocs = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="flex-1 flex items-center justify-center">
         <FormComponent />
       </div>

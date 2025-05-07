@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 import { ArrowRightIcon } from "lucide-react";
 import { User } from "next-auth";
 import Image from "next/image";
-import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
 
 interface HeroSectionProps {
@@ -26,7 +25,7 @@ const HeroSection = ({ isAuthenticated, user }: HeroSectionProps) => {
   const router = useRouter();
   const handleGetStarted = () => {
     if (!isAuthenticated) {
-      redirect("/auth/sign-in");
+      redirect("/sign-in");
     }
 
     if (isAuthenticated && user) {
@@ -131,13 +130,13 @@ const HeroSection = ({ isAuthenticated, user }: HeroSectionProps) => {
               </span>
             </h1>
             <BackgroundShine>
-              <Link
-                href={isAuthenticated ? "/dashboard" : "/auth/sign-in"}
-                className="flex items-center "
+              <span
+                onClick={handleGetStarted}
+                className="flex items-center group cursor-pointer"
               >
                 Get started
                 <ArrowRightIcon className="w-4 h-4 ml-2" />
-              </Link>
+              </span>
             </BackgroundShine>
           </motion.div>
         </LampContainer>

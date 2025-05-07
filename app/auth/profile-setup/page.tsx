@@ -69,29 +69,27 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-grid-white">
-      <div className="mt-8 flex items-center justify-center">
-        <div className="max-w-lg w-full p-4 border rounded-md bg-background">
-          <h2 className="text-2xl">Complete Your Profile</h2>
-          <span className="text-muted-foreground">
-            Select your role to begin the verification process
-          </span>
-          <div className="mt-2">
-            {Object.entries(roleInfo).map(([role, info]) => (
-              <div
-                key={role}
-                onClick={() => handleRoleSelect(role as Role)}
-                className="flex items-center space-x-3 px-4 py-2 rounded-lg  border border-transparent hover:bg-gray-500/20 cursor-pointer"
-              >
-                <div className="flex flex-col">
-                  <span className="font-medium">{info.title}</span>
-                  <span className="text-sm text-gray-500 mt-2">
-                    {info.description}
-                  </span>
-                </div>
+    <div className="min-h-screen flex flex-col bg-grid-white items-center justify-center">
+      <div className="max-w-lg w-full p-4 border rounded-md bg-background">
+        <h2 className="text-2xl">Complete Your Profile</h2>
+        <span className="text-muted-foreground">
+          Select your role to begin the verification process
+        </span>
+        <div className="mt-2">
+          {Object.entries(roleInfo).map(([role, info]) => (
+            <div
+              key={role}
+              onClick={() => handleRoleSelect(role as Role)}
+              className="flex items-center space-x-3 px-4 py-2 rounded-lg  border border-transparent hover:bg-gray-500/20 cursor-pointer"
+            >
+              <div className="flex flex-col">
+                <span className="font-medium">{info.title}</span>
+                <span className="text-sm text-gray-500 mt-2">
+                  {info.description}
+                </span>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
