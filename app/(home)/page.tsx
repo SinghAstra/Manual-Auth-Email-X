@@ -6,7 +6,7 @@ const HomePage = async () => {
   const session = await getServerSession(authOptions);
   const isAuthenticated = session ? true : false;
 
-  return <HeroSection isAuthenticated={isAuthenticated} />;
+  return <HeroSection user={session?.user} isAuthenticated={isAuthenticated} />;
 };
 
 export default HomePage;

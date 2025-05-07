@@ -8,24 +8,37 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import GradientButton from "@/components/ui/gradient-button";
 import { LampContainer } from "@/components/ui/lamp";
 import { siteConfig } from "@/config/site";
+import { dashboardRoutes } from "@/lib/constants";
+import { VerificationStatus } from "@prisma/client";
 import { motion } from "framer-motion";
 import { ArrowRightIcon } from "lucide-react";
+import { User } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
+  user: User | undefined;
 }
 
-const HeroSection = ({ isAuthenticated }: HeroSectionProps) => {
+const HeroSection = ({ isAuthenticated, user }: HeroSectionProps) => {
+  const router = useRouter();
   const handleGetStarted = () => {
     if (!isAuthenticated) {
       redirect("/auth/sign-in");
     }
 
-    if (isAuthenticated) {
-      redirect("/dashboard");
+    if (isAuthenticated && user) {
+      if (user.verificationStatus === ("PENDING" as VerificationStatus)) {
+        router.push("/auth/verification-status");
+      } else if (
+        user.verificationStatus === ("APPROVED" as VerificationStatus)
+      ) {
+        router.push(dashboardRoutes[user.role]);
+      } else {
+        router.push("/auth/profile-setup");
+      }
     }
   };
 
@@ -53,16 +66,16 @@ const HeroSection = ({ isAuthenticated }: HeroSectionProps) => {
 
             <div className="flex items-center justify-center gap-4 z-50">
               <BackgroundShine className="rounded-md">
-                <Link
-                  href={isAuthenticated ? "/dashboard" : "/auth/sign-in"}
-                  className="flex items-center group"
+                <span
+                  onClick={handleGetStarted}
+                  className="flex items-center group cursor-pointer"
                 >
                   Get started
                   <ArrowRightIcon
                     className="ml-1 size-4 transition-transform duration-300 
             ease-in-out group-hover:translate-x-2"
                   />
-                </Link>
+                </span>
               </BackgroundShine>
               <GradientButton rounded="md">
                 <a

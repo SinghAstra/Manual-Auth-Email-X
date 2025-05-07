@@ -1,5 +1,4 @@
 "use client";
-import { Navbar } from "@/components/home/navbar";
 import { Role } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -71,7 +70,6 @@ const ProfileSetup = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="mt-8 flex items-center justify-center">
         <div className="max-w-lg w-full p-4 border rounded-md bg-background">
           <h2 className="text-2xl">Complete Your Profile</h2>

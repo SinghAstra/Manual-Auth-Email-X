@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -92,7 +91,6 @@ const VerificationPending = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
         <div className="flex-1 flex justify-center items-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -128,7 +126,6 @@ const VerificationPending = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="flex-1 flex justify-center items-center p-4">
         <Card className="max-w-2xl w-full">
           <CardHeader>

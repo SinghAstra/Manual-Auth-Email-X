@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/home/navbar";
 import SelectCompany from "@/components/select/company";
 import SelectGovernment from "@/components/select/government";
 import SelectInstitute from "@/components/select/institute";
@@ -33,7 +32,6 @@ const ProfileRolePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-grid-white">
-      <Navbar />
       <div className="flex-1 flex items-center justify-center">
         <FormComponent />
       </div>
