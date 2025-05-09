@@ -16,7 +16,7 @@ const Footer = () => {
               href={siteConfig.links.github}
               className="text-foreground tracking-wider"
             >
-              SinghAstra
+              Raj Singh
             </BorderHoverLink>
           </span>
         </FadeIn>
