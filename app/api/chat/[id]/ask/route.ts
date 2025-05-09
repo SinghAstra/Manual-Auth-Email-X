@@ -11,7 +11,7 @@ export async function POST(
   {
     params,
   }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
   }
 ) {
   const { id } = await params;
