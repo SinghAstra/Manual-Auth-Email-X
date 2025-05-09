@@ -1,5 +1,5 @@
-import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth/auth-options";
+import { prisma } from "@/lib/utils/prisma";
 import { getServerSession } from "next-auth";
 
 export async function fetchChat(id: string) {
