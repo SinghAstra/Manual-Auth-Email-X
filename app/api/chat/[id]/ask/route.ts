@@ -14,7 +14,7 @@ export async function POST(
     params: { id: string };
   }
 ) {
-  const id = params.id;
+  const { id } = await params;
   console.log("id is ", id);
   try {
     const session = await getServerSession(authOptions);
