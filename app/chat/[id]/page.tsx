@@ -5,14 +5,15 @@ import React from "react";
 import Chat from "../chat";
 import { fetchChat } from "./action";
 
-const ChatPage = async ({ params }: { params: { id: string } }) => {
+const ChatPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/auth/sign-in");
   }
 
-  const chat = await fetchChat(params.id);
+  const { id } = await params;
+  const chat = await fetchChat(id);
 
   if (!chat) {
     notFound();
@@ -27,7 +28,7 @@ const ChatPage = async ({ params }: { params: { id: string } }) => {
     <Chat
       initialMessages={chat.messages}
       user={session.user}
-      chatId={params.id}
+      chatId={id}
       newChat={false}
     />
   );
