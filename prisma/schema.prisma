@@ -18,6 +18,7 @@
     role          Role      @default(UNVERIFIED)
     verificationStatus UserVerificationStatus @default(NOT_APPLIED)
     feedback     String?
+    chats         Chat[]
 
     // Auth Relationships
     accounts      Account[]
@@ -250,5 +251,33 @@
     EC
     CE
   }
+
+
+  
+model Chat {
+  id         String    @id @default(uuid())
+  title      String    @default("New Chat")
+  userId     String
+  createdAt  DateTime   @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+  messages   Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  chatId     String
+  role       MessageRole
+  content    String
+  createdAt  DateTime   @default(now())
+
+  chat       Chat     @relation(fields: [chatId], references: [id])
+}
+
+enum MessageRole {
+  user
+  model
+}
+
 
 

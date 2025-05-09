@@ -35,6 +35,17 @@ body {
     --chart-5: 340 75% 55%;
     /* Radius */
     --radius: 0.875rem;
+    --sidebar-background: 240 5% 4%; /* Almost black */
+    --sidebar-foreground: 0 0% 95%; /* Light text for contrast */
+
+    --sidebar-primary: 224.3 76.3% 48%; /* Keep as-is if you want a vibrant accent color */
+    --sidebar-primary-foreground: 0 0% 100%; /* White for primary content */
+
+    --sidebar-accent: 240 3% 8%; /* Darker accent */
+    --sidebar-accent-foreground: 0 0% 95%; /* Slightly off-white for readability */
+
+    --sidebar-border: 240 2% 10%; /* Very dark border */
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -99,8 +110,6 @@ input:-webkit-autofill:not(:focus) {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' width='64' height='64' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H63.5V64'/%3e%3c/svg%3e");
 }
 
-/* Prism Syntax Highlight */
-
 .keyword {
   color: #f97583; /* GitHub Light Red */
 }
@@ -138,22 +147,7 @@ input:-webkit-autofill:not(:focus) {
 }
 
 pre > code {
-  display: grid;
-  max-width: inherit !important;
-  padding: 10px 14px !important;
-}
-
-.rehype-code-title {
-  margin-top: 1rem;
-  margin-bottom: -1rem;
-  border: 1px solid hsl(var(--border));
-  letter-spacing: 0.05em;
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  padding: 7px 14px;
-  border-radius: 4px;
-  background-color: hsl(var(--muted) / 0.2);
+  border: 0;
 }
 
 /* Custom animations for loading state */
