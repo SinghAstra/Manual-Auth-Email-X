@@ -60,7 +60,10 @@ class MinHeap {
     if (this.heap.length === 0) {
       return "Empty Array";
     }
+    // We do not use shift() in here as it takes O(n) time whereas the below approach takes O(1) time
+    this.swap(0, this.size() - 1);
     this.heap.pop();
+    this.heapifyDown();
     this.heapifyDown();
   }
 
