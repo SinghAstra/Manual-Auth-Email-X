@@ -41,6 +41,8 @@ function logNums() {
 // For each j from 1 to end:
 // If nums[j] is different from nums[i], increment i and set nums[i] = nums[j].
 // At the end, the first i + 1 elements are unique.
+// Time Complexity : O(n)
+// Space Complexity : O(1)
 var removeDuplicatesTwoPointer = function (nums) {
   let firstPointer = 0;
   let secondPointer = 1;
