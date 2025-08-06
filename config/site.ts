@@ -5,7 +5,7 @@ export const siteConfig: SiteConfig = {
   description:
     "Simplified Manual Authentication with token, cookie and session management.",
   tagline: "Simplified Manual Authentication",
-  url: "https://manual-auth-x.vercel.app",
+  url: "https://manual-auth-email-x.vercel.app",
   links: {
     twitter: "https://x.com/XSinghAstra",
     github: "https://github.com/SinghAstra",
