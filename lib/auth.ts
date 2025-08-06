@@ -37,9 +37,12 @@ export function generateAccessToken(payload: AccessTokenPayload) {
   });
 }
 
-export function verifyAccessToken(token: string) {
+export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string);
+    const decoded = jwt.verify(
+      token,
+      JWT_SECRET as string
+    ) as unknown as AccessTokenPayload;
     return decoded;
   } catch (error) {
     console.log("Access token verification failed.");
