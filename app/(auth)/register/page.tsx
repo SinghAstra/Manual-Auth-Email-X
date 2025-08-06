@@ -13,28 +13,20 @@ import React, { useState } from "react";
 import * as yup from "yup";
 
 function RegisterPage() {
-  // State to hold form data
   const [formData, setFormData] = useState<SignUpFormData>({
     name: "",
     email: "",
     password: "",
   });
 
-  // State to hold validation errors
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignUpFormData, string>>
   >({});
 
-  // State for loading indicator during registration
   const [isRegistering, setIsRegistering] = useState(false);
 
-  // Access the toast context for displaying messages
   const { setToastMessage } = useToastContext();
 
-  /**
-   * Handles changes to input fields.
-   * Updates formData state and clears any existing error for that field.
-   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -42,27 +34,20 @@ function RegisterPage() {
     if (errors[id as keyof SignUpFormData]) {
       setErrors((prev) => ({ ...prev, [id]: undefined }));
     }
-  };
 
-  /**
-   * Handles the form submission for registration.
-   * Performs client-side validation and calls the registerUser Server Action.
-   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault(); 
 
-    setIsRegistering(true); // Set loading state
-    setErrors({}); // Clear previous errors
+    setIsRegistering(true); 
+    setErrors({}); 
 
     try {
-      // Client-side validation using Yup
       await signUpSchema.validate(formData, { abortEarly: false });
 
-      // If validation passes, call the Server Action
       const result = await registerUser(formData);
 
       if (result.success) {
-        setToastMessage(result.message, "success");
+        setToastMessage(result.message);
         // Optionally clear form or redirect after successful registration
         setFormData({ name: "", email: "", password: "" }); // Clear form
         // router.push('/login'); // Could redirect to login page

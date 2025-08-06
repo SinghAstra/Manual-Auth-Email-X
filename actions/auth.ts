@@ -1,7 +1,6 @@
 "use server";
 
 import {
-  AccessTokenPayload,
   clearAuthCookies,
   comparePassword,
   generateAccessToken,
@@ -19,17 +18,18 @@ export async function registerUser(formData: SignUpFormData) {
   try {
     const { name, email, password } = formData;
 
-    // 1. Check if user already exists
+    // TODO : Perform Server Side Validation on Input
+
+    // 2. Check if user already exists
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
       return {
         success: false,
         message: "Email already registered.",
-        errors: { email: "Email already registered." },
       };
     }
 
-    // 2. Hash the password
+    // 3. Hash the password
     const hashedPassword = await hashPassword(password);
 
     // 3. Create the user in the database (initially unverified)
@@ -67,15 +67,7 @@ export async function registerUser(formData: SignUpFormData) {
       emailHtml
     );
 
-    if (!emailResult.success) {
-      // Log the email error but don't prevent user creation, as they can request resend
-      console.error("Failed to send verification email:", emailResult.error);
-      return {
-        success: true, // User account is created
-        message:
-          "Registration successful! Please check your email for a verification link. (Email sending failed, please try resending later).",
-      };
-    }
+    console.log("emailResult is ", emailResult);
 
     return {
       success: true,
@@ -83,7 +75,11 @@ export async function registerUser(formData: SignUpFormData) {
         "Registration successful! Please check your email for a verification link.",
     };
   } catch (error) {
-    console.error("Registration failed:", error);
+    console.log("Registration failed.");
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
     return {
       success: false,
       message: "An unexpected error occurred during registration.",
@@ -100,9 +96,7 @@ export async function registerUser(formData: SignUpFormData) {
  * @param formData The login form data.
  * @returns An ActionResponse indicating success or failure.
  */
-export async function loginUser(
-  formData: LoginFormData
-): Promise<ActionResponse> {
+export async function loginUser(formData: LoginFormData) {
   try {
     const { email, password } = formData;
 
@@ -127,7 +121,7 @@ export async function loginUser(
     }
 
     // 4. Generate Access and Refresh Tokens
-    const accessTokenPayload: AccessTokenPayload = {
+    const accessTokenPayload = {
       userId: user.id,
       email: user.email,
       emailVerified: user.emailVerified,
@@ -171,7 +165,7 @@ export async function loginUser(
  * @param token The verification token from the URL.
  * @returns An ActionResponse indicating success or failure.
  */
-export async function verifyEmail(token: string): Promise<ActionResponse> {
+export async function verifyEmail(token: string) {
   try {
     // 1. Find the verification token
     const verificationRecord = await db.verificationToken.findUnique({
@@ -233,9 +227,10 @@ export async function verifyEmail(token: string): Promise<ActionResponse> {
  * - Deletes the refresh token session from the database.
  * @returns An ActionResponse indicating success.
  */
-export async function logoutUser(): Promise<ActionResponse> {
+export async function logoutUser() {
   try {
-    const refreshToken = cookies().get("refresh_token")?.value;
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get("refresh_token")?.value;
 
     if (refreshToken) {
       // Delete the session record from the database
@@ -266,11 +261,10 @@ export async function logoutUser(): Promise<ActionResponse> {
  * It uses the refresh token to issue a new access token and a new refresh token (rotation).
  * @returns An ActionResponse with new tokens or an error.
  */
-export async function refreshAuthTokens(): Promise<
-  ActionResponse<{ accessToken: string; refreshToken: string }>
-> {
+export async function refreshAuthTokens() {
   try {
-    const currentRefreshToken = cookies().get("refresh_token")?.value;
+    const cookieStore = await cookies();
+    const currentRefreshToken = cookieStore.get("refresh_token")?.value;
 
     if (!currentRefreshToken) {
       clearAuthCookies();
@@ -299,7 +293,7 @@ export async function refreshAuthTokens(): Promise<
     }
 
     // 2. Generate new Access Token
-    const newAccessTokenPayload: AccessTokenPayload = {
+    const newAccessTokenPayload = {
       userId: session.user.id,
       email: session.user.email,
       emailVerified: session.user.emailVerified,
