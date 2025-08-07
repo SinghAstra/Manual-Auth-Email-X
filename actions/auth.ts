@@ -2,23 +2,142 @@
 
 import { siteConfig } from "@/config/site";
 import {
-  clearAuthCookies,
   comparePassword,
   generateAccessToken,
   generateRefreshToken,
   hashPassword,
-  setAuthCookies,
+  verifyAccessToken,
 } from "@/lib/auth";
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  REFRESH_TOKEN_COOKIE_NAME,
+} from "@/lib/constants";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/mail";
 import {
   LoginFormData,
+  loginSchema,
   SignUpFormData,
   signUpSchema,
 } from "@/validations/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ValidationError } from "yup";
+
+export async function setAuthCookies(
+  accessToken: string,
+  refreshToken: string
+) {
+  const accessExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+  const refreshExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const cookieStore = await cookies();
+
+  cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: accessExpires,
+  });
+
+  cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: refreshExpires,
+  });
+
+  console.log("cookiesStore is ", cookieStore);
+}
+
+export async function clearAuthCookies() {
+  const cookieStore = await cookies();
+
+  cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, "", {
+    expires: new Date(0),
+    path: "/",
+  });
+  cookieStore.set(REFRESH_TOKEN_COOKIE_NAME, "", {
+    expires: new Date(0),
+    path: "/",
+  });
+}
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+
+  if (!accessToken) {
+    return null;
+  }
+
+  // Verify the access token
+  const payload = verifyAccessToken(accessToken);
+
+  if (!payload) {
+    // If access token is invalid or expired, try to refresh it
+    const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
+
+    if (!refreshToken) {
+      clearAuthCookies(); // No refresh token, clear everything
+      return null;
+    }
+
+    // Attempt to refresh the token
+    try {
+      const session = await db.session.findUnique({
+        where: { refreshToken },
+        include: { user: true },
+      });
+
+      if (!session || session.expiresAt < new Date()) {
+        await db.session.deleteMany({ where: { refreshToken } });
+        clearAuthCookies();
+        return null;
+      }
+
+      const newAccessToken = generateAccessToken({
+        userId: session.user.id,
+        email: session.user.email,
+        emailVerified: session.user.emailVerified,
+      });
+      const newRefreshToken = generateRefreshToken();
+
+      // Update session in DB with new refresh token (rotation)
+      await db.session.update({
+        where: { id: session.id },
+        data: {
+          refreshToken: newRefreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      // Set new cookies
+      setAuthCookies(newAccessToken, newRefreshToken);
+
+      return session.user; // Return the user from the refreshed session
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      clearAuthCookies();
+      return null;
+    }
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: payload.userId },
+  });
+
+  // Ensure the user exists and email verification status matches (optional but good for consistency)
+  if (user && user.emailVerified === payload.emailVerified) {
+    return user;
+  }
+
+  // If user not found or verification status mismatch, clear cookies and return null
+  clearAuthCookies();
+  return null;
+}
 
 export async function registerUser(formData: SignUpFormData) {
   try {
@@ -111,32 +230,30 @@ export async function registerUser(formData: SignUpFormData) {
   }
 }
 
-// --- Login Action ---
-/**
- * Handles user login.
- * - Compares password.
- * - Checks email verification status.
- * - Generates and sets access and refresh tokens.
- * @param formData The login form data.
- * @returns An ActionResponse indicating success or failure.
- */
 export async function loginUser(formData: LoginFormData) {
   try {
     const { email, password } = formData;
 
-    // 1. Find user by email
+    // 1. Perform Server Side Validation on req body
+    await loginSchema.validate({ email, password }, { abortEarly: false });
+
+    // 2. Find user by email
     const user = await db.user.findUnique({ where: { email } });
     if (!user) {
       return { success: false, message: "Invalid credentials." };
     }
 
-    // 2. Compare password
+    console.log("user is ", user);
+
+    // 3. Compare password
     const passwordMatch = await comparePassword(password, user.passwordHash);
     if (!passwordMatch) {
       return { success: false, message: "Invalid credentials." };
     }
 
-    // 3. Check if email is verified
+    console.log("passwordMatch is ", passwordMatch);
+
+    // 4. Check if email is verified
     if (!user.emailVerified) {
       return {
         success: false,
@@ -144,35 +261,43 @@ export async function loginUser(formData: LoginFormData) {
       };
     }
 
-    // 4. Generate Access and Refresh Tokens
+    // 5. Generate Access and Refresh Tokens
     const accessTokenPayload = {
       userId: user.id,
       email: user.email,
       emailVerified: user.emailVerified,
     };
     const accessToken = generateAccessToken(accessTokenPayload);
-    const refreshToken = generateRefreshToken(); // Generate a new unique refresh token
+    const refreshToken = generateRefreshToken();
 
-    // 5. Store Refresh Token in the database (Session model)
-    // First, delete any existing sessions for this user to ensure only one active session per device
-    // Or, if you want multiple sessions, you'd just create a new one without deleting.
-    // For simplicity, let's assume one active session per user for now, or manage multiple by userAgent/IP.
-    // For this template, we'll allow multiple sessions, so we just create a new one.
+    console.log("accessToken is ", accessToken);
+    console.log("refreshToken is ", refreshToken);
+
+    // 6. Store Refresh Token in the database (Session model)
     await db.session.create({
       data: {
         userId: user.id,
         refreshToken: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days expiration
-        // You could add userAgent and ipAddress here from headers if needed
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
-    // 6. Set tokens as HTTP-only cookies
+    // 7. Set tokens as HTTP-only cookies
     setAuthCookies(accessToken, refreshToken);
 
     return { success: true, message: "Login successful!" };
   } catch (error) {
-    console.error("Login failed:", error);
+    console.log("Login failed.");
+    if (error instanceof ValidationError) {
+      return {
+        success: false,
+        message: "Validation failed.",
+      };
+    }
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
     return {
       success: false,
       message: "An unexpected error occurred during login.",

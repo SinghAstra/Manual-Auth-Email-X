@@ -1,45 +1,33 @@
-// app/login/page.tsx
-// This is the client-side login page component.
-// It handles user input, client-side validation with Yup, and calls the loginUser Server Action.
+"use client";
 
-"use client"; // Mark as a Client Component
-
-import { loginUser } from "@/actions/auth"; // Import the Server Action
-import { useToastContext } from "@/components/providers/toast"; // For displaying toast messages
+import { loginUser } from "@/actions/auth";
+import { useToastContext } from "@/components/providers/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { siteConfig } from "@/config/site";
-import { LoginFormData, loginSchema } from "@/lib/validations/auth";
-import { Loader } from "lucide-react";
+import { LoginFormData, loginSchema } from "@/validations/auth";
+import { Eye, EyeOff, Loader } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // For redirection after login
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import * as yup from "yup";
 
-export default function LoginPage() {
-  // State to hold form data
+function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
-
-  // State to hold validation errors
   const [errors, setErrors] = useState<
     Partial<Record<keyof LoginFormData, string>>
   >({});
-
-  // State for loading indicator during login
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Access the toast context for displaying messages
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { setToastMessage } = useToastContext();
-  const router = useRouter(); // Initialize router for redirection
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
-  /**
-   * Handles changes to input fields.
-   * Updates formData state and clears any existing error for that field.
-   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -49,35 +37,24 @@ export default function LoginPage() {
     }
   };
 
-  /**
-   * Handles the form submission for login.
-   * Performs client-side validation and calls the loginUser Server Action.
-   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
-    setIsLoggingIn(true); // Set loading state
-    setErrors({}); // Clear previous errors
+    setIsLoggingIn(true);
+    setErrors({});
 
     try {
-      // Client-side validation using Yup
       await loginSchema.validate(formData, { abortEarly: false });
 
-      // If validation passes, call the Server Action
       const result = await loginUser(formData);
 
       if (result.success) {
-        setToastMessage(result.message, "success");
-        router.push("/dashboard"); // Redirect to dashboard on successful login
+        setToastMessage(result.message);
+        router.push("/dashboard");
       } else {
-        // Handle server-side validation errors or other messages
-        if (result.errors) {
-          setErrors(result.errors); // Set specific field errors
-        }
-        setToastMessage(result.message, "error"); // Display general error message
+        setToastMessage(result.message);
       }
     } catch (error) {
-      // Handle Yup validation errors
       if (error instanceof yup.ValidationError) {
         const newErrors: Partial<Record<keyof LoginFormData, string>> = {};
         error.inner.forEach((err) => {
@@ -85,16 +62,15 @@ export default function LoginPage() {
             newErrors[err.path as keyof LoginFormData] = err.message;
           }
         });
-        setErrors(newErrors); // Set validation errors
-        setToastMessage("Please correct the errors in the form.", "error");
+        setErrors(newErrors);
+        setToastMessage("Please correct the errors in the form.");
       } else if (error instanceof Error) {
-        // Handle other unexpected client-side errors
-        setToastMessage(error.message, "error");
+        setToastMessage(error.message);
       } else {
-        setToastMessage("An unexpected error occurred.", "error");
+        setToastMessage("An unexpected error occurred.");
       }
     } finally {
-      setIsLoggingIn(false); // Reset loading state
+      setIsLoggingIn(false);
     }
   };
 
@@ -104,7 +80,6 @@ export default function LoginPage() {
         <Link href="/">
           <div className="flex items-center space-x-2 mb-16 md:mb-0 md:absolute md:top-0 md:left-0">
             <Loader className="h-6 w-6 text-primary" />{" "}
-            {/* Placeholder for a logo */}
             <span className="text-lg font-semibold text-foreground">
               {siteConfig.name}
             </span>
@@ -123,11 +98,11 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="jonas_kahnwald@example.com"
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 className={errors.email ? "border-destructive" : ""}
-                autoComplete="email"
+                autoComplete="off"
               />
               {errors.email && (
                 <p className="text-sm text-destructive text-right">
@@ -137,22 +112,41 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                value={formData.password}
-                onChange={handleChange}
-                className={errors.password ? "border-destructive" : ""}
-                autoComplete="current-password"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="********"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={errors.password ? "border-destructive" : ""}
+                  autoComplete="off"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 cursor-pointer bg-transparent hover:bg-transparent"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-destructive text-right">
                   {errors.password}
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoggingIn}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer mt-4"
+              disabled={isLoggingIn}
+            >
               {isLoggingIn ? (
                 <div className="flex items-center gap-2">
                   <Loader className="w-3 h-3 animate-spin" /> Logging In...
@@ -170,14 +164,24 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-      {/* Placeholder for an image on larger screens */}
       <div className="hidden md:flex relative flex-1">
-        <img
-          src="/placeholder.svg?height=800&width=800"
-          alt="Abstract background"
-          className="object-cover w-full h-full rounded-xl"
+        {!isImageLoaded && (
+          <div className="absolute inset-0 bg-muted/40 border-muted-foreground rounded-xl" />
+        )}
+        <Image
+          src="/assets/bg-auth.png"
+          alt="Auth"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          onLoad={() => setIsImageLoaded(true)}
+          className={`object-cover transition-opacity duration-700 ${
+            isImageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          priority
         />
       </div>
     </div>
   );
 }
+
+export default LoginPage;
