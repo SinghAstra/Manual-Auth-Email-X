@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 body {
   font-family: "Space Grotesk", "Space Mono", monospace;
@@ -82,9 +82,62 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
   }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--secondary) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    border-radius: 3px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--secondary);
+    border-radius: 8px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.274 0.006 286.033 / 0.8);
+    cursor: grab;
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -400% 0;
+  }
+}
+
+.shine {
+  animation: shine 6s linear infinite;
+}
+
+@keyframes moving-glow {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+    top: 50%;
+    left: 50%;
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+    top: 50%;
+    left: 50%;
+  }
+}
+
+.moving-glow {
+  animation: moving-glow 4s linear infinite;
 }

@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { siteConfig } from "@/config/site";
 import { SignUpFormData, signUpSchema } from "@/validations/auth";
-import { Loader } from "lucide-react";
+import { Eye, EyeOff, Loader } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import * as yup from "yup";
@@ -18,14 +19,13 @@ function RegisterPage() {
     email: "",
     password: "",
   });
-
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignUpFormData, string>>
   >({});
-
   const [isRegistering, setIsRegistering] = useState(false);
-
   const { setToastMessage } = useToastContext();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -34,12 +34,13 @@ function RegisterPage() {
     if (errors[id as keyof SignUpFormData]) {
       setErrors((prev) => ({ ...prev, [id]: undefined }));
     }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
-    setIsRegistering(true); 
-    setErrors({}); 
+    setIsRegistering(true);
+    setErrors({});
 
     try {
       await signUpSchema.validate(formData, { abortEarly: false });
@@ -48,18 +49,11 @@ function RegisterPage() {
 
       if (result.success) {
         setToastMessage(result.message);
-        // Optionally clear form or redirect after successful registration
-        setFormData({ name: "", email: "", password: "" }); // Clear form
-        // router.push('/login'); // Could redirect to login page
+        setFormData({ name: "", email: "", password: "" });
       } else {
-        // Handle server-side validation errors or other messages
-        if (result.errors) {
-          setErrors(result.errors); // Set specific field errors
-        }
-        setToastMessage(result.message, "error"); // Display general error message
+        setToastMessage(result.message);
       }
     } catch (error) {
-      // Handle Yup validation errors
       if (error instanceof yup.ValidationError) {
         const newErrors: Partial<Record<keyof SignUpFormData, string>> = {};
         error.inner.forEach((err) => {
@@ -67,16 +61,15 @@ function RegisterPage() {
             newErrors[err.path as keyof SignUpFormData] = err.message;
           }
         });
-        setErrors(newErrors); // Set validation errors
-        setToastMessage("Please correct the errors in the form.", "error");
+        setErrors(newErrors);
+        setToastMessage("Please correct the errors in the form.");
       } else if (error instanceof Error) {
-        // Handle other unexpected client-side errors
-        setToastMessage(error.message, "error");
+        setToastMessage(error.message);
       } else {
-        setToastMessage("An unexpected error occurred.", "error");
+        setToastMessage("An unexpected error occurred.");
       }
     } finally {
-      setIsRegistering(false); // Reset loading state
+      setIsRegistering(false);
     }
   };
 
@@ -86,7 +79,6 @@ function RegisterPage() {
         <Link href="/">
           <div className="flex items-center space-x-2 mb-16 md:mb-0 md:absolute md:top-0 md:left-0">
             <Loader className="h-6 w-6 text-primary" />{" "}
-            {/* Placeholder for a logo */}
             <span className="text-lg font-semibold text-foreground">
               {siteConfig.name}
             </span>
@@ -104,11 +96,11 @@ function RegisterPage() {
               <Label htmlFor="name">Your Name</Label>
               <Input
                 id="name"
-                placeholder="Jonas Khanwald"
+                placeholder="Enter Your Name"
                 value={formData.name}
                 onChange={handleChange}
                 className={errors.name ? "border-destructive" : ""}
-                autoComplete="name"
+                autoComplete="off"
               />
               {errors.name && (
                 <p className="text-sm text-destructive text-right">
@@ -121,11 +113,11 @@ function RegisterPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="jonas_kahnwald@example.com"
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 className={errors.email ? "border-destructive" : ""}
-                autoComplete="email"
+                autoComplete="off"
               />
               {errors.email && (
                 <p className="text-sm text-destructive text-right">
@@ -133,24 +125,45 @@ function RegisterPage() {
                 </p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                value={formData.password}
-                onChange={handleChange}
-                className={errors.password ? "border-destructive" : ""}
-                autoComplete="new-password"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="********"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={errors.password ? "border-destructive" : ""}
+                  autoComplete="off"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 cursor-pointer bg-transparent hover:bg-transparent"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+
               {errors.password && (
                 <p className="text-sm text-destructive text-right">
                   {errors.password}
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={isRegistering}>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer mt-4"
+              disabled={isRegistering}
+            >
               {isRegistering ? (
                 <div className="flex items-center gap-2">
                   <Loader className="w-3 h-3 animate-spin" /> Registering...
@@ -168,12 +181,20 @@ function RegisterPage() {
           </div>
         </div>
       </div>
-      {/* Placeholder for an image on larger screens */}
       <div className="hidden md:flex relative flex-1">
-        <img
-          src="/placeholder.svg?height=800&width=800"
-          alt="Abstract background"
-          className="object-cover w-full h-full rounded-xl"
+        {!isImageLoaded && (
+          <div className="absolute inset-0 bg-muted/40 border-muted-foreground rounded-xl" />
+        )}
+        <Image
+          src="/assets/bg-auth.png"
+          alt="Auth"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          onLoad={() => setIsImageLoaded(true)}
+          className={`object-cover transition-opacity duration-700 ${
+            isImageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          priority
         />
       </div>
     </div>

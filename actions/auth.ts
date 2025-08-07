@@ -1,5 +1,6 @@
 "use server";
 
+import { siteConfig } from "@/config/site";
 import {
   clearAuthCookies,
   comparePassword,
@@ -10,15 +11,24 @@ import {
 } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/mail";
-import { LoginFormData, SignUpFormData } from "@/validations/auth";
+import {
+  LoginFormData,
+  SignUpFormData,
+  signUpSchema,
+} from "@/validations/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ValidationError } from "yup";
 
 export async function registerUser(formData: SignUpFormData) {
   try {
     const { name, email, password } = formData;
 
-    // TODO : Perform Server Side Validation on Input
+    // 1. Perform Server Side Validation on req body
+    await signUpSchema.validate(
+      { name, email, password },
+      { abortEarly: false }
+    );
 
     // 2. Check if user already exists
     const existingUser = await db.user.findUnique({ where: { email } });
@@ -29,8 +39,12 @@ export async function registerUser(formData: SignUpFormData) {
       };
     }
 
+    console.log("existingUser is ", existingUser);
+
     // 3. Hash the password
     const hashedPassword = await hashPassword(password);
+
+    console.log("hashedPassword is ", hashedPassword);
 
     // 3. Create the user in the database (initially unverified)
     const newUser = await db.user.create({
@@ -38,15 +52,17 @@ export async function registerUser(formData: SignUpFormData) {
         name,
         email,
         passwordHash: hashedPassword,
-        emailVerified: false, // User is unverified until they click the link
+        emailVerified: false,
       },
     });
 
-    // 4. Generate and store a verification token
-    const verificationToken = crypto.randomUUID(); // Cryptographically secure random token
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // Token expires in 24 hours
+    console.log("newUser is ", newUser);
 
-    await db.verificationToken.create({
+    // 4. Generate and store a verification token
+    const verificationToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    const newVerificationToken = await db.verificationToken.create({
       data: {
         userId: newUser.id,
         token: verificationToken,
@@ -54,11 +70,13 @@ export async function registerUser(formData: SignUpFormData) {
       },
     });
 
+    console.log("newVerificationToken is ", newVerificationToken);
+
     // 5. Send verification email
     const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
-    const emailSubject = "Verify Your Email for Mini LinkedIn";
+    const emailSubject = `Verify Your Email for ${siteConfig.name}`;
     const emailText = `Please verify your email by clicking on this link: ${verificationLink}`;
-    const emailHtml = `<p>Welcome to Mini LinkedIn! Please verify your email by clicking the link below:</p><p><a href="${verificationLink}">Verify Email</a></p><p>This link will expire in 24 hours.</p>`;
+    const emailHtml = `<p>Welcome to ${siteConfig.name}! Please verify your email by clicking the link below:</p><p><a href="${verificationLink}">Verify Email</a></p><p>This link will expire in 24 hours.</p>`;
 
     const emailResult = await sendEmail(
       newUser.email,
@@ -76,6 +94,12 @@ export async function registerUser(formData: SignUpFormData) {
     };
   } catch (error) {
     console.log("Registration failed.");
+    if (error instanceof ValidationError) {
+      return {
+        success: false,
+        message: "Validation failed.",
+      };
+    }
     if (error instanceof Error) {
       console.log("error.stack is ", error.stack);
       console.log("error.message is ", error.message);

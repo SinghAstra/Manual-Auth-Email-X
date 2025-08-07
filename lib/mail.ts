@@ -1,3 +1,4 @@
+import { siteConfig } from "@/config/site";
 import nodemailer from "nodemailer";
 
 const EMAIL_USER = process.env.EMAIL_USER;
@@ -27,7 +28,7 @@ export async function sendEmail(
 ) {
   try {
     const info = await transporter.sendMail({
-      from: `"Mini LinkedIn" <${EMAIL_USER}>`, // Sender address
+      from: `${siteConfig.name} <${EMAIL_USER}>`,
       to: to,
       subject: subject,
       text: text,
@@ -42,6 +43,6 @@ export async function sendEmail(
       console.log("error.stack is ", error.stack);
       console.log("error.message is ", error.message);
     }
-    return { success: false, message: "Error sending email." };
+    return { success: false, message: "Failed sending email." };
   }
 }
