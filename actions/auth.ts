@@ -1,12 +1,24 @@
 "use server";
 
 import { siteConfig } from "@/config/site";
-import { hashPassword } from "@/lib/auth";
+import { AccessTokenPayload } from "@/interfaces/auth";
+import {
+  comparePassword,
+  generateAccessToken,
+  hashPassword,
+  verifyAccessToken,
+} from "@/lib/auth";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/mail";
-import { SignUpFormData, signUpSchema } from "@/validations/auth";
+import {
+  LoginFormData,
+  loginSchema,
+  SignUpFormData,
+  signUpSchema,
+} from "@/validations/auth";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ValidationError } from "yup";
 
 export async function registerUser(formData: SignUpFormData) {
@@ -161,11 +173,139 @@ export async function verifyEmail(token: string) {
   }
 }
 
-export async function clearAuthCookies() {
+export async function logOutUser(callback?: string) {
   const cookieStore = await cookies();
 
   cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, "", {
     expires: new Date(0),
     path: "/",
   });
+  if (callback) {
+    redirect(callback);
+  }
+}
+
+export async function logInUser(formData: LoginFormData) {
+  try {
+    const { email, password } = formData;
+
+    console.log("formData is ", formData);
+
+    // 1. Server-side validation using Yup
+    await loginSchema.validate({ email, password }, { abortEarly: false });
+
+    // 2. Find user by email
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      return {
+        success: false,
+        message: "Invalid credentials.",
+      };
+    }
+
+    console.log("user is ", user);
+
+    // 3. Compare password
+    const passwordMatch = await comparePassword(password, user.passwordHash);
+    if (!passwordMatch) {
+      return {
+        success: false,
+        message: "Invalid credentials.",
+      };
+    }
+
+    console.log("passwordMatch is ", passwordMatch);
+
+    // 4. Check if email is verified
+    if (!user.emailVerified) {
+      return {
+        success: false,
+        message: "Please verify your email before logging in.",
+      };
+    }
+
+    // 5. Generate Access and Refresh Tokens
+    const accessTokenPayload: AccessTokenPayload = {
+      userId: user.id,
+      email: user.email,
+      emailVerified: user.emailVerified,
+    };
+    const accessToken = generateAccessToken(accessTokenPayload);
+
+    console.log("accessToken is ", accessToken);
+
+    // 7. Set tokens as HTTP-only cookies using the Server Action helper
+    const accessExpires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const cookieStore = await cookies();
+
+    cookieStore.set(ACCESS_TOKEN_COOKIE_NAME, accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: accessExpires,
+    });
+
+    console.log(
+      "cookieStore.get(ACCESS_TOKEN_COOKIE_NAME) is ",
+      cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)
+    );
+
+    return {
+      success: true,
+      message: "Logged In Successfully.",
+    };
+  } catch (error) {
+    console.log("Login API failed.");
+    if (error instanceof ValidationError) {
+      return {
+        success: false,
+        message: "Validation failed.",
+      };
+    }
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
+    return {
+      success: false,
+      message: "An unexpected error occurred during login.",
+    };
+  }
+}
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  console.log("In getCurrentUser");
+  console.log(
+    "cookieStore.get(ACCESS_TOKEN_COOKIE_NAME) is ",
+    cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)
+  );
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+
+  console.log("accessToken is ", accessToken);
+  if (!accessToken) {
+    console.log("Not accessToken ");
+    return null;
+  }
+
+  const payload = verifyAccessToken(accessToken);
+  console.log("payload is ", payload);
+
+  if (!payload) {
+    console.log("Not payload ");
+    return null;
+  }
+
+  console.log("payload is ", payload);
+
+  const user = await db.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (!user) {
+    console.log("Not user ");
+    return null;
+  }
+  return user;
 }

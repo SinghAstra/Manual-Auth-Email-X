@@ -1,6 +1,6 @@
 "use client";
 
-import { clearAuthCookies } from "@/actions/auth";
+import { logOutUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { User } from "@prisma/client";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 interface DashboardClientPageProps {
@@ -18,10 +17,8 @@ interface DashboardClientPageProps {
 }
 
 const DashboardClientPage = ({ user }: DashboardClientPageProps) => {
-  const router = useRouter();
   const handleLogOut = async () => {
-    await clearAuthCookies();
-    router.push("/");
+    await logOutUser("/");
   };
   return (
     <div className="flex min-h-screen items-center justify-center b p-4">

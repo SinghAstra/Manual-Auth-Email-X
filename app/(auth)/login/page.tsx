@@ -1,5 +1,6 @@
 "use client";
 
+import { logInUser } from "@/actions/auth";
 import { useToastContext } from "@/components/providers/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ import * as yup from "yup";
 function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "singhisabhaypratap@gmail.com",
-    password: "Abhay@codeman1",
+    password: "",
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof LoginFormData, string>>
@@ -45,17 +46,9 @@ function LoginPage() {
     try {
       await loginSchema.validate(formData, { abortEarly: false });
 
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const result = await logInUser(formData);
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
+      if (result.success) {
         router.push("/dashboard");
         setToastMessage(result.message);
       } else {
