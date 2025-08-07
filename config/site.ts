@@ -1,14 +1,14 @@
 import { SiteConfig } from "@/interfaces/site";
 
 export const siteConfig: SiteConfig = {
-  name: "Manual Auth",
+  name: "ComX",
   description:
-    "Simplified Manual Authentication with token, cookie and session management.",
-  tagline: "Simplified Manual Authentication",
-  url: "https://manual-auth-email-x.vercel.app",
+    "A mini LinkedIn-like community platform for users to network, share posts, and build their professional profiles.",
+  tagline: "Build your network. Share your story. Grow together.",
+  url: "https://comx.vercel.app",
   links: {
     twitter: "https://x.com/XSinghAstra",
     github: "https://github.com/SinghAstra",
-    githubRepo: "https://github.com/SinghAstra/manual-auth-email-x",
+    githubRepo: "https://github.com/SinghAstra/comx",
   },
 };

@@ -3,11 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const ACCESS_TOKEN_EXPIRATION = "7d";
 
-const ACCESS_TOKEN_EXPIRATION = "15m";
-
-if (!JWT_SECRET || !REFRESH_TOKEN_SECRET) {
+if (!JWT_SECRET) {
   throw new Error(
     "JWT_SECRET and REFRESH_TOKEN_SECRET must be defined in environment variables."
   );
