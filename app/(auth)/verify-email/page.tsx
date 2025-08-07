@@ -1,64 +1,57 @@
-// app/verify-email/page.tsx
-// This is a Server Component that handles the email verification process.
-// It extracts the token from the URL and calls the verifyEmail Server Action.
-
-import { verifyEmail } from "@/actions/auth"; // Import the Server Action
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { verifyEmail } from "@/actions/auth";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-// Define the props for the page, which include search parameters
 interface VerifyEmailPageProps {
-  searchParams: {
-    token?: string; // The verification token from the URL query
-  };
+  searchParams: Promise<{
+    token?: string;
+  }>;
 }
 
 export default async function VerifyEmailPage({
   searchParams,
 }: VerifyEmailPageProps) {
-  const { token } = searchParams; // Extract the token from search parameters
+  const { token } = await searchParams;
 
   let verificationResult = {
     success: false,
     message: "Invalid or missing verification token.",
   };
 
-  // If a token is present, attempt to verify the email
   if (token) {
     verificationResult = await verifyEmail(token);
   }
 
+  if (!token) {
+    redirect("/register");
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <CardTitle className="text-2xl">Email Verification</CardTitle>
-          <CardDescription>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-md text-center border bg-muted/40 px-3 py-2 flex flex-col gap-2">
+        <div>
+          <h1 className="text-2xl">Email Verification</h1>
+          <p>
             {verificationResult.success
               ? "Your email has been successfully verified!"
               : "There was an issue verifying your email."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="space-y-4">
           {verificationResult.success ? (
             <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
           ) : (
             <XCircle className="mx-auto h-16 w-16 text-red-500" />
           )}
-          <p className="text-lg font-medium">{verificationResult.message}</p>
-          <Link href="/login">
-            <Button className="w-full">Go to Login</Button>
+          <p className="text-lg">{verificationResult.message}</p>
+          <Link href="/login" className={cn(buttonVariants(), "w-full")}>
+            Go to Login
           </Link>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

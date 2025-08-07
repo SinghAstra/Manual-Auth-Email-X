@@ -180,22 +180,15 @@ export async function loginUser(formData: LoginFormData) {
   }
 }
 
-// --- Email Verification Action ---
-/**
- * Verifies a user's email using a token.
- * - Finds and validates the token.
- * - Updates user's emailVerified status.
- * - Deletes the used token.
- * @param token The verification token from the URL.
- * @returns An ActionResponse indicating success or failure.
- */
 export async function verifyEmail(token: string) {
   try {
     // 1. Find the verification token
     const verificationRecord = await db.verificationToken.findUnique({
       where: { token },
-      include: { user: true }, // Include user data for verification
+      include: { user: true },
     });
+
+    console.log("verificationRecord is ", verificationRecord);
 
     if (!verificationRecord) {
       return { success: false, message: "Invalid verification token." };
@@ -236,7 +229,11 @@ export async function verifyEmail(token: string) {
       message: "Email verified successfully! You can now log in.",
     };
   } catch (error) {
-    console.error("Email verification failed:", error);
+    console.log("Email verification failed.");
+    if (error instanceof Error) {
+      console.log("error.stack is ", error.stack);
+      console.log("error.message is ", error.message);
+    }
     return {
       success: false,
       message: "An unexpected error occurred during email verification.",
