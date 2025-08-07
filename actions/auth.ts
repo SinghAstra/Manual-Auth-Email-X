@@ -23,6 +23,7 @@ import { ValidationError } from "yup";
 
 export async function registerUser(formData: SignUpFormData) {
   try {
+    console.log("In RegisterUser");
     const { name, email, password } = formData;
 
     // 1. Perform Server Side Validation on req body
@@ -187,6 +188,7 @@ export async function logOutUser(callback?: string) {
 
 export async function logInUser(formData: LoginFormData) {
   try {
+    console.log("In logInUser");
     const { email, password } = formData;
 
     console.log("formData is ", formData);
@@ -202,7 +204,6 @@ export async function logInUser(formData: LoginFormData) {
         message: "Invalid credentials.",
       };
     }
-
     console.log("user is ", user);
 
     // 3. Compare password
@@ -283,7 +284,7 @@ export async function getCurrentUser() {
 
   console.log("accessToken is ", accessToken);
   if (!accessToken) {
-    console.log("Not accessToken ");
+    console.log("AccessToken Not Found.");
     return null;
   }
 
@@ -291,7 +292,7 @@ export async function getCurrentUser() {
   console.log("payload is ", payload);
 
   if (!payload) {
-    console.log("Not payload ");
+    console.log("Payload Not Found.");
     return null;
   }
 
@@ -304,7 +305,7 @@ export async function getCurrentUser() {
   });
 
   if (!user) {
-    console.log("Not user ");
+    console.log("User Not Found.");
     return null;
   }
   return user;
