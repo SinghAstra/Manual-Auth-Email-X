@@ -47,15 +47,3 @@ export function verifyAccessToken(token: string): AccessTokenPayload | null {
     return null;
   }
 }
-
-export function generateRefreshToken() {
-  return crypto.randomUUID();
-}
-
-export async function hashRefreshToken(token: string) {
-  return bcrypt.hash(token, 10);
-}
-
-export async function compareRefreshToken(token: string, hashedToken: string) {
-  return bcrypt.compare(token, hashedToken);
-}

@@ -1,5 +1,5 @@
 import { verifyEmail } from "@/actions/auth";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
